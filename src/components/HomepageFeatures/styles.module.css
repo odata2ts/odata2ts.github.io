@@ -1,0 +1,19 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureImgWrapper {
+  height: 200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.featureImg {
+  height: 96px;
+  width: 96px;
+}

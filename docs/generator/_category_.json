@@ -1,0 +1,8 @@
+{
+  "label": "Generator",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Documents installation, configuration & usage of `@odata2ts/odata2ts`"
+  }
+}
