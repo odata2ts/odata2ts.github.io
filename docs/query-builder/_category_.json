@@ -1,0 +1,8 @@
+{
+  "label": "Query Builder",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Documentation of the query builder, which allows for building complex and type-safe OData queries."
+  }
+}
