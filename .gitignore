@@ -8,6 +8,11 @@
 .docusaurus
 .cache-loader
 
+# yarn
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+
 # Misc
 .DS_Store
 .env.local

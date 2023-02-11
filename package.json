@@ -2,17 +2,20 @@
   "name": "odata2ts-doc-site",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=16.14"
+  },
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start",
     "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
+    "deploy": "docusaurus deploy",
+    "docusaurus": "docusaurus",
     "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
+    "start": "docusaurus start",
+    "swizzle": "docusaurus swizzle",
+    "typecheck": "tsc",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "write-translations": "docusaurus write-translations"
   },
   "dependencies": {
     "@docusaurus/core": "2.3.1",
@@ -49,7 +52,5 @@
       "last 1 safari version"
     ]
   },
-  "engines": {
-    "node": ">=16.14"
-  }
+  "packageManager": "yarn@3.4.1"
 }

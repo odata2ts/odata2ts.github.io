@@ -1,9 +1,9 @@
 # Workflow for building and deploying odata2ts docs site to GitHub Pages
 ##
-name: Deploy Docusaurus site to Github Pages
+name: Deploy odata2ts docs to Github Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Runs on pushes targeting the release branch
   push:
     branches: ["release"]
 
