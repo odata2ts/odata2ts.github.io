@@ -15,7 +15,7 @@ of artefacts:
 
 ## Setup
 
-The base setup for the generator is part of the getting started guide: [Generator Setup](../getting-started/01-generator-setup.md)
+The base setup for the generator is part of the getting started guide: [Generator Setup](../getting-started/generator-setup)
 
 ## Usage
 
