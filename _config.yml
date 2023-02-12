@@ -1,5 +1,0 @@
-source: ./docs
-safe: true
-theme: jekyll-theme-minimal
-title: odata2ts
-description: "Set of tools for generating useful stuff out of given OData services: From TypeScript model interfaces to complete TypeScript based OData client services."
