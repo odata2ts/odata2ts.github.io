@@ -77,13 +77,15 @@ const config = {
 ## Configuring Naming Schemes
 
 In general, most naming schemes consist of the following settings:
-* prefix
-* suffix
-* namingStrategy
+
+- prefix
+- suffix
+- namingStrategy
 
 As best practice, always override `prefix` **and** `suffix`, when you want to set one or the other.
 
 Here is an example showing the default naming options for models:
+
 ```ts
 const namingConfig = {
   naming: {
@@ -114,10 +116,12 @@ const namingConfig = {
   }
 }
 ```
+
 If the special property `applyModelNaming` is `true`, then prefix and suffix of the parent property
-are added as well. 
+are added as well.
 
 A common convention is to add "I" in front of interfaces, which would be as easy as this:
+
 ```ts
 const namingConfig = {
   naming: {
@@ -128,6 +132,5 @@ const namingConfig = {
   }
 }
 ```
+
 Now all models would be prefixed in this way, e.g. "IPerson", "IEditablePerson", "IPersonId".
-
-
