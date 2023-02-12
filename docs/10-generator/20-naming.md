@@ -32,7 +32,7 @@ a given string regarding its individual parts. The following naming strategies a
 We rely on the [change-case library](https://www.npmjs.com/package/change-case) here.
 
 Naming strategies guarantee consistency without sacrificing semantics, since the original term lives on.
-See the [default config](./03-configuration.md#default-config) for example usage.
+See the [default config](./configuration#default-config) for example usage.
 
 ## Renaming Properties
 
