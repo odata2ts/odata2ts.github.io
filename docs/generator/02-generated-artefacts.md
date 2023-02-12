@@ -69,3 +69,10 @@ When installed and configured, you just set the option `prettier` to `true`.
 - OData Client Service
   - one main odata service as entry point
   - per EntityType, ComplexType, and any form of collection: one service
+
+You can use the following options to skip the generation of certain artefacts
+(only applies if mode=models or mode=qobjects):
+
+- skipEditableModels
+- skipIdModels
+- skipOperations
