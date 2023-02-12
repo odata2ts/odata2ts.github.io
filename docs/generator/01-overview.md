@@ -91,15 +91,3 @@ Additionally, individual services can be addressed as arguments:
 yarn odata2ts northwind
 yarn odata2ts northwind trippin
 ```
-
-### Default Settings vs Base Settings vs Service Settings
-
-The [defaultConfig](https://github.com/odata2ts/odata2ts/blob/main/packages/odata2ts/src/defaultConfig.ts) lists all default values, which are always used.
-
-All settings except the `services` attribute are **base settings**, which will also be used as default settings,
-i.e. on top of the defaultConfig.
-
-All settings starting from the `services` attribute are only valid for a specific service and only applied
-for its generation run. Service specific settings are applied on top of the base settings.
-
-Additionally, CLI options can be used to override base or service settings.

@@ -5,6 +5,8 @@ sidebar_position: 2
 
 # Generated Artefacts
 
+## Generation Modes
+
 `odata2ts` is able to produce three different kinds of artefacts:
 
 - models: TypeScript interfaces
