@@ -1,5 +1,5 @@
 ---
-id: generator-overview
+id: setup-and-usage
 sidebar_position: 1
 ---
 
