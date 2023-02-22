@@ -1,8 +1,8 @@
 {
-  "label": "Services",
-  "position": 3,
+  "label": "Main Service",
+  "position": 40,
   "link": {
     "type": "generated-index",
-    "description": "Documents generated services & package `@odata2ts/odata-service`"
+    "description": "Documents the generated main service & package `@odata2ts/odata-service`"
   }
 }
