@@ -23,7 +23,7 @@ If you're only interested in typings than you're good to go, you only need the g
 More advanced use cases and artefacts will involve additional runtime dependencies, e.g.
 `@odata2ts/odata-query-builder` or `@odata2ts/odata-service`.
 
-The [Getting Started Guide](./getting-started) walks you through installation and
+The [Getting Started Guide](./category/getting-started) walks you through installation and
 configuration based on one of the main use cases.
 
 ## Generator
@@ -42,7 +42,7 @@ It comes with powerful configuration options. Some highlights:
   - consistent casing (as in "camelCase" or "PascalCase") even for property names of entity types
 - use type converters
 
-See the [generator documentation](./generator) for more information.
+See the [generator documentation](./category/generator) for more information.
 
 ## Full-Fledged OData Client
 
@@ -51,7 +51,7 @@ This is where all generated artefacts and provided libraries come together.
 
 Feature Highlights:
 
-- powerful, fluent and type-safe [query builder](./query-builder)
+- powerful, fluent and type-safe [query builder](./category/query-builder)
 - type-safe CRUD operations
 - type-safe (unbound or bound) functions and actions
 - configurable HTTP client

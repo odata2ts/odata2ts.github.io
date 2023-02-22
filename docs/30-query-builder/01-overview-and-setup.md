@@ -1,5 +1,5 @@
 ---
-id: query-builder-overview
+id: overview-and-setup
 sidebar_position: 1
 ---
 
