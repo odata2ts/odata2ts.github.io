@@ -1,5 +1,5 @@
 ---
-id: query-builder-querying
+id: querying
 sidebar_position: 10
 ---
 
@@ -180,3 +180,159 @@ createUriBuilderV2("Product", qProduct)
 Non-encoded result: `/Product?$expand=supplier&$select=supplier/name,supplier/id`
 
 Using the V4 API also for V2 avoids repetition and pitfalls.
+
+## Filter
+
+Filtering makes direct use of the generated `query-objects` to support type-safety and code assistance all around.
+They are the functional counterparts to each known entity. Each property of such a query object brings its
+own type specific filter operations:
+
+```ts
+createUriBuilderV4("People", qPerson)
+  .filter(
+    // lastName will only offer string based operations and requires string as argument
+    qPerson.lastName.eq("Smith"),
+    // age as number property only accepts numbers
+    qPerson.age.gt(18)
+  )
+```
+
+Non-encoded result: `People?$filter=LastName eq 'Smith' AND Age gt 18`
+
+### Filter Operations
+
+All individual operations of any filter type are documented in [Filter Operations](./filter-operations).
+
+The following is only concerned with the `filter` operation of the builder.
+
+### Logical Operators
+
+The `filter` operation accepts one or more filter expressions which are concatenated by an `AND` expression.
+The same holds true when calling the operation multiple times.
+
+#### Or-Expression
+
+An `OR` expression would look like this (`AND` can also be used in this same way):
+
+```ts
+builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")))
+```
+
+Result: `$filter=(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
+
+As you can see parentheses are added around the or-expression.
+
+#### Not-Expression
+
+In the same manner you can negate any expression by calling `not()`:
+
+```ts
+builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")).not())
+```
+
+Result: `$filter=not(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
+
+### Custom Filter Expressions
+
+You can create custom filter expressions directly. This is meant to be used as an escape hatch:
+
+```ts
+builder.filter(new QFilterExpression("name eq 'Heinz'").and(new QFilterExpression("age eq 8")))
+```
+
+## Count
+
+When querying on collections you can use the `count` operation to get the total count
+of all items as special field within the response.
+
+This becomes relevant when the server delivers limited/paged results.
+
+```ts
+builder.count().build();
+```
+
+Result: `$count=true`
+
+## Top
+
+When querying on collections you can use the `top` operation to limit the result size.
+
+To only retrieve a maximum of three records:
+
+```ts
+builder.top(3)
+```
+
+Result: `$top=3`
+
+## Skip
+
+When querying on collections you can use the `skip` operation to select the start position
+of the data slice. You would need this to implement pagination or something like a
+"More"-Button to load the next results.
+
+To retrieve results from the 11th item onwards:
+
+```ts
+builder.skip(10)
+```
+
+Result: `$skip=10`
+
+## OrderBy
+
+When querying on collections you can use the `orderBy` operation to sort the result list.
+
+You use the generated `query-object` directly:
+
+```ts
+createUriBuilderV4("People", qPerson)
+  .orderBy(qPerson.lastName.desc(), qPerson.firstName.asc())
+  .build()
+```
+
+Result: `People?$orderby=lastName desc,firstName asc`
+
+## Search
+
+The `search` operation is a V4 only feature. It allows to specify free text terms
+and phrases which can be combined with logical operators.
+The server decides how to apply these search values.
+
+The query builder abstracts away the difference between term and phrase:
+By virtue of white spaces it is automatically determined if a search term
+is a term or a phrase.
+
+```ts
+builder.search("operation", "odata v4").build();
+```
+
+Result: `$search=operation AND "odata v4"`<br/>
+As you can see the phrase needs to be wrapped with double quotes.
+
+### Logical Operators
+
+Calling `search` with multiple parameters or calling it multiple times will
+concatenate the terms and phrases by the `and` operator.
+
+To use the other logical operators you'll need a utility called `searchTerm`
+
+```ts
+import { searchTerm } from "@odata2ts/odata-query-objects";
+
+builder.search(searchTerm("operation").or("odata v4").not()).build();
+
+```
+
+Result: `$search=NOT(operation OR "odata v4")`
+
+## GroupBy
+
+Currently, the query builder only supports a very simple `groupBy` operation which makes
+use of the advanced `apply` operation, which is a V4 only feature.
+
+```ts
+builder.groupBy("name", "age").build()
+```
+
+Result: `$apply=groupby((name,age))`
