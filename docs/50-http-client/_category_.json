@@ -1,0 +1,8 @@
+{
+  "label": "HTTP Client",
+  "position": 50,
+  "link": {
+    "type": "generated-index",
+    "description": "Documents packages @odata2ts/odata-client-api and @odata2ts/axios-odata-client."
+  }
+}
