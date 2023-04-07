@@ -79,5 +79,9 @@ of approaches (go native with `fetch`) and libraries (e.g. Axios) are available.
 To keep this aspect configurable `odata2ts` defines and uses its "own" API:
 [The OData Client API](https://www.npmjs.com/package/@odata2ts/odata-client-api).
 
-`odata2ts` provides an [Axios](https://axios-http.com/) based implementation of this API:
-[axios-odata-client](https://www.npmjs.com/package/@odata2ts/axios-odata-client).
+Two implementations are currently provided:
+
+- one based on Axios
+- one based on JQuery
+
+See [OData HTTP Client](./http-client/odata-client) for more details.

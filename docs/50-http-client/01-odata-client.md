@@ -1,5 +1,5 @@
 ---
-id: http-client
+id: odata-client
 sidebar_position: 1
 ---
 
