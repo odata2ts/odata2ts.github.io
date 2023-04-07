@@ -14,7 +14,7 @@ The filter capabilities are grouped into the following categories:
 - [Type Specific Functions](#type-specific-functions): functionality dependent on data type
 
 To realize this functionality `odata2ts` generates `Query Objects`, which are functional twins of your
-entities and complex types (see [Q-Objects](../q-objects) for more details).
+entities and complex types (see [Q-Objects](../q-objects/overview) for more details).
 Each property of such a `Query Object` provides all the filter methods available for its data type.
 
 ```ts
