@@ -55,9 +55,9 @@ The distinction is only relevant within the syntactical context of OData: operat
 
 :::caution
 
-OData services don't have to support all filter capabilities.
-When using an unsupported filter operation the OData service should respond with status code
-`406 Not Implemented`.
+Be aware that an OData service does not have to implement all filter functionalities.
+When using an unsupported operation, then the server should respond with `501: Not Implemented`
+(since the world's not perfect, you might face `500: Server Error` instead).
 
 :::
 
