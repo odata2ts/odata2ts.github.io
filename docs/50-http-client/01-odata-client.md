@@ -25,9 +25,8 @@ of the HTTP client and may never be.
 
 Provided implementations:
 
-- [axios-odata-client](https://www.npmjs.com/package/@odata2ts/axios-odata-client)
+- [Axios OData Client](./axios-odata-client)
 - [jquery-odata-client](https://www.npmjs.com/package/@odata2ts/jquery-odata-client)
-
 
 ## Execute HTTP Requests
 
