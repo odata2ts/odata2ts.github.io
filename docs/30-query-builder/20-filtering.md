@@ -10,44 +10,86 @@ The filter capabilities are grouped into the following categories:
 
 - [Logical Operators](#logical-operators): `and`, `or` and `not`
 - [Common Operators](#common-operators): equality and comparison
-- [Arithmetic Operators](#arithmetic-operators): basic math operations
-- [Type Specific Functions](#type-specific-functions): operators which depend on the data type
+- [Arithmetic Operators](#arithmetic-operators): basic math
+- [Type Specific Functions](#type-specific-functions): functionality dependent on data type
 
-:::caution
-
-Keep in mind that OData services don't have to provide for all filter capabilities.
-When using an unsupported filter operation the OData service should respond with status code
-`406 Not Implemented`, but might also return `500 Server Error`.
-
-:::
-
-## Basics
-
-### Query Objects
-
-`Query Objects` represent functional twins of the entities known from
-your OData service. You use them directly within the filter part of the query
-to work with their properties which provide the filter operations.
+To realize this functionality `odata2ts` generates `Query Objects`, which are functional twins of your
+entities and complex types (see [Q-Objects](../q-objects) for more details).
+Each property of such a `Query Object` provides all the filter methods available for its data type.
 
 ```ts
-import { qPerson } from "../generated/trippin/QTrippin";
+import { QPerson } from "../generated/trippin/QTrippin";
 
+const qPerson = new QPerson();
 builder
   .filter(
-    // here we see the query object "qPerson" in action
+    // here we see the query object "qPerson" in action and its string property "lastName"
     qPerson.lastName.startsWith("Why"),
-    // each property offers only filter operations suited to the given type of the property
+    // each property offers only functionlity suited to its data type
     qPerson.age.plus(5).lt(30)
   )
   .build();
 ```
 
-See [Q-Objects](../q-objects) for more detailed explanations.
+There's one distinction here to be made regarding the available methods:
+
+- Terminal Functions, e.g. `startsWith` or `lt`
+- Manipulation Functions, e.g. `plus`
+
+The filter operation itself expects one or more filter expressions (class `QFilterExpression`),
+each of which results in a `boolean` value in order to decide whether the record gets filtered.
+A **"terminal function"** will produce a proper filter expression, while the **manipulation function** produces
+an intermediate value object.
+
+From a usage standpoint:
+You can use as many **manipulation functions** as you like (all arithmetic operators and most type-specific functions),
+but you need to end your filter expression with a **terminal function** (all common operators and some type-specific functions).
+
+:::
+
+Regarding the language use of "operator" and "function": When using `odata2ts` this differentiation is
+opaque for you, you will always call JavaScript methods. Hence, you can treat both terms as synonyms.
+The distinction is only relevant within the syntactical context of OData: operator `x eq 2` vs function `startswith(x,'A')`.
+
+:::
+
+:::caution
+
+OData services don't have to support all filter capabilities.
+When using an unsupported filter operation the OData service should respond with status code
+`406 Not Implemented`.
+
+:::
+
+## Basics
+
+### Origins
+
+The approach of generating certain objects to provide type-specific and type-safe query capabilities is by no means an
+invention of `odata2ts`. On the contrary, `odata2ts` has been built in order to realize this approach for the domain
+of OData queries.
+
+For us, this concept originates in two outstanding Java libraries which are designed for the domain of
+database queries: [QueryDsl](https://querydsl.com/) and [jOOQ](https://www.jooq.org/).
+
+While `odata2ts` diverges in some aspects from those libraries, the similarities really stand out when it
+comes to filtering (and ordering). Hence, the extra kudos to those libraries at this point.
+
+### Using Other Properties Instead of Values
+
+The following descriptions of filter operators and functions are using concrete values.
+However, you can also compare properties with each other:
+
+```ts
+builder.filter(qPerson.lastName.eq(qPerson.firstName))
+```
+
+So whenever you meet any function or operator which expects a value, you can also use another property instead.
 
 ### Custom Filter Expressions
 
-The filter operation is fed with `QFilterExpression` objects, e.g. `qPerson.age.gt(18)` produces such a filter expression.
-You can also create them manually to write raw filter expressions:
+A terminal method produces a filter expression (class `QFilterExpression`).
+You can also create them manually to provide raw filter expressions and mix and match them with regular ones:
 
 ```ts
 import { QFilterExpression } from "@odata2ts/odata-query-objects";
@@ -66,15 +108,13 @@ If you need to use it, you should probably also file a bug / issue via Github.
 
 ## Logical Operators
 
-The `filter` operation accepts multiple filter expressions and can also be called multiple times.
-In these cases filter expressions are concatenated by the `and` operator.
+The basic logical operators are `and`, `or` and `not`.
+
+The `and` operator is implied when calling the `filter` operation with multiple filter expressions
+or multiple times.
 
 You control this aspect via the filter expression itself, since any `QFilterExpression` provides for
 the logical operators:
-
-- `and`
-- `or`
-- `not`
 
 ```ts
 builder.filter(
@@ -86,13 +126,11 @@ builder.filter(
 
 Result: `$filter=not(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
 
-Admittedly, the usage of `not` at the end of the expression is a little weired.
-
 Specification: OData V4 URL Conventions on [Logical Operators](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_LogicalOperators).
 
 ## Common Operators
 
-All operations listed here are valid for all data types:
+All operators listed here are valid for (nearly) all data types:
 
 | Operator Name(s)     | Example Usage                   | Produced OData Query       |
 | -------------------- | ------------------------------- | -------------------------- |
@@ -106,7 +144,7 @@ All operations listed here are valid for all data types:
 | isNull               | `q.firstName.isNull()`          | `FirstName eq null`        |
 | isNotNull            | `q.firstName.isNotNull()`       | `FirstName ne null`        |
 
-Well, actually the following data types don't support any filtering:
+The following data types don't support any filtering:
 
 - `Edm.Binary`
 - `Edm.Stream`
@@ -134,20 +172,22 @@ And by using only basic operators (`equals` and `or`) this emulated `in` operato
 
 ## Arithmetic Operators
 
-| Operator Name(s)             | Example Usage     | Produced OData Query | Notes                                                                                     |
-| ---------------------------- | ----------------- | -------------------- | ----------------------------------------------------------------------------------------- |
-| add<br/>plus                 | `q.age.plus(1)`   | `Age add 1`          |                                                                                           |
-| sub<br/>minus                | `q.age.minus(1)`  | `Age sub 1`          |                                                                                           |
-| mul<br/>multiply             | `q.age.mul(2)`    | `Age mul 2`          |                                                                                           |
-| div<br/>divide               | `q.age.div(2)`    | `Age div 2`          |                                                                                           |
-| divBy<br/>divideWithFraction | `q.age.divBy(2)`  | `Age divby 2`        | Decimal division: Commits both operands to decimal before dividing. Only available in V4. |
-| mod<br/>modulo               | `q.age.modulo(2)` | `Age mod 2`          |                                                                                           |
+The basic mathematical operators are specified for OData. All of them are **manipulation functions**:
+
+| Operator Name(s)             | Example Usage     | Produced OData Query | Notes                                                                                                                           |
+| ---------------------------- | ----------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| add<br/>plus                 | `q.age.plus(1)`   | `Age add 1`          |                                                                                                                                 |
+| sub<br/>minus                | `q.age.minus(1)`  | `Age sub 1`          |                                                                                                                                 |
+| mul<br/>multiply             | `q.age.mul(2)`    | `Age mul 2`          |                                                                                                                                 |
+| div<br/>divide               | `q.age.div(2)`    | `Age div 2`          |                                                                                                                                 |
+| divBy<br/>divideWithFraction | `q.age.divBy(2)`  | `Age divby 2`        | Decimal division: Commits both operands to decimal before dividing and may result in value with fraction. Only available in V4. |
+| mod<br/>modulo               | `q.age.modulo(2)` | `Age mod 2`          |                                                                                                                                 |
 
 ## Type Specific Functions
 
-`Terminal Functions` result in a boolean value.
-
 ### Number Functions
+
+Here we have the typical rounding functions:
 
 | Function | Data Type                  | Example             | Produced OData Query | Description                                              |
 | -------- | -------------------------- | ------------------- | -------------------- | -------------------------------------------------------- |
@@ -169,7 +209,7 @@ Terminal Functions:
 To achieve a **case-insensitive** matching you can use `toLower` or `toUpper` like so:
 `q.lastName.toLower().startsWith(x.toLowerCase())`
 
-Transformer Functions:
+Manipulation Functions:
 
 | Function     | Example                          | Produced OData Query     | Result Type | Description                                                                                           |
 | ------------ | -------------------------------- | ------------------------ | ----------- | ----------------------------------------------------------------------------------------------------- |
