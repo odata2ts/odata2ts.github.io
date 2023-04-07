@@ -1,5 +1,5 @@
 ---
-id: generator-qobjects
+id: overview
 sidebar_position: 20
 ---
 
