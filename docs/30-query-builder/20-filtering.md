@@ -45,7 +45,7 @@ From a usage standpoint:
 You can use as many **manipulation functions** as you like (all arithmetic operators and most type-specific functions),
 but you need to end your filter expression with a **terminal function** (all common operators and some type-specific functions).
 
-:::
+:::note
 
 Regarding the language use of "operator" and "function": When using `odata2ts` this differentiation is
 opaque for you, you will always call JavaScript methods. Hence, you can treat both terms as synonyms.
