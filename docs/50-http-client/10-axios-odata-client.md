@@ -17,7 +17,7 @@ By default, the request headers `Accept` and `Content-Type` are set to `applicat
 
 ## Setup
 
-The axios-odata client is installed as runtime dependency:
+Install package `@odata2ts/axios-odata-client` as runtime dependency:
 
 ```bash npm2yarn
 npm install --save @odata2ts/axios-odata-client
