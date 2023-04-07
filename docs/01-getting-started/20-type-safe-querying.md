@@ -16,8 +16,8 @@ The query builder relies on the generated models and q-objects.
 
 You rely on the query builder as runtime dependency:
 
-```
-yarn add @odata2ts\odata-query-builder
+```bash npm2yarn
+npm install --save @odata2ts\odata-query-builder
 ```
 
 ## Generation Settings
@@ -45,9 +45,13 @@ export default config;
 
 ## Usage
 
-Update your metadata file if necessary.
+Update your metadata file whenever the server changes.
 
-Run `yarn gen-odata` or `npm run gen-odata` to trigger the generation process.
+Run the `gen-odata` script:
+
+```bash npm2yarn
+npm run gen-odata
+```
 
 Create the builder by providing the path to the resource and the generated query object:
 

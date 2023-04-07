@@ -14,9 +14,13 @@ graphQL should come to mind...
 
 Additionally, OData V4 specifies even more functionalities like searching or aggregation.
 
+:::caution
+
 Be aware that an OData service does not have to implement all functionalities.
-When using an unsupported filter operator or an unsupported operation, then the
-server might respond with `501 (Not Implemented)` in the best case or `5ßß (Internal Server Error)`.
+When using an unsupported operation, then the server should respond with `501: Not Implemented`
+(since the world's not perfect, you might face `500: Server Error` instead).
+
+:::
 
 ## Query Builder
 
@@ -29,7 +33,7 @@ It supports
 - V4 search operation
 - simple group-by
 
-It depends on the generated `query-objects` and is itself built into any generated `service`.
+It depends on the generated `Query Qbjects` and is itself built into any generated `service`.
 
 ## Setup
 
@@ -38,8 +42,7 @@ then you're already good to go: [See Initialization](#initialization).
 
 Install as regular runtime dependency:
 
-```shell
-yarn add @odata2ts/odata-query-builder
+```bash npm2yarn
 npm install --save @odata2ts/odata-query-builder
 ```
 

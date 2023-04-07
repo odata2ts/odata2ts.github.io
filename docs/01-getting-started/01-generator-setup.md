@@ -20,8 +20,8 @@ Save the XML in an own file, e.g. `resource/trippin.xml`.
 
 Install the generator as dev dependency.
 
-```
-yarn add --dev @odata2ts/odata2ts
+```bash npm2yarn
+npm install --save-dev @odata2ts/odata2ts
 ```
 
 ## Generator Configuration
@@ -62,11 +62,19 @@ Edit your `scripts` block in `package.json`:
 }
 ```
 
-NOTE: you'll probably also want to execute the generation before building your own package, so add it accordingly
+:::info
+
+You probably also want to execute the generation before building your own package, so add it accordingly
 to your build script as well.
+
+:::
 
 ## Usage
 
 Update your metadata file whenever the server changes.
 
-Run `yarn gen-odata` or `npm run gen-odata` to trigger the generation process.
+Run the `gen-odata` script:
+
+```bash npm2yarn
+npm run gen-odata
+```

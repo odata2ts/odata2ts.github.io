@@ -40,8 +40,12 @@ Via the `skipXXX` options you can tell `odata2ts` to not generate model interfac
 
 ## Usage
 
-Update your metadata file if necessary.
+Update your metadata file whenever the server changes.
 
-Run `yarn gen-odata` or `npm run gen-odata` to trigger the generation process.
+Run the `gen-odata` script:
 
-Now you can use the generated models in your code by importing them from the configured build folder.
+```bash npm2yarn
+npm run gen-odata
+```
+
+You can now use the generated models in your code by importing them from the configured build folder.

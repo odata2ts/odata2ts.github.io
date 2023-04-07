@@ -184,8 +184,8 @@ Using the V4 API also for V2 avoids repetition and pitfalls.
 ## Filter
 
 Filtering makes direct use of the generated `query-objects` to support type-safety and code assistance all around.
-They are the functional counterparts to each known entity. Each property of such a query object brings its
-own type specific filter operations:
+They are the functional counterparts to each known entity.
+And each property of such an object brings its own type specific filter operations:
 
 ```ts
 createUriBuilderV4("People", qPerson)
@@ -197,48 +197,9 @@ createUriBuilderV4("People", qPerson)
   )
 ```
 
-Non-encoded result: `People?$filter=LastName eq 'Smith' AND Age gt 18`
+Non-encoded result: `People?$filter=LastName eq 'Smith' and Age gt 18`
 
-### Filter Operations
-
-All individual operations of any filter type are documented in [Filter Operations](./filter-operations).
-
-The following is only concerned with the `filter` operation of the builder.
-
-### Logical Operators
-
-The `filter` operation accepts one or more filter expressions which are concatenated by an `AND` expression.
-The same holds true when calling the operation multiple times.
-
-#### Or-Expression
-
-An `OR` expression would look like this (`AND` can also be used in this same way):
-
-```ts
-builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")))
-```
-
-Result: `$filter=(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
-
-As you can see parentheses are added around the or-expression.
-
-#### Not-Expression
-
-In the same manner you can negate any expression by calling `not()`:
-
-```ts
-builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")).not())
-```
-
-Result: `$filter=not(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
-
-### Custom Filter Expressions
-
-You can create custom filter expressions directly. This is meant to be used as an escape hatch:
-
-```ts
-builder.filter(new QFilterExpression("name eq 'Heinz'").and(new QFilterExpression("age eq 8")))
-```
+See [Filtering](./filtering) for the complete reference of filter options supported by `odata2ts`.
 
 ## Count
 

@@ -16,8 +16,7 @@ So if you're already set up, go to [usage](#Usage)
 
 Install the generator as dev dependency with the weapon of your choice:
 
-```
-yarn add --dev @odata2ts/odata2ts
+```bash npm2yarn
 npm install --save-dev @odata2ts/odata2ts
 ```
 

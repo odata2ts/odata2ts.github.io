@@ -15,7 +15,7 @@ const config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
-  
+
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "odata2ts", // Usually your GitHub org/user name.
@@ -41,10 +41,13 @@ const config = {
     [
       '@docusaurus/plugin-content-docs',
       {
-        sidebarPath: require.resolve("./sidebars.js")
+        sidebarPath: require.resolve("./sidebars.js"),
         // Remove this to remove the "edit this page" links.
         // editUrl:
         //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+        remarkPlugins: [
+          [require('@docusaurus/remark-plugin-npm2yarn'), {sync: true}],
+        ],
       }
       ],
     [
