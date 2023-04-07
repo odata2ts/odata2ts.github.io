@@ -19,8 +19,8 @@ we get the full-fledged and type-safe odata client:
 
 You require the following runtime dependencies:
 
-```
-yarn add @odata2ts/odata-service @odata2ts/axios-odata-client
+```bash npm2yarn
+npm install --save @odata2ts/odata-service @odata2ts/axios-odata-client
 ```
 
 ## Generation Settings
@@ -49,9 +49,13 @@ strategies like PascalCase or camelCase. The naming is configurable.
 
 ## Usage
 
-Update your metadata file if necessary.
+Update your metadata file whenever the server changes.
 
-Run `yarn gen-odata` or `npm run gen-odata` to trigger the generation process.
+Run the `gen-odata` script:
+
+```bash npm2yarn
+npm run gen-odata
+```
 
 Initialize the main OData service:
 

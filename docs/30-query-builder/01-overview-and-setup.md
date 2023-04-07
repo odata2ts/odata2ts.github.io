@@ -42,8 +42,7 @@ then you're already good to go: [See Initialization](#initialization).
 
 Install as regular runtime dependency:
 
-```shell
-yarn add @odata2ts/odata-query-builder
+```bash npm2yarn
 npm install --save @odata2ts/odata-query-builder
 ```
 
