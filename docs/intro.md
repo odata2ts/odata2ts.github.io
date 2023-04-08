@@ -58,7 +58,7 @@ Feature Highlights:
 - use type converters to interact with data types of your choice
   - use provided ones: v2-to-v4-converter, luxon-converter
   - roll your own
-- allow [renaming of entity properties](./generator/naming)
+- allow renaming of entity properties
   - establish consistent casing, e.g. `camelCase`
   - rename an individual property
 

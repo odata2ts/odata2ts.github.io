@@ -10,13 +10,13 @@ select, filter, count, skip, top. You also get the ability to expand related ent
 filtered, selected or further expanded.
 
 Selecting and expanding really means that the client has the power to shape the response structure.
-graphQL should come to mind...
+[GraphQL](https://graphql.org/) should come to mind...
 
 Additionally, OData V4 specifies even more functionalities like searching or aggregation.
 
 :::caution
 
-Be aware that an OData service does not have to implement all functionalities.
+Be aware that an OData service does not have to implement all querying functionalities.
 When using an unsupported operation, then the server should respond with `501: Not Implemented`
 (since the world's not perfect, you might face `500: Server Error` instead).
 
