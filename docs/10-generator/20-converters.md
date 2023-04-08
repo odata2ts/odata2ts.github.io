@@ -27,11 +27,10 @@ You can use the existing converters as example.
 
 The following converters are provided by `odata2ts`:
 
-- [v2-to-v4-converter](https://www.npmjs.com/package/@odata2ts/converter-v2-to-v4)
-  - you probably want V2 number types to be JS numbers
+- [v2-to-v4-converter](./v2-to-v4-converter)
   - by converting v2 to v4 data types other converters only need to take care of V4 data types
   - makes switch between V2 and V4 versions of the same OData service more pain-free
-- [luxon-converter](https://www.npmjs.com/package/@odata2ts/converter-luxon)
+- [luxon-converter](./luxon-converter)
   - third-party `DateTime` type
   - third-party `Duration` type
 
