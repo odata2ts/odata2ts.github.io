@@ -14,7 +14,7 @@ User facing data types:
 
 ## Installation
 
-```
+```shell npm2yarn
 npm install --save @odata2ts/converter-luxon
 ```
 
