@@ -5,6 +5,10 @@ sidebar_position: 2
 
 # Configuration
 
+## Basics
+
+### Default Configuration
+
 In the background `odata2ts` has a [defaultConfig](https://github.com/odata2ts/odata2ts/blob/main/packages/odata2ts/src/defaultConfig.ts),
 so that you only need to provide those settings which diverge from that.
 
@@ -110,50 +114,101 @@ const defaultConfig = {
   </details>
 </p>
 
-Within your `odata2ts.config.ts` you have two kinds of settings:
+### Configuration Hierarchy
 
-- **base settings**: apply to all configured services
-- **service settings**: configure one specific service, specifying source and output.
+`odata2ts` exposes different configuration possibilities. Here are all of them and the order in which they are applied:
+
+- **default config**: sensible defaults provided by `odata2ts`
+- **base settings**: basic settings which apply to all configured services
+- **service settings**: settings for one specific service, `source` and `output` must be specified
+- **CLI options**: options provided from command line
 
 The base settings are also some kind of default settings as they have an effect on the generation process
 of all configured odata services. Base settings are applied on top of the default config.
 
 All settings starting from the `services` attribute are only valid for a specific service and only applied
-for its generation run. Service specific settings are applied on top of the base settings.
+for its generation run. Service specific settings may override any default or base setting and allow
+for reconfiguring entities and properties.
 
 <p>
   <details>
-    <summary>Some visual aid: A picture can say more...</summary>
+    <summary>Some visual aid: A picture can say more than a thousand words...</summary>
 
 ![Base vs Service Settings](../../static/img/base-and-service-settings.png)
 
   </details>
-
 </p>
 
 Options specified on the command line always win over other configuration possibilities.
-All base settings are available as CLI options.
+Most base settings are available as CLI options.
 Options `source` and `output` are required unless the config file is also used
 containing appropriate service definitions.
 
-Consider using the config file instead of specifying any settings via the command line.
+:::tip
+
+Consider using the config file for all your configurations
+instead of specifying some settings via the command line.
+
+:::
 
 ## Base Settings
 
-Here all CLI options and all base settings of the config file are listed:
+Here is the list of all **base settings** of the config file. By and large this matches the [CLI options](#cli-options).
 
-| Option Name           | CLI Option                 | CLI Shorthand | Default Value | Description                                                                                                                                      |
-| --------------------- | -------------------------- | ------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ---                   | --source                   | -s            |               | Specifies the source file, i.e. metadata description                                                                                             |
-| ---                   | --output                   | -o            |               | Specifies the output directory. This folder gets cleaned and overwritten on generation.                                                          |
-| mode                  | --mode                     | -m            | all           | Allowed are: all, models, qobjects, service                                                                                                      |
-| emitMode              | --emit-mode                | -e            | js_dts        | Specify what to emit. ALlowed values: ts, js, dts, js_dts                                                                                        |
-| prettier              | --prettier                 | -p            | false         | Use prettier to pretty print the TS result files; only applies when emitMode = ts                                                                |
-| tsconfig              | --tsconfig                 | -t            | tsconfig.json | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts                              |
-| allowRenaming         | --allow-renaming           | -r            | false         | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase                                      |
-| disableAutoManagedKey | --disable-auto-managed-key | -n            | false         | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism |
-| debug                 | --debug                    | -d            | false         | Add debug information                                                                                                                            |
-| ---                   | --service-name             | -name         |               | Overwrites the service name found in OData metadata => controls name of main odata service                                                       |
+| Base Setting          | Type                         | Default Value     | Description                                                                                                                                                                                     |
+| --------------------- | ---------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mode                  | `Modes`                      | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
+| emitMode              | `EmitModes`                  | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
+| prettier              | `boolean`                    | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
+| tsconfig              | `string`                     | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
+| allowRenaming         | `boolean`                    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-properties)                                    |
+| disableAutoManagedKey | `boolean`                    | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
+| debug                 | `boolean`                    | `false`           | Add debug information                                                                                                                                                                           |
+| serviceName           | `string`                     |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                 |
+| skipEditableModels    | `boolean`                    | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                        |
+| skipIdModels          | `boolean`                    | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                              |
+| skipOperations        | `boolean`                    | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
+| converters            | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converter documentation](./converters)                                                                                                        |
+| naming                | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
+
+## Service Settings
+
+There's one more option on the root level of the config file called `services`.
+It represents the entry point into the **service settings**, which are by nature specific for a single odata service.
+The `services` option is an object, where each key is the internal name of the service
+and the value is the configuration (class `ServiceGenerationOptions`).
+
+These service settings contain **all base settings**, options `source` and `output` (cf. CLI options),
+as well as options to reconfigure entities and properties:
+
+| Service Setting  | Type                               | Default Value | Description                                                                                                                                      |
+| ---------------- | ---------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| source           | `string`                           | ---           | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                      |
+| output           | `string`                           | ---           | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)     |
+| serviceName      | `string`                           |               | Overwrites the service name found in OData metadata & controls the main service name. Same as the base setting but on this level it makes sense. |
+| entitiesByName   | `Array<EntityGenerationOptions>`   | `[]`          | Match entities by their name and configure them. See [generation modes](#generation-modes)                                                       |
+| propertiesByName | `Array<PropertyGenerationOptions>` | `[]`          | Match properties by their name and configure them. See [configuration by property](#configuration-by-property)                                   |
+
+## CLI Options
+
+Here is the list of all options available for the command line.
+As you can see, this largely matches the **base settings**:
+
+- additionally, `source` and `output` options are available (cf. [service settings](#service-settings))
+- options `skipXXX`, `converters` and `naming` are not available though
+
+| CLI Option                            | Default Value     | Description                                                                                                                                                                                     |
+| ------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--source`<br/>`-s`                   |                   | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                                                                     |
+| `--output`<br/>`-o`                   |                   | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)                                                    |
+| `--service-name`<br/>`-name`          |                   | Overwrites the service name found in OData metadata => controls name of main odata service                                                                                                      |
+| `--mode`<br/>`-m`                     | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
+| `--emit-mode`<br/>`-e`                | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
+| `--prettier`<br/>`-p`                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
+| `--tsconfig`<br/>`-t`                 | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
+| `--allow-renaming`<br/>`-r`           | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-properties)                                    |
+| `--disable-auto-managed-key`<br/>`-n` | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
+| `--debug`<br/>`-d`                    | `false`           | Add debug information                                                                                                                                                                           |
 
 ## Generation Modes
 
@@ -229,8 +284,8 @@ update, and patch actions: All managed fields need to be filtered out.
 ### Automatism
 
 `odata2ts` employs the following automatism:
-Single key fields, like ID, are marked as managed,
-while each field of a complex key is regarded as unmanaged.
+Single key fields (the key of the entity is composed of one single field), like ID, are marked as `managed`,
+while each field of a complex key (the key of the entity is composed of multiple fields) is regarded as `unmanaged`.
 
 If you want to turn off that automatism, use the option `disableAutoManagedKey`.
 
