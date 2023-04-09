@@ -40,12 +40,19 @@ Typically, you use the "scripts" block of the `package.json` along these lines:
 For each OData service two settings must be specified:
 
 - source: the downloaded metadata file
-- output: the output directory for the generated files
+- output: the output directory for the generated files; warning: this folder gets wiped on generation
 
 `odata2ts` doesn't necessarily requires a config file, since the essential settings are available as CLI options.
 However, the pure CLI usage is restricted to generating only one service. With the help of the config file,
 you centralize all your settings, allow for handling the generation for multiple services and have type-safety
 and a documentation at your fingertips. In other words, it's highly recommended to use the config file.
+
+:::caution
+
+On each generation run the output folder of each specified service gets completely cleaned!
+So make up an own folder for each service and **never** use paths like `src`
+
+:::
 
 ### Config File
 
@@ -62,8 +69,8 @@ for two OData services:
 import { ConfigFileOptions, Modes } from "@odata2ts/odata2ts";
 
 const config: ConfigFileOptions = {
+  mode: Modes.models,
   services: {
-    mode: Modes.models,
     northwind: {
       source: "resource/northwind.xml",
       output: "build/northwind",
@@ -108,3 +115,4 @@ yarn odata2ts -s resource/trippin.xml -o build/trippin
 ```
 
 Of course, you can always use any CLI option to override any other settings.
+See [./configuration#cli-options] for a listing of all available CLI options.
