@@ -168,11 +168,11 @@ Attribute `from` can be a list of types.
 
 The handling of data types within the ValueConverter is a bit special, but follows these rules:
 
-- the types of JS data types are just written as strings: "number", "string", "Date", ...
-- OData Types always have the prefix "Edm.", e.g. "Edm.String", "Edm.DateTimeOffset", ...
+- the types of JS data types are just written as strings: `"number"`, `"string"`, `"Date"`, ...
+- OData Types always have the prefix "Edm.", e.g. `"Edm.String"`, `"Edm.DateTimeOffset"`, ...
   - enums for V2 and V4 data types are available via `@odata2ts/odata-core`
-- 3rd party data types (need to be imported before usage) specify their module as prefix separated by a dot, e.g. "luxon.Duration"
-  - "module.DataType" => import { DataType } from "module";
+- Third-party data types (need to be imported before usage) specify their module as prefix separated by a dot, e.g. `"luxon.Duration"`
+  - `"module.DataType"` becomes `import { DataType } from "module"`;
 
 ### The Module Export
 

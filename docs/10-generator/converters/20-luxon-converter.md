@@ -29,11 +29,12 @@ it doesn't pull Luxon automatically into your project. So if not already present
 
 ## Configuration
 
-To integrate this converter into any `odata2ts` project, add it to the list of converters within the project configuration file `odata2ts.config.ts`.
+To integrate this converter into any `odata2ts` project, add it to the list of converters
+within the project configuration file `odata2ts.config.ts`.
 Converters are referenced by their package name, so in this case `@odata2ts/converter-luxon`.
 
-For V2, the v2-to-v4-converter should also be installed to handle V2 date times (Edm.DateTime) with Luxon as well.
-For V4 you just leave it out.
+For V2, the [v2-to-v4-converter](./v2-to-v4-converter) should also be installed to handle
+V2 date times (Edm.DateTime) with Luxon as well. For V4 you just leave it out.
 
 ```typescript
 import { ConfigOptions } from "@odata2ts/odata2model";
@@ -48,8 +49,8 @@ export default config;
 ### Select Converters
 
 You can also choose to exactly specify which converters to use instead of automatically integrating all of them.
-Instead of a simple string you specify an object where the converters are listed by their id (in the following example "xxxToLuxon").
-These converter ids are listed in the "Conversions" table.
+Instead of a simple string you specify an object where the converters are listed by their id.
+These converter ids are listed in the [conversions table](#conversions).
 
 ```typescript
     ...

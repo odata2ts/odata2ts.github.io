@@ -41,7 +41,7 @@ export default config;
 
 You can also choose to exactly specify which converters to use instead of automatically integrating all of them.
 Instead of a simple string you specify an object where the converters are listed by their id.
-These converter ids are listed in the "Conversions" table.
+These converter ids are listed in the [conversions table](#conversions).
 
 ```typescript
     ...

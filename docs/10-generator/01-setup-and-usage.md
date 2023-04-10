@@ -50,7 +50,7 @@ and a documentation at your fingertips. In other words, it's highly recommended 
 :::caution
 
 On each generation run the output folder of each specified service gets completely cleaned!
-So make up an own folder for each service and **never** use paths like `src`
+So make up an own folder for each service and **never** use paths like `src`.
 
 :::
 
