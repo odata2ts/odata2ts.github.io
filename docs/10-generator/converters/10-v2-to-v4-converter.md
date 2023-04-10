@@ -1,6 +1,6 @@
 ---
 id: v2-to-v4-converter
-sidebar_position: 21
+sidebar_position: 10
 ---
 
 # V2 to V4 Converter

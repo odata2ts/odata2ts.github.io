@@ -1,6 +1,6 @@
 ---
 id: luxon-converter
-sidebar_position: 22
+sidebar_position: 20
 ---
 
 # Luxon Converter
