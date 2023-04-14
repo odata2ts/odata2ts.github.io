@@ -3,7 +3,7 @@ id: odata-client
 sidebar_position: 1
 ---
 
-# OData HTTP Client
+# HTTP Client
 
 To perform the actual HTTP request `odata2ts` requires a third-party library. There are multiple popular choices
 and each choice has their pros and cons.
