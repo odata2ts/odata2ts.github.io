@@ -44,8 +44,8 @@ const config: ConfigFileOptions = {
 export default config;
 ```
 
-Setting the `allowRenaming` flag allows odata2ts to change attribute names of entities and complex types by using naming
-strategies like PascalCase or camelCase. The naming is configurable.
+See [renaming entities and properties](../generator/configuration#renaming-entities-and-properties) to understand
+the `allowRenaming` setting.
 
 ## Usage
 

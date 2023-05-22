@@ -46,8 +46,15 @@ export default config;
 
 With this minimal configuration you define:
 
-- the path to the downloaded XML source
+- the path to the downloaded XML source (see [Download Metadata File(s)](#download-metadata-files))
 - the output folder
+
+:::caution
+
+On each generation run the output folder of each specified service gets completely cleaned!
+So create an own folder for each service and **never** use paths like `src`.
+
+:::
 
 ## Build Configuration
 
