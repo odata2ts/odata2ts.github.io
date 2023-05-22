@@ -12,6 +12,17 @@ User facing data types:
 - [DateTime](https://moment.github.io/luxon/api-docs/index.html#datetime)
 - [Duration](https://moment.github.io/luxon/api-docs/index.html#duration)
 
+## Conversions
+
+| OData Type           | Result Type | Converter Id                   | Description                                                                     |
+| -------------------- | ----------- | ------------------------------ | ------------------------------------------------------------------------------- |
+| `Edm.DateTimeOffset` | `DateTime`  | dateTimeOffsetToLuxonConverter |                                                                                 |
+| `Edm.Date`           | `DateTime`  | dateToLuxonConverter           | Luxon's DateTime will still have the time part, which should be ignored by user |
+| `Edm.TimeOfDay`      | `DateTime`  | timeOfDayToLuxonConverter      | Luxon's DateTime will still have the date part, which should be ignored by user |
+| `Edm.Duration`       | `Duration`  | durationToLuxonConverter       |                                                                                 |
+
+All result types are provided by Luxon.
+
 ## Installation
 
 ```shell npm2yarn
@@ -62,12 +73,3 @@ These converter ids are listed in the [conversions table](#conversions).
     ],
     ...
 ```
-
-## Conversions
-
-| OData Type         | Converter Id                   | Luxon Type | Description                                                                     |
-| ------------------ | ------------------------------ | :--------: | ------------------------------------------------------------------------------- |
-| Edm.DateTimeOffset | dateTimeOffsetToLuxonConverter |  DateTime  |                                                                                 |
-| Edm.Date           | dateToLuxonConverter           |  DateTime  | Luxon's DateTime will still have the time part, which should be ignored by user |
-| Edm.TimeOfDay      | timeOfDayToLuxonConverter      |  DateTime  | Luxon's DateTime will still have the date part, which should be ignored by user |
-| Edm.Duration       | durationToLuxonConverter       |  Duration  |                                                                                 |
