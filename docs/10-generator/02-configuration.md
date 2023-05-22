@@ -160,7 +160,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | emitMode              | `EmitModes`                  | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
 | prettier              | `boolean`                    | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
 | tsconfig              | `string`                     | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
-| allowRenaming         | `boolean`                    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-properties)                                    |
+| allowRenaming         | `boolean`                    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                       |
 | disableAutoManagedKey | `boolean`                    | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
 | debug                 | `boolean`                    | `false`           | Add debug information                                                                                                                                                                           |
 | serviceName           | `string`                     |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                 |
@@ -198,14 +198,14 @@ As you can see, this largely matches the **base settings**:
 
 | CLI Option                            | Default Value     | Description                                                                                                                                                                                     |
 | ------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--source`<br/>`-s`                   |                   | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                                                                     |
-| `--output`<br/>`-o`                   |                   | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)                                                    |
+| `--source`<br/>`-s`                   |                   | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](../setup-and-usage#configuration)                                                                                  |
+| `--output`<br/>`-o`                   |                   | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](../setup-and-usage#configuration)                                                 |
 | `--service-name`<br/>`-name`          |                   | Overwrites the service name found in OData metadata => controls name of main odata service                                                                                                      |
 | `--mode`<br/>`-m`                     | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
 | `--emit-mode`<br/>`-e`                | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
 | `--prettier`<br/>`-p`                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
 | `--tsconfig`<br/>`-t`                 | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
-| `--allow-renaming`<br/>`-r`           | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-properties)                                    |
+| `--allow-renaming`<br/>`-r`           | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                       |
 | `--disable-auto-managed-key`<br/>`-n` | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
 | `--debug`<br/>`-d`                    | `false`           | Add debug information                                                                                                                                                                           |
 
@@ -299,7 +299,7 @@ Without any converters `odata2ts` adheres to the appropriate specification.
 ### Type Converters
 
 `odata2ts` acknowledges the fact that this kind of shallow data representation (string of some format)
-is far from being optimal and offers [**converters**](./converters) to use different data types.
+is far from being optimal and offers [**converters**](../converters) to use different data types.
 
 Available converter packages:
 
@@ -308,7 +308,7 @@ Available converter packages:
 - luxon: use Luxon's `DateTime` and `Duration` types
 - ui5-v2: use same types as UI5's V2 ODataModel
 
-See [Provided Converters](./converters/#provided-converters)
+See [Provided Converters](../converters/#provided-converters)
 
 ### Roll Your Own Converter
 
@@ -318,7 +318,7 @@ Outline:
 - each converter implements interface `ValueConverter<x, y>`
 - follow conventions regarding package structure and exports
 
-See [Creating You Own Converter Module](./converters/#creating-your-own-converter-module).
+See [Creating You Own Converter Module](../converters/#creating-your-own-converter-module).
 
 ## Naming
 
