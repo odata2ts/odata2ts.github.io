@@ -167,7 +167,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | skipEditableModels    | `boolean`                    | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                        |
 | skipIdModels          | `boolean`                    | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                              |
 | skipOperations        | `boolean`                    | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
-| converters            | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converter documentation](./converters)                                                                                                        |
+| converters            | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
 | naming                | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
 
 ## Service Settings
@@ -268,6 +268,57 @@ of the `gen-src` folder in your `tsconfig.json`.
 
 `odata2ts` allows to prettify the generated TS files via [prettier](https://prettier.io/).
 When installed and configured, you just set the option `prettier` to `true`.
+
+## Types and Converters
+
+OData defines its own primitive data types: `Edm.*` (e.g. `Edm.String` or `Edm.Boolean`).
+The JSON representation for each type is defined by the V2 and V4 OData specifications.
+
+Without any converters `odata2ts` adheres to the appropriate specification.
+
+| OData Type           | V2 Type   | V4 Type   | Example                                                    | Description                                                      |
+| -------------------- | --------- | --------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| `Edm.String`         | `string`  | `string`  | `"Test"`                                                   |                                                                  |
+| `Edm.Boolean`        | `boolean` | `boolean` | `true`                                                     |                                                                  |
+| `Edm.Byte`           | `string`  | `number`  | V2: `"1"`<br/>V4: `1`                                      |                                                                  |
+| `Edm.SByte`          | `string`  | `number`  |                                                            |                                                                  |
+| `Edm.Int16`          | `number`  | `number`  | `3`                                                        |                                                                  |
+| `Edm.Int32`          | `number`  | `number`  | `222`                                                      |                                                                  |
+| `Edm.Int64`          | `string`  | `number`  |                                                            |                                                                  |
+| `Edm.Single`         | `string`  | `number`  |                                                            |                                                                  |
+| `Edm.Double`         | `string`  | `number`  |                                                            |                                                                  |
+| `Edm.Decimal`        | `string`  | `number`  |                                                            |                                                                  |
+| `Edm.Duration`       | -         | `string`  | `"P12DT12H15M"`                                            | ISO 8601 Duration                                                |
+| `Edm.Time`           | `string`  | -         | `"PT12H15M"`                                               | ISO 8601 Duration, restricted to the time part                   |
+| `Edm.TimeOfDay`      | -         | `string`  | `"12:15:00"`                                               | ISO 8601 Time                                                    |
+| `Edm.Date`           | -         | `string`  | `"2022-12-31"`                                             | ISO 8601 Date                                                    |
+| `Edm.DateTime`       | `string`  | -         | `"/Date(123...)/"`                                         | completely custom format: Unix time stamp with offset in minutes |
+| `Edm.DateTimeOffset` | `string`  | `string`  | `"2022-12-31T12:15:00Z"`<br/>`"2022-12-31T12:15:00+01:00"` | ISO 8601 Date and Time                                           |
+| `Edm.Binary`         | `string`  | `string`  |                                                            | base64 encoded string                                            |
+
+### Type Converters
+
+`odata2ts` acknowledges the fact that this kind of shallow data representation (string of some format)
+is far from being optimal and offers [**converters**](./converters) to use different data types.
+
+Available converter packages:
+
+- v2-to-v4: dispense with weired `DateTime` formats and numeric `string`s
+- common: facilitate JS `Date` or `bigint`
+- luxon: use Luxon's `DateTime` and `Duration` types
+- ui5-v2: use same types as UI5's V2 ODataModel
+
+See [Provided Converters](./converters/#provided-converters)
+
+### Roll Your Own Converter
+
+Outline:
+
+- individual converters reside in a **converter package** which is an own JS module with its own `package.json`
+- each converter implements interface `ValueConverter<x, y>`
+- follow conventions regarding package structure and exports
+
+See [Creating You Own Converter Module](./converters/#creating-your-own-converter-module).
 
 ## Naming
 

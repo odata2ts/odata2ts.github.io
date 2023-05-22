@@ -36,11 +36,13 @@ It comes with powerful configuration options. Some highlights:
 - generation of TypeScript files or compiled JS / DTS files
   - TS: option to use prettier on generated TS files
   - JS/DTS: option to specify path to `tsconfig.json`
+- use type converters
+  - work with data types of your choice
+  - integrate with other technologies
 - name or rename stuff
   - naming of pretty much any aspect of the generated artefacts
   - e.g. all types should be prefixed with an "I", `Person` => `IPerson`
   - consistent casing (as in "camelCase" or "PascalCase") even for property names of entity types
-- use type converters
 
 See the [generator documentation](./category/generator) for more information.
 
