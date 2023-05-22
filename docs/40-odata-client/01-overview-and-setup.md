@@ -7,7 +7,7 @@ sidebar_position: 1
 
 For each OData service `odata2ts` will generate one corresponding OData client.
 It is generated so that we can bake all the domain knowledge from the metadata into the OData client.
-In this way we can have a full-fledged and truly type-safe odata client, which:
+In this way we can have a full-fledged and truly type-safe OData client, which:
 
 - supports all CRUD (create, read, update, delete) operations for each entity
 - supports bound and unbound operations (functions and actions)

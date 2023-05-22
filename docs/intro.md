@@ -86,4 +86,4 @@ Two implementations are currently provided:
 - one based on Axios
 - one based on JQuery
 
-See [OData HTTP Client](./http-client/odata-client) for more details.
+See [OData HTTP Client](./odata-client/http-client) for more details.
