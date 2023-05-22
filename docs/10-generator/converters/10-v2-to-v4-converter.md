@@ -8,13 +8,20 @@ sidebar_position: 10
 Convert certain OData V2 types to their V4 analog.
 Thus, other converters only need to take care of V4 data types.
 
-Conversions:
+## Conversions
 
-- `Edm.DateTime` => `Edm.DateTimeOffset`
-- Number types represented as strings => `number`
-- `Edm.Time`
-  - => `Edm.TimeOfDay`
-  - => `Edm.Duration`
+| OData V2 Type  | Result Type          | Converter Id                      | Description                                                                                            |
+| -------------- | -------------------- | :-------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `Edm.DateTime` | `Edm.DateTimeOffset` | dateTimeToDateTimeOffsetConverter | Converts "/Date(123...)/" to ISO8601 "2022-02-22T12:00:00Z"; offsets are supported "/Date(123..+120)/" |
+| `Edm.Byte`     | `number`             | stringToNumberConverter           |                                                                                                        |
+| `Edm.SByte`    | `number`             | stringToNumberConverter           |                                                                                                        |
+| `Edm.Single`   | `number`             | stringToNumberConverter           |                                                                                                        |
+| `Edm.Double`   | `number`             | stringToNumberConverter           |                                                                                                        |
+| `Edm.Time`     | `Edm.TimeOfDay`      | timeToTimeOfDayConverter          | Converts duration format to time format, e.g. `PT12H15M` to `12:15:00`                                 |
+| `Edm.Time`     | `Edm.Duration`       | timeToDurationConverter           | Relabels `Edm.Time` to `Edm.Duration` (no conversion required); not a default converter                |
+
+`Edm.Int64` & `Edm.Decimal` do not get converted to the `number` type as V4 does it;
+they remain `string` types as they potentially don't fit into JS' number type with the implied precision loss.
 
 ## Installation
 
@@ -41,7 +48,7 @@ export default config;
 
 You can also choose to exactly specify which converters to use instead of automatically integrating all of them.
 Instead of a simple string you specify an object where the converters are listed by their id.
-These converter ids are listed in the "Conversions" table.
+These converter ids are listed in the [conversions table](#conversions).
 
 ```typescript
     ...
@@ -54,21 +61,7 @@ These converter ids are listed in the "Conversions" table.
     ...
 ```
 
-## Conversions
-
-| OData V2 Type | OData V4 Type      | Converter Id                      | Description                                                                                                |
-| ------------- | ------------------ | :-------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Edm.DateTime  | Edm.DateTimeOffset | dateTimeToDateTimeOffsetConverter | Converts "/Date(123...)/" to ISO8601 "2022-02-22T12:00:00Z"; offsets are supported "/Date(123..+120)/"     |
-| Edm.Byte      | number             | stringToNumberConverter           | fits into JS number                                                                                        |
-| Edm.SByte     | number             | stringToNumberConverter           | fits into JS number                                                                                        |
-| Edm.Int64     | number             | stringToNumberConverter           | might exceed JS number capacity                                                                            |
-| Edm.Single    | number             | stringToNumberConverter           | fits into JS number                                                                                        |
-| Edm.Double    | number             | stringToNumberConverter           | fits into JS number                                                                                        |
-| Edm.Decimal   | number             | stringToNumberConverter           | might exceed JS number capacity                                                                            |
-| Edm.Time      | Edm.TimeOfDay      | timeToTimeOfDayConverter          | Converts PT12H15M to "12:15:00"                                                                            |
-| Edm.Time      | Edm.Duration       | timeToDurationConverter           | alternative which doesn't convert => Edm.Time has the same format as Edm.Duration; not a default converter |
-
-### Notes on `Edm.Time`
+## Notes on `Edm.Time`
 
 By default `Edm.Time` is converted to `Edm.TimeOfDay`, since that is what I believe the spec intended it to mean.
 However, it can also be used to mean a duration. In that case you could use the `timeToDurationConverter` by

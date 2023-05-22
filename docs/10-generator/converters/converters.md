@@ -16,7 +16,7 @@ which could be used in these cases. Thus, the choice of how to map data types
 must be left open to the user.
 
 To support different converters and stay open to custom converter implementations
-odata2ts supports a plugin architecture. So you install only those converters you need
+`odata2ts` supports a plugin architecture. So you install only those converters you need
 and configure them in the config file.
 
 Furthermore, you are invited to roll your own converters.
@@ -28,11 +28,21 @@ You can use the existing converters as example.
 The following converters are provided by `odata2ts`:
 
 - [v2-to-v4-converter](./v2-to-v4-converter)
-  - by converting v2 to v4 data types other converters only need to take care of V4 data types
-  - makes switch between V2 and V4 versions of the same OData service more pain-free
-- [luxon-converter](./luxon-converter)
-  - third-party `DateTime` type
-  - third-party `Duration` type
+  - V2 numeric types are converted from `string` to `number`
+  - `Edm.Int64` and `Edm.Decimal` are not converted and remain type `string`
+  - `Edm.DateTime` is converted to `Edm.DateTimeOffset`, i.e. proper ISO 8601 date and time presentation
+  - `Edm.Time` is by default converted to `Edm.TimeOfDay` (ISO 8601 time), but can also be relabeled as `Edm.Duration`
+- [Common Converters](./common-converter)
+  - `Edm.DateTimeOffset`: JavaScript `Date` type
+  - `Edm.Duration`: simple duration object
+  - `Edm.Int64`: JavaScript `bigint` type
+- [Luxon Converters](./luxon-converter)
+  - `Edm.DateTimeOffset`: Luxon's `DateTime` type
+  - `Edm.Date`: Luxon's `DateTime` type
+  - `Edm.TimeOfDay`: Luxon's `DateTime` type
+  - `Edm.Duration`: Luxon's `Duration` type
+- [UI5 V2 Converters](./ui5-v2-converter)
+  - type alignment with UI5 V2 ODataModel (`sap.ui.model.odata.v2.ODataModel`)
 
 ## About Converters
 
@@ -168,11 +178,11 @@ Attribute `from` can be a list of types.
 
 The handling of data types within the ValueConverter is a bit special, but follows these rules:
 
-- the types of JS data types are just written as strings: "number", "string", "Date", ...
-- OData Types always have the prefix "Edm.", e.g. "Edm.String", "Edm.DateTimeOffset", ...
+- the types of JS data types are just written as strings: `"number"`, `"string"`, `"Date"`, ...
+- OData Types always have the prefix "Edm.", e.g. `"Edm.String"`, `"Edm.DateTimeOffset"`, ...
   - enums for V2 and V4 data types are available via `@odata2ts/odata-core`
-- 3rd party data types (need to be imported before usage) specify their module as prefix separated by a dot, e.g. "luxon.Duration"
-  - "module.DataType" => import { DataType } from "module";
+- Third-party data types (need to be imported before usage) specify their module as prefix separated by a dot, e.g. `"luxon.Duration"`
+  - `"module.DataType"` becomes `import { DataType } from "module"`;
 
 ### The Module Export
 

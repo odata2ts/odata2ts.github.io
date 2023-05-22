@@ -12,6 +12,17 @@ User facing data types:
 - [DateTime](https://moment.github.io/luxon/api-docs/index.html#datetime)
 - [Duration](https://moment.github.io/luxon/api-docs/index.html#duration)
 
+## Conversions
+
+| OData Type           | Result Type | Converter Id                   | Description                                                                     |
+| -------------------- | ----------- | ------------------------------ | ------------------------------------------------------------------------------- |
+| `Edm.DateTimeOffset` | `DateTime`  | dateTimeOffsetToLuxonConverter |                                                                                 |
+| `Edm.Date`           | `DateTime`  | dateToLuxonConverter           | Luxon's DateTime will still have the time part, which should be ignored by user |
+| `Edm.TimeOfDay`      | `DateTime`  | timeOfDayToLuxonConverter      | Luxon's DateTime will still have the date part, which should be ignored by user |
+| `Edm.Duration`       | `Duration`  | durationToLuxonConverter       |                                                                                 |
+
+All result types are provided by Luxon.
+
 ## Installation
 
 ```shell npm2yarn
@@ -29,11 +40,12 @@ it doesn't pull Luxon automatically into your project. So if not already present
 
 ## Configuration
 
-To integrate this converter into any `odata2ts` project, add it to the list of converters within the project configuration file `odata2ts.config.ts`.
+To integrate this converter into any `odata2ts` project, add it to the list of converters
+within the project configuration file `odata2ts.config.ts`.
 Converters are referenced by their package name, so in this case `@odata2ts/converter-luxon`.
 
-For V2, the v2-to-v4-converter should also be installed to handle V2 date times (Edm.DateTime) with Luxon as well.
-For V4 you just leave it out.
+For V2, the [v2-to-v4-converter](./v2-to-v4-converter) should also be installed to handle
+V2 date times (Edm.DateTime) with Luxon as well. For V4 you just leave it out.
 
 ```typescript
 import { ConfigOptions } from "@odata2ts/odata2model";
@@ -48,8 +60,8 @@ export default config;
 ### Select Converters
 
 You can also choose to exactly specify which converters to use instead of automatically integrating all of them.
-Instead of a simple string you specify an object where the converters are listed by their id (in the following example "xxxToLuxon").
-These converter ids are listed in the "Conversions" table.
+Instead of a simple string you specify an object where the converters are listed by their id.
+These converter ids are listed in the [conversions table](#conversions).
 
 ```typescript
     ...
@@ -61,12 +73,3 @@ These converter ids are listed in the "Conversions" table.
     ],
     ...
 ```
-
-## Conversions
-
-| OData Type         | Converter Id                   | Luxon Type | Description                                                                     |
-| ------------------ | ------------------------------ | :--------: | ------------------------------------------------------------------------------- |
-| Edm.DateTimeOffset | dateTimeOffsetToLuxonConverter |  DateTime  |                                                                                 |
-| Edm.Date           | dateToLuxonConverter           |  DateTime  | Luxon's DateTime will still have the time part, which should be ignored by user |
-| Edm.TimeOfDay      | timeOfDayToLuxonConverter      |  DateTime  | Luxon's DateTime will still have the date part, which should be ignored by user |
-| Edm.Duration       | durationToLuxonConverter       |  Duration  |                                                                                 |
