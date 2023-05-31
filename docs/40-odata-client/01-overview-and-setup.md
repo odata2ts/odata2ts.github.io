@@ -19,7 +19,8 @@ In this way we can have a full-fledged and truly type-safe OData client, which:
 ## Setup
 
 If you've followed the [Getting Started Guide](../getting-started/use-case_full-service) for this
-use case, then you already are good to go. Skip this section and go to TODO.
+use case, then you already are good to go. The remainder of this chapter repeats what has been said there,
+but might go into more details.
 
 Install the runtime dependency `@odata2ts/odata-service`:
 
@@ -27,12 +28,11 @@ Install the runtime dependency `@odata2ts/odata-service`:
 npm install --save @odata2ts/odata-service
 ```
 
-You also need an [HTTP client](./http-client) to execute requests. The reference implementation is
-the [axios-odata-client](./http-client/axios-odata-client) which you would also install as
-runtime dependency:
+You also need an [HTTP client](./http-client) to execute requests. For example, when using `http-client-fetch`
+you would also install as runtime dependency:
 
 ```bash npm2yarn
-npm install --save @odata2ts/axios-odata-client
+npm install --save @odata2ts/http-client-fetch
 ```
 
 ## Configuration
@@ -81,13 +81,13 @@ which points to the root of your OData service:
 // the generated main service
 import { TrippinService } from "../build/trippin/TrippinService";
 // the chosen http client implementation
-import { AxiosODataClient } from "@odata2ts/axios-odata-client";
+import { AxiosClient } from "@odata2ts/http-client-axios";
 
 const baseUrl = "https://services.odata.org/TripPinRESTierService"
 // initialize and, optionally, configure the http client
-const odataClient = new AxiosODataClient();
+const httpClient = new AxiosClient();
 // initialize the client service
-const trippinService = new TrippinService(odataClient, baseUrl);
+const trippinService = new TrippinService(httpClient, baseUrl);
 ```
 
 For each OData service you create one corresponding client service.
