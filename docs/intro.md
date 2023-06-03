@@ -79,11 +79,11 @@ A proper HTTP client is required to perform the actual HTTP requests. Of course,
 of approaches (go native with `fetch`) and libraries (e.g. Axios) are available.
 
 To keep this aspect configurable `odata2ts` defines and uses its "own" API:
-[The OData Client API](https://www.npmjs.com/package/@odata2ts/odata-client-api).
+[HTTP Client API](https://www.npmjs.com/package/@odata2ts/http-client-api).
 
 Two implementations are currently provided:
 
 - one based on Axios
 - one based on JQuery
 
-See [OData HTTP Client](./odata-client/http-client) for more details.
+See [HTTP Client](./odata-client/http-client) for more details.
