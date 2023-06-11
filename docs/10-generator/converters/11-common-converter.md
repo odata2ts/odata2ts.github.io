@@ -38,19 +38,19 @@ Note: `seconds` can be a fraction to represent milliseconds, e.g. `23.123` = 23 
 ## Installation
 
 ```shell npm2yarn
-npm install --save @odata2ts/converter-ui5-v2
+npm install --save @odata2ts/converter-common
 ```
 
 ## Configuration
 
 To integrate this converter into any `odata2ts` project, add it to the list of converters within the project configuration file `odata2ts.config.ts`.
-Converters are referenced by their package name, so in this case `@odata2ts/converter-v2-to-v4`.
+Converters are referenced by their package name, so in this case `@odata2ts/converter-common`.
 
 ```typescript
-import { ConfigOptions } from "@odata2ts/odata2model";
+import { ConfigOptions } from "@odata2ts/odata2ts";
 
 const config: ConfigOptions = {
-  converters: ["@odata2ts/converter-ui5-v2"],
+  converters: ["@odata2ts/converter-common"],
 };
 
 export default config;
@@ -66,7 +66,7 @@ These converter ids are listed in the [conversions table](#conversions).
     ...
     converters: [
       {
-        module: "@odata2ts/converter-ui5-v2",
+        module: "@odata2ts/converter-common",
         use: ["dateTimeOffsetToDateConverter", "simpleDurationConverter", "int64ToBigIntConverter"],
       },
     ],

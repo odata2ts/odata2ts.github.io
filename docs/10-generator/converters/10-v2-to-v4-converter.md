@@ -35,7 +35,7 @@ To integrate this converter into any `odata2ts` project, add it to the list of c
 Converters are referenced by their package name, so in this case `@odata2ts/converter-v2-to-v4`.
 
 ```typescript
-import { ConfigOptions } from "@odata2ts/odata2model";
+import { ConfigOptions } from "@odata2ts/odata2ts";
 
 const config: ConfigOptions = {
   converters: ["@odata2ts/converter-v2-to-v4"],
