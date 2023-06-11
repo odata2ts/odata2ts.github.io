@@ -45,7 +45,7 @@ within the project configuration file `odata2ts.config.ts`.
 Converters are referenced by their package name, so in this case `@odata2ts/converter-ui5-v2`.
 
 ```typescript
-import { ConfigOptions } from "@odata2ts/odata2model";
+import { ConfigOptions } from "@odata2ts/odata2ts";
 
 const config: ConfigOptions = {
   converters: ["@odata2ts/converter-ui5-v2"],

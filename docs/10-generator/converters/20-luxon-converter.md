@@ -48,7 +48,7 @@ For V2, the [v2-to-v4-converter](./v2-to-v4-converter) should also be installed 
 V2 date times (Edm.DateTime) with Luxon as well. For V4 you just leave it out.
 
 ```typescript
-import { ConfigOptions } from "@odata2ts/odata2model";
+import { ConfigOptions } from "@odata2ts/odata2ts";
 
 const config: ConfigOptions = {
   converters: ["@odata2ts/converter-v2-to-v4", "@odata2ts/converter-luxon"],

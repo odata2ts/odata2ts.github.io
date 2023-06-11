@@ -29,6 +29,7 @@ const defaultConfig = {
   skipEditableModels: false,
   skipIdModels: false,
   skipOperations: false,
+  skipComments: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
   naming: {
@@ -155,7 +156,7 @@ Consider using the config file for all your configurations.
 Here is the list of all **base settings** of the config file. By and large this matches the [CLI options](#cli-options).
 
 | Base Setting          | Type                         | Default Value     | Description                                                                                                                                                                                     |
-| --------------------- | ---------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------- | ---------------------------- | ----------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | mode                  | `Modes`                      | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
 | emitMode              | `EmitModes`                  | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
 | prettier              | `boolean`                    | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
@@ -167,6 +168,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | skipEditableModels    | `boolean`                    | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                        |
 | skipIdModels          | `boolean`                    | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                              |
 | skipOperations        | `boolean`                    | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
+| skipComments          | `boolean`                    | `false`           | Don't generate comments for model properties.                                                                                                                                                   |
 | converters            | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
 | naming                | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
 
