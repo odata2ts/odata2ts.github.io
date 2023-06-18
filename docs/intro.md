@@ -56,11 +56,11 @@ Feature Highlights:
 - powerful, fluent and type-safe [query builder](./category/query-builder)
 - type-safe CRUD operations
 - type-safe (unbound or bound) functions and actions
-- configurable HTTP client
-- use type converters to interact with data types of your choice
+- configurable [HTTP client](./odata-client/http-client/) (fetch, Axios, ...)
+- use [type converters](./generator/converters/) to interact with data types of your choice
   - use provided ones: v2-to-v4-converter, luxon-converter
   - roll your own
-- allow renaming of entity properties
+- allow [renaming of entity properties](./generator/configuration#renaming-entities-and-properties)
   - establish consistent casing, e.g. `camelCase`
   - rename an individual property
 
@@ -71,7 +71,7 @@ OData service:
 From there you can navigate to all of its parts, perform your typical CRUD operations,
 call unbound and bound functions / actions and execute even complex queries with ease.
 
-TODO: service docs
+See [the main service documentation](./odata-client/the-main-service).
 
 ### HTTP Client
 
@@ -79,11 +79,12 @@ A proper HTTP client is required to perform the actual HTTP requests. Of course,
 of approaches (go native with `fetch`) and libraries (e.g. Axios) are available.
 
 To keep this aspect configurable `odata2ts` defines and uses its "own" API:
-[HTTP Client API](https://www.npmjs.com/package/@odata2ts/http-client-api).
+the [HTTP Client API](https://www.npmjs.com/package/@odata2ts/http-client-api).
 
-Two implementations are currently provided:
+Three implementations are currently provided:
 
-- one based on Axios
-- one based on JQuery
+- [Fetch Client](./odata-client/http-client/fetch)
+- [Axios Client](./odata-client/http-client/axios)
+- [JQuery Client](./odata-client/http-client/jquery)
 
-See [HTTP Client](./odata-client/http-client) for more details.
+See [HTTP Client](./odata-client/http-client/) for more details.
