@@ -81,31 +81,12 @@ GET /People('russelwhyte')/BestFriend
 GET /People('russelwhyte')/BestFriend/Trips
 ```
 
-### CRUD & Querying
+### `PATCH` vs `MERGE`
 
-The acronym "CRUD" describes the basic operations on an entity and has been translated into
-HTTP verbs for REST web services (OData being a specialized version of REST):
-
-- **C**reate: `POST`
-- **R**ead: `GET`
-- **U**pdate: `PUT` or `PATCH`
-- **D**elete: `DELETE`
-
-I think, CRUD has its conceptual shortcomings. On the one hand, there are two different update operations
-(full & partial), which we discuss in a bit. But on the other hand "read" is simply misleading.
-We're talking about **querying**, being able to filter or sort, and having the power to shape the response
-object by means of `select` and `expand` in the case of OData. That's not "reading", but "querying"!
-
-### `PUT`, `PATCH` & `MERGE`
-
-So there are two different update methods: Full and partial.
-The full update (`PUT`) replaces the entire entity, while the partial update (`PATCH`) only updates
-those fields that have been specified.
-
-The OData V2 spec already introduced this distinction, but it was published before the `PATCH` request
-was officially supported by the HTTP spec
-(it was already envisioned though; cf. the note in the
-[Operations Spec](https://www.odata.org/documentation/odata-version-2-0/operations/), chap. 2.6).
+The OData V2 spec already introduced the distinction between a replacing update and a partial update
+which updates only those fields that have been specified.
+But the OData V2 spec was published before the `PATCH` request was officially supported by the HTTP spec
+(cf. [Operations Spec](https://www.odata.org/documentation/odata-version-2-0/operations/), chap. 2.6).
 So OData V2 defined its very own `MERGE` HTTP request, before adopting `PATCH` from V3 onwards.
 
 To be sure:
@@ -113,6 +94,9 @@ To be sure:
 - OData V2 only supports `MERGE`
 - OData V3 should support both
 - OData V4 only supports `PATCH`
+
+`odata2ts` hides this implementation details and only offers the `patch` method for
+V4 and V2, so that you don't need to bother.
 
 :::tip
 
@@ -123,12 +107,17 @@ But `MERGE` can always be emulated as `POST` request with the special header `X-
 
 ## Navigation
 
-As discussed in the basics, OData exposes and advertises entry points, most often **entity sets** (e.g. `/People`).
-We can traverse to a specific entity of that collection by its key(s) (e.g. `/People('russelwhyte')`)
-and use its **navigation properties** to traverse ever deeper into the service
-(e.g. `/People('russelwhyte')/BestFriend/Trips`). There is no defined end to this kind of navigation.
+As discussed in the basics, OData exposes and advertises entry points, most often **entity sets**
+(e.g. `/People`). We can traverse to a specific entity of that collection by its key(s)
+(e.g. `/People('russelwhyte')`) and use its **navigation properties** to traverse ever deeper
+into the service (e.g. `/People('russelwhyte')/BestFriend/Trips`).
+There is no defined end to this kind of navigation.
 
-The main service lists all entity sets, so you call the appropriate function, e.g. `trippinService.people()`.
+With `odata2ts` you call a function for each step of your way, which creates the appropriate service
+tailored to the entity or collection at hand. Conveniently, we thereby also build up the URL sequentially.
+
+But let's start at the beginning: The main service lists all entity sets, so you call
+the appropriate function, e.g. `trippinService.people()`.
 
 ![Screenshot of auto-completion options for .people()](../../static/img/trippinService-people-auto-completion.png)
 
@@ -235,7 +224,22 @@ From this example you can see that the builder
 
 You get the complete [query builder documentation](../query-builder/querying) in its own chapter.
 
-## CUD Operations
+## CRUD Operations
+
+The acronym "CRUD" describes the basic operations on an entity and has been translated into
+HTTP verbs for REST web services (OData being a specialized version of REST):
+
+- **C**reate: `POST`
+- **R**ead: `GET`
+- **U**pdate:
+  - Replacing Update: `PUT`
+  - Partial Update: `PATCH`
+- **D**elete: `DELETE`
+
+So there are two different update methods: The replacing update (`PUT`) replaces the entire entity with
+the stuff that you provide, while the partial update (`PATCH`) only updates those fields that you
+provide, leaving the rest of the entity as it was. The OData spec clearly recommends usage of the
+partial update and argues with better resiliency.
 
 **Creating** an entity necessarily happens on the collection level,
 while **updating** and **deleting** requires the entity in question.
@@ -249,7 +253,7 @@ await trippinService.people("russelwhyte").delete();
 
 ### Editable Model Versions
 
-Now the type that is used for create or update parameters (e.g. `EditablePerson`) is not the same one that
+Now the model type that is used for create or update (e.g. `EditablePerson`) is not the same one that
 you get from a query response (e.g. `Person`). There are multiple reasons for that distinction.
 
 For one, when querying for something like an ID field, you definitely get a value, because from a database
@@ -276,7 +280,68 @@ in the future though: See [#140](https://github.com/odata2ts/odata2ts/issues/140
 
 :::
 
-### Return Types
+### Responses
+
+The **Delete** action must respond with `204 (No Content)` on success.
+
+**Update** actions either respond with status code `200` containing the updated entity
+in the response body or with status code `204 (No Content)` with no response body at all.
+
+**Create** should respond with HTTP status `201 (Created)` and return the created entity
+as response body. If you're OData service works this way, then everything is fine from the client side.
+
+However, OData services are also allowed to return `204 (No Content)`
+(cf. [OData V4 spec](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_CreateanEntity))
+and in this case you don't get any response body. And now you would have the following problem:
+What's the generated ID of the entity that I've just created?
+
+The one thing that the create method MUST return is the `Location` header which represents
+the edit / read URL of the entity, e.g.:<br>
+`Location:  https://services.odata.org/TripPinRESTierService/People('heineritis')`.
+
+Provided with this information you are now tasked with parsing that key out of the URL.
+`odata2ts` can help here with one of its helper functions: see [parseKey()](#parsekey)
+
+### `createKey()`
+
+The helper method `createKey()` is available on the collection level and allows you to generate
+OData conform URL paths for entities.
+
+```ts
+// shorthand version
+const personUrl = trippinService.people().createKey("russelwhyte");
+// personUrl = "People('russelwhyte')"
+
+// complex version
+const personUrlComplex = trippinService.people().createKey({ userName: "russelwhyte" });
+// personUrlComplex = "People(UserName='russelwhyte')"
+
+// complex version is required for composite keys
+const result = myService.translations().createKey({ key: "myKey", language: "en"  });
+// result = "Translation(Key='myKey',Language='en')"
+```
+
+This functionality is, of course, used internally by `odata2ts` and is only exposed for your
+convenience. One use case might be to use this syntax for client side routing.
+
+### `parseKey()`
+
+The helper method `parseKey()` is available on the collection level and is able to parse OData conform
+URL paths in order to retrieve the entity keys.
+
+```ts
+// parsing the shorthand version
+const personKey = trippinService.people().parseKey("People('russelwhyte')");
+// personKey = "russelwhyte"
+
+// parsing the complex version
+const personKeyComplex = trippinService.people().parseKey("People(UserName='russelwhyte')");
+// personKeyComplex = { userName: "russelwhyte" }
+```
+
+It's actually irrelevant how the URL starts and if the entity part really fits, hence passing something
+like `https://mytest/t('russelwhyte')` as value for the first example would yield the exact same result
+`"russelwhyte"`. So it's only important that you pick the right entity type to parse the key with.
 
 ## Custom Operations
 
@@ -291,6 +356,8 @@ You find **custom operations** bound to different levels of the service hierarch
 - unbound: found at the root level of the service, where entity sets reside
 - bound to an entity: the first parameter will be the given entity defined by the URL path
 - bound to an entity collection
+  - this is neither explicitly endorsed nor disallowed by the spec
+  - I've only seen this using SAP's RAP framework
 
 ```ts
 // unbound function
@@ -302,7 +369,7 @@ const nearResponse = await trippinService.getNearestAirport({ lat:51.918777, lon
 // nearResponse: HttpResponseModel<ODataModelResponseV4<Airport>>
 
 // entity bound action
-await trippinService.people("russelwhyte").shareTrip({tripId: 1, userName: "russelwhyte"})
+await trippinService.people("russelwhyte").shareTrip({tripId: 1, userName: "russelwhyte"});
 ```
 
 :::note
@@ -327,7 +394,8 @@ but always only the URL query parameters. Hence, it cannot really be regarded as
 
 As `GET` request have limitations regarding the payload (URLs have browser-dependent limit on their length),
 `POST` requests are often necessary. One work-around I've heard of: defining a custom entity
-and semantically misusing the `create` request.
+and semantically misusing the `create` request. I wouldn't call this a recommendation of any sorts,
+but people have taken this approach.
 
 :::
 
@@ -337,3 +405,78 @@ Whatever the request - CRUD or custom - you always have the option to pass a req
 parameter. At the utmost minimum, you should be able to set custom headers for the request.
 
 However, the type of the request configuration is entirely dependent on the chosen [HTTP client](./http-client/).
+Minimal example, based on the Axios client:
+
+```ts
+trippinService.people().create(model, { headers: { "myCustomHeader": "myCustomHeaderValue" } });
+```
+
+## Response Structures
+
+`odata2ts` enforces a conventionalized response structure which starts with the `HttpResponseModel`.
+This conventionalized structure is used for any OData operation - CRUD or custom. It contains:
+
+- the response `status`: numeric value
+- the response `statusText`: something like "OK" or "No Content"
+- the response `headers`: which is a flat map, i.e. `Record<string,string>`
+- the response `data`: this the response body evaluated to JSON
+
+### OData Response Models
+
+The structure of `data` largely depends on two factors:
+
+- which OData version is used: V2 or V4?
+- the return type in question: is it a collection type or entity type or value type?
+
+Let's work with generics here, so whatever the type in question, we call it `T`:
+
+| Return Type           | OData Version | Response Structure                               |
+| --------------------- | ------------- | ------------------------------------------------ |
+| Collection            | V4            | `{ "@odata.count"?: number; value: Array<T> }`   |
+| Entity / Complex Type | V4            | `T`                                              |
+| Value Type            | V4            | `{ value: T }`                                   |
+| Collection            | V2            | `{ d: { __count?: string; results: Array<T> } }` |
+| Entity / Complex Type | V4            | `{ d: T }`                                       |
+| Value Type            | V4            | `{ d: { [propName: string]: T } }`               |
+
+As you can see, V4 is pretty straightforward: The `data` property will be filled with the entity or
+complex type model, or we get an additional object containing the `value` property.
+
+In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
+property `d`. Collections are wrapped again, like in V4, but with the property `results` (this is not
+always the case, see [Extra Results Wrapping](#v2-extra-results-mapping)).
+
+Value Types (e.g. selecting a primitive property of an entity) are really special in V2. First you
+have the standard wrapping with `d` and then you use the name of the property in question as the key
+of this single valued map. So requesting `GET Trippin/People('russelwhyte')/LastName` will result in
+`{ d: {LastName: "Whyte"} }`.
+
+### V2: Extra Results Mapping
+
+Some V2 services will return expanded collections with an extra `results` wrapping. To give you an
+example for that, imagine we're querying for one person and expand its "trips" property. The result
+would then look like:
+
+```json
+{
+  "d": {
+    "UserName": "russelwhyte",
+    "Trips": {
+      // here it comes: the extra wrapping
+      "results": [...]
+    }
+  }
+}
+```
+
+When comparing to the [V2 spec, chapter 9](https://www.odata.org/documentation/odata-version-2-0/json-format/),
+this seems to be wrong: Trips should already list the array of entities without this extra "results" wrapping.
+
+`odata2ts` will remove this extra wrapping at runtime. You don't have to configure anything for that, it
+just works out-of-the-box. See [#125](https://github.com/odata2ts/odata2ts/issues/125).
+
+When only generating model types, this runtime work-around cannot work obviously. In those cases you
+specify an extra configuration `v2ModelsWithExtraResultsWrapping` and set it to `true`.
+See [#153](https://github.com/odata2ts/odata2ts/issues/153).
+
+## Exception Handling
