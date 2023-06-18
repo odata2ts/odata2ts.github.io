@@ -1,6 +1,6 @@
 ---
 id: http-client
-sidebar_position: 1
+sidebar_position: 50
 ---
 
 # HTTP Client

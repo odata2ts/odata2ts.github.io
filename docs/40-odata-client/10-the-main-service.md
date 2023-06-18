@@ -29,7 +29,7 @@ and the other [CRUD operations](#crud-operations).
 But first we need to discuss how to navigate the OData service, because OData establishes a navigation
 concept that goes beyond your typical REST service.
 
-::: note
+:::note
 
 The real entity set and operation names of the TrippinService are in Pascal case
 (`People`, `GetNearestAirport`, ...). Setting `allowRenaming` to `true` will

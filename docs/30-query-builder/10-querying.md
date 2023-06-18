@@ -9,35 +9,48 @@ One of OData's core strengths is its powerful querying capabilities.
 
 On the one hand you get your typical SQL-like operations:
 
-- filter
-- sort
-- count
-- top & skip
+- [filter](#filter)
+- [orderBy](#orderby) a.k.a. sort
+- [count](#count): getting the total count additionally in the same request
+- [top](#top) & [skip](#skip): for pagination
 
 On the other hand you also get the ability to shape the response structure:
 
-- select: only selected attributes of the entity / complex type are fetched
-- expand: attributes which relate to other entities can be expanded, so that they are included in the result type
+- [select](#select): only selected attributes of the entity / complex type are fetched
+- [expand](#expand): attributes which relate to other entities can be expanded, so that they are included in the result type
 
 This feature of OData can have a huge impact. A well crafted API could easily be used to
 serve very different clients: Each client would only select and expand the relevant information.
 
 Last but not least V4 defines additional functionality:
 
-- search: free-text search capabilities (logic is defined by server)
-- compute: create computed properties; allows to simulate a group-by clause
+- [search](#search): free-text search capabilities (logic is defined by server)
+- apply: complex feature; allows to simulate a [group-by](#groupby) clause
 
 ## General Usage
 
 The builder is fluent, i.e. it returns itself, so that you're able to define your whole query in one go
 (also known as Builder Pattern).
 
-At the end you will have to call `build()` to get the final URI string.
-It will be properly encoded.
+When using the query builder in the context of generated OData client, the builder is created for us,
+and we only need to return it. Here is the minimal example:
 
-Minimal example:
-`createUriBuilderV4("People", qPerson).build()`<br/>
-Result: `People`
+```ts
+await mainService.entity().query((builder, qObject) => builder);
+```
+
+When using the query builder on its own, you call the appropriate factory function and provide the
+path and the appropriate query object. At the end you will have to call `build()` to get the final
+URI string, which will be properly encoded.
+
+```ts
+import { createUriBuilderV2, createUriBuilderV4 } from "@odata2ts/odata-query-builder";
+
+// create the builder
+const builder = createUriBuilderV4("People", qPerson);
+// ...
+const result = builder.build();
+```
 
 ### Stay Fluent
 
@@ -45,13 +58,12 @@ To not break the fluent API style, your expressions can evaluate to `null` or `u
 and will get filtered out automatically. This applies to all operations of the query builder.
 
 ```ts
-createUriBuilderV4("People", qPerson)
+builder
   .select("lastName", isAgeRelevant ? "age" : undefined)
   .filter(null)
-  .build()
 ```
 
-Result, if `age` doesn't matter: `/People?$select=LastName`
+Result, if `age` doesn't matter: `$select=LastName`
 
 ### Keep Adding
 
@@ -59,15 +71,14 @@ You can call all operations multiple times. This will just keep adding stuff.
 Only in the case of `skip`, `top` and `count` this will overwrite the previous value.
 
 ```ts
-createUriBuilderV4("People", qPerson)
+builder
   .select("lastName")
   .select("age")
   .filter(qPerson.age.gt(18))
   .filter(qPerson.age.lowerThan(66))
-  .build()
 ```
 
-Non-encoded result: `/People?$select=LastName,Age&$filter=Age gt 18 AND Age lt 66`
+Non-encoded result: `$select=LastName,Age&$filter=Age gt 18 AND Age lt 66`
 
 ## Select
 
@@ -82,12 +93,10 @@ the following properties:
 By using `select` you only pick those properties you care about.
 
 ```ts
-createUriBuilderV4("People", qPerson)
-  .select("lastName", "firstName")
-  .build()
+builder.select("lastName", "firstName")
 ```
 
-The non-encoded result: `People?$select=lastName,firstName`<br/>
+The non-encoded result: `$select=lastName,firstName`<br/>
 Response structure example:
 
 ```ts
@@ -102,10 +111,11 @@ Response structure example:
 ### Deep Select
 
 A deep select (something like `$select=bestFriend/lastName`) is not possible via the `select`
-operation of the query builder.
+operation of the query builder. It's considered to not being needed.
 
-It's considered to not being needed.
-Use the `expanding` operation of the query builder instead and then `select` those props you need.
+In V4 you use the `expanding` operation of the query builder and then `select` those props you need.
+And it works the same way for V2 when using `odata2ts`: Behind the scenes the V4 syntax is translated
+to a deep select including the necessary expand. See [complex expanding in V2](#complex-expanding-in-v2).
 
 ## Expand
 
@@ -122,12 +132,10 @@ The query builder offers two different methods: `expand` and `expanding`.
 Use `expand` to expand the complete entity behind a property.
 
 ```ts
-createUriBuilderV4("People", qPerson)
-  .expand("trips", "bestFriend")
-  .build()
+builder.expand("trips", "bestFriend")
 ```
 
-Non-encoded result: `/People?$expand=Trips,BestFriend`
+Non-encoded result: `$expand=Trips,BestFriend`
 
 ### Complex Expanding
 
@@ -141,20 +149,22 @@ you can further `select` & `expand`.
 In addition, V4 also allows to use `filter`, `orderBy`, `skip` and `top` on expanded collections.
 
 ```ts
-createUriBuilderV4("People", qPerson)
-  .expanding("trips", (tripsBuilder, qTrip) =>
-    tripsBuilder
-      .select("budget")
-      .orderBy(qTrip.budget.desc())
-      .top(1)
-  )
-  .build()
+builder.expanding("trips", (tripsBuilder, qTrip) =>
+  tripsBuilder
+    .select("budget")
+    .orderBy(qTrip.budget.desc())
+    .top(1)
+)
 ```
 
-Non-encoded result: `/People?$expand=Trips(select=Budget;orderby=Trips desc;top=1)`
+Non-encoded result: `$expand=Trips(select=Budget;orderby=Trips desc;top=1)`
 
-NOTE: Always return the passed query builder from your callback function.
+:::note
+
+Always return the passed query builder from your callback function.
 It's currently not mandatory, but will be in the future.
+
+:::
 
 ### Complex Expanding in V2
 
@@ -163,21 +173,17 @@ The V2 query builder offers the same `expand` and `expanding` operations as its 
 The builder which works on the expanded property won't offer any collection operations
 like `filter` or `top` as they are not supported by OData V2.
 But `select`, `expand` and `expanding` work just the same.
-
-The translation into V2 is completely different, however.
+The translation into V2 results in a completely different query string though.
 
 ```ts
-import { createUriBuilderV2 } from "@odata2ts/odata-query-builder";
-
-createUriBuilderV2("Product", qProduct)
+builder
   .expanding("supplier", (catBuilder, qSupplier) =>
     catBuilder
       .select("name", "id")
   )
-  .build()
 ```
 
-Non-encoded result: `/Product?$expand=supplier&$select=supplier/name,supplier/id`
+Non-encoded result: `$expand=supplier&$select=supplier/name,supplier/id`
 
 Using the V4 API also for V2 avoids repetition and pitfalls.
 
@@ -188,7 +194,7 @@ They are the functional counterparts to each known entity.
 And each property of such an object brings its own type specific filter operations:
 
 ```ts
-createUriBuilderV4("People", qPerson)
+builder
   .filter(
     // lastName will only offer string based operations and requires string as argument
     qPerson.lastName.eq("Smith"),
@@ -197,7 +203,7 @@ createUriBuilderV4("People", qPerson)
   )
 ```
 
-Non-encoded result: `People?$filter=LastName eq 'Smith' and Age gt 18`
+Non-encoded result: `$filter=LastName eq 'Smith' and Age gt 18`
 
 See [Filtering](./filtering) for the complete reference of filter options supported by `odata2ts`.
 
@@ -247,12 +253,10 @@ When querying on collections you can use the `orderBy` operation to sort the res
 You use the generated `query-object` directly:
 
 ```ts
-createUriBuilderV4("People", qPerson)
-  .orderBy(qPerson.lastName.desc(), qPerson.firstName.asc())
-  .build()
+builder.orderBy(qPerson.lastName.desc(), qPerson.firstName.asc())
 ```
 
-Result: `People?$orderby=lastName desc,firstName asc`
+Result: `$orderby=lastName desc,firstName asc`
 
 ## Search
 
