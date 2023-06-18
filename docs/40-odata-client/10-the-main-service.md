@@ -17,100 +17,34 @@ import { TrippinService } from "../build/trippin/TrippinService";
 const trippinService = new TrippinService(httpClient, baseUrl);
 ```
 
-Equipped with this main service you have a single entry point into your OData service
-and can explore the service from the client side with the power of TypeScript.
+Equipped with this **main service** you have a single entry point into your OData service
+and can now explore the service from the client side with the power of TypeScript.
 
 ![Screenshot of auto-completion options for main Trippin service](../../static/img/trippinService-auto-completion.png)
 
-You can see unbound operations (`getNearestAirport` or `resetDataSource`)
-as well as the exposed entity sets (`people`, `airports`, etc.).
-But let's discuss this in detail in the upcoming sections.
+You can already see unbound [operations](#custom-operations) (`getNearestAirport` or `resetDataSource`)
+as well as the exposed entity sets (`people`, `airports`, etc.) which are used for [querying](#querying)
+and the other [CRUD operations](#crud-operations).
+
+But first we need to discuss how to navigate the OData service, because OData establishes a navigation
+concept that goes beyond your typical REST service.
 
 ::: note
 
 The real entity set and operation names of the TrippinService are in Pascal case
 (`People`, `GetNearestAirport`, ...). Setting `allowRenaming` to `true` will
 convert those names to camel case, so that this feels more "natural" from a JS / TS standpoint.
-See [renaming](../generator/configuration#naming) for all the options.
-
-:::
-
-## OData Basics
-
-Some relevant background on OData and its concepts.
-
-### Entry Points
-
-OData services expose **entity sets** and - since V4 - **singletons** as entry points into the service.
-Each OData service must list these entry points when its root URL is called
-(e.g. https://services.odata.org/TripPinRESTierService/).
-
-This information is, of course, also present in the meta description of the service.
-In EDMX you will find the `EntityContainer` element:
-
-```xml
-<EntityContainer Name="Container">
-  <EntitySet Name="People" EntityType="Trippin.Person">...</EntitySet>
-  <Singleton Name="Me" Type="Trippin.Person">...</Singleton>
-  ...
-</EntityContainer>
-```
-
-The **entity set** represents a collection of entities, while the **singleton** represents one entity.
-Any semantics are determined by the server, e.g. that `/Me` refers to the current user.
-Both concepts really only exist as means of defining entry points into the OData service.
-
-### Navigation Properties
-
-An entity may encompass properties which represent another entity or entity collection.
-
-```xml
-<EntityType Name="Person">
-  <!-- ...  -->
-  <NavigationProperty Name="BestFriend" Type="Trippin.Person" />
-  <NavigationProperty Name="Trips" Type="Collection(Trippin.Trip)" />
-</EntityType>
-```
-
-These relations can be traversed:
-
-```
-GET /People('russelwhyte')/Trips
-GET /People('russelwhyte')/Trips(0)
-GET /People('russelwhyte')/BestFriend
-GET /People('russelwhyte')/BestFriend/Trips
-```
-
-### `PATCH` vs `MERGE`
-
-The OData V2 spec already introduced the distinction between a replacing update and a partial update
-which updates only those fields that have been specified.
-But the OData V2 spec was published before the `PATCH` request was officially supported by the HTTP spec
-(cf. [Operations Spec](https://www.odata.org/documentation/odata-version-2-0/operations/), chap. 2.6).
-So OData V2 defined its very own `MERGE` HTTP request, before adopting `PATCH` from V3 onwards.
-
-To be sure:
-
-- OData V2 only supports `MERGE`
-- OData V3 should support both
-- OData V4 only supports `PATCH`
-
-`odata2ts` hides this implementation details and only offers the `patch` method for
-V4 and V2, so that you don't need to bother.
-
-:::tip
-
-Custom request methods like `MERGE` are not supported by every HTTP client.
-But `MERGE` can always be emulated as `POST` request with the special header `X-Http-Method: MERGE`.
+See [renaming](../generator/configuration#naming) for all the options. In all examples it is
+assumed that this setting would have been active.
 
 :::
 
 ## Navigation
 
-As discussed in the basics, OData exposes and advertises entry points, most often **entity sets**
+OData exposes and advertises [entry points](#entry-points), most often **entity sets**
 (e.g. `/People`). We can traverse to a specific entity of that collection by its key(s)
-(e.g. `/People('russelwhyte')`) and use its **navigation properties** to traverse ever deeper
-into the service (e.g. `/People('russelwhyte')/BestFriend/Trips`).
+(e.g. `/People('russelwhyte')`) and use its [navigation properties](#navigation-properties)
+to traverse ever deeper into the service (e.g. `/People('russelwhyte')/BestFriend/Trips`).
 There is no defined end to this kind of navigation.
 
 With `odata2ts` you call a function for each step of your way, which creates the appropriate service
@@ -149,7 +83,7 @@ to the query builder.
 
 ### `query()`
 
-In the most simplistic case - which might be called "read" ;-) - you just call the `query()` function
+In the most simplistic case - which might be called "read" - you just call the `query()` function
 on any entity or entity collection.
 
 Calling `query()` will eventually execute the HTTP request to the server and so it returns a `Promise`:
@@ -160,26 +94,22 @@ const peopleResponse = await trippinService.people().query();
 // peopleResponse: HttpResponseModel<ODataCollectionResponseV4<PersonModel>>
 
 // get a particular entity in its entirety (classical promise based style)
-trippinService.people('russelwhyte').query().then((personResponse) => {
+trippinService.people("russelwhyte").query().then((personResponse) => {
   // personResponse: HttpResponseModel<ODataModelResponseV4<PersonModel>>
 });
 
 // you can also force a sub-type by supplying it to the query via generics
-const specialPersonResponse = await trippinService.people('russelwhyte').query<SpecialPerson>();
+const specialPersonResponse = await trippinService.people("russelwhyte").query<SpecialPerson>();
 // specialPersonResponse: HttpResponseModel<ODataModelResponseV4<SpecialPerson>>
 ```
 
 When the promise resolves we get an `HttpResponseModel` representing the response from the server.
 It contains the response `status`, the response `headers`, and the response body evaluated to JSON,
-called `data`. This conventionalized structure is used for any OData operation - CRUD or custom.
+called `data`.
 
-The structure of the response `data` largely depends on two factors:
-
-- which OData version is used: V2 or V4?
-- are we querying a collection type or entity type?
-
-Querying for an entity in a V4 OData service adds no additional data structures,
-the model is directly available:
+The structure of the response `data` largely depends on two factors, the OData version and which kind
+of type was targeted (EntityType, Collection, etc.). Querying for an entity in a V4 OData service adds
+no additional data structures, the model is directly available:
 
 ![Screenshot of auto-completion options for response.data](../../static/img/trippinService-person-response-auto-completion.png)
 
@@ -189,6 +119,8 @@ which contains the result array of the given entity type. When using the
 the total amount of records (defined as `Edm.Int64`):
 
 ![Screenshot of auto-completion options for response.data.value](../../static/img/trippinService-people-response-auto-completion.png)
+
+See the section about [response structures](#response-structures) for more info.
 
 ### Query Builder
 
@@ -251,6 +183,8 @@ await trippinService.people("russelwhyte").patch(model);
 await trippinService.people("russelwhyte").delete();
 ```
 
+The **reading** part has already been covered in [querying](#querying).
+
 ### Editable Model Versions
 
 Now the model type that is used for create or update (e.g. `EditablePerson`) is not the same one that
@@ -288,7 +222,7 @@ The **Delete** action must respond with `204 (No Content)` on success.
 in the response body or with status code `204 (No Content)` with no response body at all.
 
 **Create** should respond with HTTP status `201 (Created)` and return the created entity
-as response body. If you're OData service works this way, then everything is fine from the client side.
+as response body. If your OData service works this way, then everything is fine from the client side.
 
 However, OData services are also allowed to return `204 (No Content)`
 (cf. [OData V4 spec](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_CreateanEntity))
@@ -300,7 +234,9 @@ the edit / read URL of the entity, e.g.:<br>
 `Location:  https://services.odata.org/TripPinRESTierService/People('heineritis')`.
 
 Provided with this information you are now tasked with parsing that key out of the URL.
-`odata2ts` can help here with one of its helper functions: see [parseKey()](#parsekey)
+`odata2ts` can help here with one of its helper functions: see [parseKey()](#parsekey).
+
+See the section about [response structures](#response-structures) for more information.
 
 ### `createKey()`
 
@@ -372,6 +308,10 @@ const nearResponse = await trippinService.getNearestAirport({ lat:51.918777, lon
 await trippinService.people("russelwhyte").shareTrip({tripId: 1, userName: "russelwhyte"});
 ```
 
+As with any request, you can supply a [request configuration](#request-configuration) and the topics
+of [response structures](#response-structures) and [exception handling](#exception-handling) come
+into play.
+
 :::note
 
 For SAP users: RAP is only able to bind operations to entity collections or entity types;
@@ -436,15 +376,15 @@ Let's work with generics here, so whatever the type in question, we call it `T`:
 | Entity / Complex Type | V4            | `T`                                              |
 | Value Type            | V4            | `{ value: T }`                                   |
 | Collection            | V2            | `{ d: { __count?: string; results: Array<T> } }` |
-| Entity / Complex Type | V4            | `{ d: T }`                                       |
-| Value Type            | V4            | `{ d: { [propName: string]: T } }`               |
+| Entity / Complex Type | V2            | `{ d: T }`                                       |
+| Value Type            | V2            | `{ d: { [propName: string]: T } }`               |
 
 As you can see, V4 is pretty straightforward: The `data` property will be filled with the entity or
 complex type model, or we get an additional object containing the `value` property.
 
 In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
 property `d`. Collections are wrapped again, like in V4, but with the property `results` (this is not
-always the case, see [Extra Results Wrapping](#v2-extra-results-mapping)).
+always the case, see [extra results wrapping](#v2-extra-results-mapping)).
 
 Value Types (e.g. selecting a primitive property of an entity) are really special in V2. First you
 have the standard wrapping with `d` and then you use the name of the property in question as the key
@@ -461,8 +401,7 @@ would then look like:
 {
   "d": {
     "UserName": "russelwhyte",
-    "Trips": {
-      // here it comes: the extra wrapping
+    "Trips": {  // here comes the extra wrapping; Trips should be the array
       "results": [...]
     }
   }
@@ -471,12 +410,140 @@ would then look like:
 
 When comparing to the [V2 spec, chapter 9](https://www.odata.org/documentation/odata-version-2-0/json-format/),
 this seems to be wrong: Trips should already list the array of entities without this extra "results" wrapping.
+However, the spec itself is quite vague in this regard.
 
-`odata2ts` will remove this extra wrapping at runtime. You don't have to configure anything for that, it
-just works out-of-the-box. See [#125](https://github.com/odata2ts/odata2ts/issues/125).
+When using the main service, the generated types won't contain this extra wrapping and
+`odata2ts` will remove this extra wrapping at runtime. You don't have to configure anything for that,
+it just works out-of-the-box. See [#125](https://github.com/odata2ts/odata2ts/issues/125).
 
-When only generating model types, this runtime work-around cannot work obviously. In those cases you
-specify an extra configuration `v2ModelsWithExtraResultsWrapping` and set it to `true`.
+When only generating model types, this runtime work-around cannot work. Instead, you want the types
+to contain the extra wrapping. In this scenario, you specify an extra configuration
+`v2ModelsWithExtraResultsWrapping` and set it to `true`.
 See [#153](https://github.com/odata2ts/odata2ts/issues/153).
 
 ## Exception Handling
+
+Any request that succeeds with a response but has a status code outside the `2xx` range (200 - 299),
+will cause an exception to be thrown. These are the typical exceptions (not found, validation failures,
+server errors) one has in mind when communicating with a REST server.
+
+The actual failure message from the server is contained within the response body. Because OData defines
+the response body structure, `odata2ts` already knows how to retrieve the failure message. You can also
+provide your own message retrieval logic when initializing the HTTP client.
+
+In these cases, the thrown exception will carry the following information:
+
+- `message` (`string`): some static message + the actual failure message from the server
+- `status` (`number`): HTTP response status
+- `headers` (`Record<string, string>`): HTTP response headers
+- `cause` (`Error`): new error object; its message only contains the actual failure message from the server
+- `name` (`string`): the name of this error class, e.g. "FetchClientError" or "AxiosClientError"
+
+Of course, other types of failures can occur as well when trying to execute a request:
+Maybe invoking some method of the given HTTP client fails, maybe the request fails,
+maybe the connection is lost, maybe the JSON parsing of the response body fails, etc.
+
+In any case, each exception is translated to one specific error type. And while this error type is
+dependent on the chosen HTTP client implementation, it should extend `Error` and
+implement the `ODataClientError` interface. So we get the following information:
+
+- `message`: some static message + message from the thrown error
+- `status`: if the request succeeded, the HTTP response status, otherwise `undefined`
+- `headers`: if the request succeeded, the HTTP response status, otherwise `undefined`
+- `cause`: the thrown error, if any
+- `name`: the name of this error class, e.g. "FetchClientError" or "AxiosClientError"
+
+Let's see this in action:
+
+```ts
+// async-await style
+try {
+  await trippinService.people().query();
+} catch(error) { // this error cannot be typed
+  // let's cast this error to one we can work with
+  const theError = error as ODataClientError;
+  // as example, handle validation failures
+  if (theError.status === 400) {
+    // ...
+  }
+}
+
+// classical promise style
+trippinService.people().query()
+  .then((response) => {
+    // ...
+  })
+  .catch((error: ODataClientError) => {
+    if (error.status === 400) {
+      //...
+    }
+  });
+```
+
+## OData Basics
+
+### Entry Points
+
+OData services expose **entity sets** and - since V4 - **singletons** as entry points into the service.
+Each OData service must list these entry points when its root URL is called
+(e.g. https://services.odata.org/TripPinRESTierService/).
+
+This information is, of course, also present in the meta description of the service.
+In EDMX you will find the `EntityContainer` element:
+
+```xml
+<EntityContainer Name="Container">
+  <EntitySet Name="People" EntityType="Trippin.Person">...</EntitySet>
+  <Singleton Name="Me" Type="Trippin.Person">...</Singleton>
+  ...
+</EntityContainer>
+```
+
+The **entity set** represents a collection of entities, while the **singleton** represents one entity.
+Any semantics are determined by the server, e.g. that `/Me` refers to the current user.
+Both concepts really only exist as means of defining entry points into the OData service.
+
+### Navigation Properties
+
+An entity may encompass properties which represent another entity or entity collection.
+
+```xml
+<EntityType Name="Person">
+  <!-- ...  -->
+  <NavigationProperty Name="BestFriend" Type="Trippin.Person" />
+  <NavigationProperty Name="Trips" Type="Collection(Trippin.Trip)" />
+</EntityType>
+```
+
+These relations can be traversed:
+
+```
+GET /People('russelwhyte')/Trips
+GET /People('russelwhyte')/Trips(0)
+GET /People('russelwhyte')/BestFriend
+GET /People('russelwhyte')/BestFriend/Trips
+```
+
+### `MERGE`
+
+The OData V2 spec already introduced the distinction between a replacing update and a partial update
+which updates only those fields that have been specified.
+But the OData V2 spec was published before the `PATCH` request was officially supported by the HTTP spec
+(cf. [Operations Spec](https://www.odata.org/documentation/odata-version-2-0/operations/), chap. 2.6).
+So OData V2 defined its very own `MERGE` HTTP request, before adopting `PATCH` from V3 onwards.
+
+And to be sure:
+
+- OData V2 only supports `MERGE`
+- OData V3 supports both
+- OData V4 only supports `PATCH`
+
+`odata2ts` treats this as implementation detail and only offers the `patch` method for
+V4 as well as V2.
+
+:::tip
+
+Custom request methods like `MERGE` are not supported by every HTTP client.
+But `MERGE` can always be emulated as `POST` request with the special header `X-Http-Method: MERGE`.
+
+:::
