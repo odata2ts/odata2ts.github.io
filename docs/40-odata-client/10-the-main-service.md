@@ -230,7 +230,7 @@ and in this case you don't get any response body. And now you would have the fol
 What's the generated ID of the entity that I've just created?
 
 The one thing that the create method MUST return is the `Location` header which represents
-the edit / read URL of the entity, e.g.:<br>
+the edit / read URL of the entity, e.g.:<br />
 `Location:  https://services.odata.org/TripPinRESTierService/People('heineritis')`.
 
 Provided with this information you are now tasked with parsing that key out of the URL.
