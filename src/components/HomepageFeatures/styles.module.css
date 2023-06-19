@@ -17,3 +17,8 @@
   height: 96px;
   width: 96px;
 }
+
+.featureScreenshot {
+  max-height: 200px;
+  clip-path: ellipse();
+}

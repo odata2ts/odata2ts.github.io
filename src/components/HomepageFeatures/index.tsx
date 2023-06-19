@@ -5,11 +5,11 @@ import { FEATURE_LIST, FeatureItem } from "@site/src/components/HomepageFeatures
 
 
 
-function Feature({ title, Svg, img, description }: FeatureItem) {
+function Feature({ title, Svg, img, screenshot, description }: FeatureItem) {
   return (
     <div className={clsx("col col--4")}>
       <div className={styles.featureImgWrapper}>
-        {img ? <img src={img} className={styles.featureImg} role="img" /> : <Svg className={styles.featureImg} role="img" />}
+        {img || screenshot ? <img src={img || screenshot} className={ screenshot ? styles.featureScreenshot : styles.featureImg} role="img" /> : <Svg className={styles.featureImg} role="img" />}
       </div>
       <div className="text--center padding-horiz--md">
         <h3>{title}</h3>
