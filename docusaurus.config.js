@@ -7,7 +7,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: "odata2ts",
-  tagline: "Set of tools for generating useful stuff out of given OData services: From TypeScript model interfaces to complete TypeScript based OData client services.",
+  tagline: "Centers around a flexible and powerful generator, so that you can work with OData model types, type-safe query builders, and full-fledged, domain-specific OData clients.",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
