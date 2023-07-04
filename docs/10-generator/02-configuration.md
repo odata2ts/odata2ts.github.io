@@ -155,22 +155,23 @@ Consider using the config file for all your configurations.
 
 Here is the list of all **base settings** of the config file. By and large this matches the [CLI options](#cli-options).
 
-| Base Setting          | Type                         | Default Value     | Description                                                                                                                                                                                     |
-| --------------------- | ---------------------------- | ----------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| mode                  | `Modes`                      | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
-| emitMode              | `EmitModes`                  | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
-| prettier              | `boolean`                    | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
-| tsconfig              | `string`                     | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
-| allowRenaming         | `boolean`                    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                       |
-| disableAutoManagedKey | `boolean`                    | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
-| debug                 | `boolean`                    | `false`           | Add debug information                                                                                                                                                                           |
-| serviceName           | `string`                     |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                 |
-| skipEditableModels    | `boolean`                    | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                        |
-| skipIdModels          | `boolean`                    | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                              |
-| skipOperations        | `boolean`                    | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
-| skipComments          | `boolean`                    | `false`           | Don't generate comments for model properties.                                                                                                                                                   |
-| converters            | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
-| naming                | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
+| Base Setting                      | Type                         | Default Value     | Description                                                                                                                                                                                     |
+|-----------------------------------|------------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| mode                              | `Modes`                      | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                          |
+| emitMode                          | `EmitModes`                  | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                        |
+| prettier                          | `boolean`                    | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                              |
+| tsconfig                          | `string`                     | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                              |
+| allowRenaming                     | `boolean`                    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                       |
+| disableAutoManagedKey             | `boolean`                    | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties) |
+| debug                             | `boolean`                    | `false`           | Add debug information                                                                                                                                                                           |
+| serviceName                       | `string`                     |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                 |
+| skipEditableModels                | `boolean`                    | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                        |
+| skipIdModels                      | `boolean`                    | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                              |
+| skipOperations                    | `boolean`                    | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
+| skipComments                      | `boolean`                    | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                           |
+| converters                        | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
+| naming                            | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
+| v2ModelsWithExtraResultsWrapping  | `boolean`                    | `false`           | Add an extra wrapper object around expanded entities in V2. See [extra results wrapper](#V2-extra-results-wrapper)                                                                              |
 
 ## Service Settings
 
@@ -183,11 +184,11 @@ These service settings contain **all base settings**, options `source` and `outp
 as well as options to reconfigure entities and properties:
 
 | Service Setting  | Type                               | Default Value | Description                                                                                                                                      |
-| ---------------- | ---------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ---------------- | ---------------------------------- | ------------- |--------------------------------------------------------------------------------------------------------------------------------------------------|
 | source           | `string`                           | ---           | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                      |
 | output           | `string`                           | ---           | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)     |
 | serviceName      | `string`                           |               | Overwrites the service name found in OData metadata & controls the main service name. Same as the base setting but on this level it makes sense. |
-| entitiesByName   | `Array<EntityGenerationOptions>`   | `[]`          | Match entities by their name and configure them. See [generation modes](#generation-modes)                                                       |
+| entitiesByName   | `Array<EntityGenerationOptions>`   | `[]`          | Match entities by their name and configure them. See [entity options](#entity-options)                                                         |
 | propertiesByName | `Array<PropertyGenerationOptions>` | `[]`          | Match properties by their name and configure them. See [configuration by property](#configuration-by-property)                                   |
 
 ## CLI Options
@@ -230,6 +231,8 @@ which has an enum representation in the config file (`import { Modes } from "@od
 If you're only interested in `models` or `qobjects`, you might want to skip the generation of
 certain artefacts. The following options are available as base-settings:
 
+- skipComments:
+  - dispense with comments for each model property
 - skipEditableModels:
   - don't create entity representations needed for create, update and patch operations
 - skipIdModels:
@@ -550,3 +553,31 @@ Renaming properties this way is independent of the `allowRenaming` setting
 (see [renaming entities and properties](#renaming-entities-and-properties)).
 
 :::
+
+## V2 Extra Results Wrapper
+
+The OData V2 specification is sometimes quite ambiguous or not detailed enough. This is especially true when it 
+comes to the JSON representation of expanded collections. Because of that two variants exist in the wild:
+
+```ts
+export interface Category {
+  // this is the default typing by odata2ts
+  products: Array<Product> | DeferredContent;
+}
+
+export interface Category {
+  // this is with the extra results wrapper 
+  products: { results: Array<Product> } | DeferredContent;
+}
+```
+
+You need to add a special configuration if
+* your OData service adds this extra results wrapper
+* you're only generating types
+
+You simply set the base setting `v2ModelsWithExtraResultsWrapping` to `true` and the second version gets generated.
+This setting only takes effect, when `mode=Models` and the OData service in question is V2.
+
+If you're generating more than just the types, then `odata2ts` already got you covered.
+It changes this detail at runtime and converts the second version to the first version on-the-fly.
+So it works out-of-the-box.
