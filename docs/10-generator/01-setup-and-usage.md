@@ -22,8 +22,16 @@ npm install --save-dev @odata2ts/odata2ts
 
 ### Build Integration
 
-Usually you would not commit the generated stuff, but generate it as part of your build.
+You have at least two approaches here:
+a) just commit the generated files or
+b) generate when building.
 
+The main aspects here is whether your OData service will change often, because it's also in development,
+and how "clean" you want to have your build setup.
+
+The easiest approach is just to commit the generated files.
+
+Usually you would not commit generated stuff, but generate it as part of your build.
 Typically, you use the "scripts" block of the `package.json` along these lines:
 
 ```json
@@ -37,10 +45,17 @@ Typically, you use the "scripts" block of the `package.json` along these lines:
 
 ## Configuration
 
-For each OData service two settings must be specified:
+For each OData service two settings **must** be specified:
 
-- source: the downloaded metadata file
-- output: the output directory for the generated files; warning: this folder gets wiped on generation
+- `source`: the downloaded metadata file
+- `output`: the output directory for the generated files; warning: this folder gets wiped on generation
+
+You can also let `odata2ts` download the metadata file for you:
+
+- `sourceUrl`: full URL to the root of your OData service, e.g. `https://services.odata.org/TripPinRESTierService`
+  - use `prettier` option to pretty print the file
+- `source`: becomes the storage path to the downloaded file
+- see [downloading metadata](./configuration#downloading-metadata) for more information
 
 `odata2ts` doesn't necessarily requires a config file, since the essential settings are available as CLI options.
 However, the pure CLI usage is restricted to generating only one service. With the help of the config file,
@@ -62,7 +77,7 @@ and default export it.
 
 You get types and enums from the generator package `@odata2ts/odata2ts`.
 
-The following example demonstrates the minimal configuration needed to generate typings
+The following example demonstrates the (almost) minimal configuration needed to generate typings
 for two OData services:
 
 ```ts
@@ -76,8 +91,10 @@ const config: ConfigFileOptions = {
       output: "build/northwind",
     },
     trippin: {
+      sourceUrl: "https://services.odata.org/TripPinRESTierService",
       source: "resource/trippin.xml",
       output: "build/trippin",
+      prettier: true
     }
   }
 }
@@ -105,10 +122,11 @@ yarn odata2ts northwind trippin
 
 Without the config file you need to set the two required settings via options:
 
-| Setting | Option   | Shorthand |
-| ------- | -------- | --------- |
-| source  | --source | -s        |
-| output  | --output | -o        |
+| Setting   | Option      | Shorthand |
+| --------- | ----------- | --------- |
+| source    | --source    | -s        |
+| output    | --output    | -o        |
+| sourceUrl | --sourceUrl | -u        |
 
 ```shell
 yarn odata2ts -s resource/trippin.xml -o build/trippin
