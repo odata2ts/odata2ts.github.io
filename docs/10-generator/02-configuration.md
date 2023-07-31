@@ -605,7 +605,7 @@ Activating this option affects the type generation and will use `string` for `Ed
 All requests are executed with the **accept header** set to `application/json;IEEE754Compatible=true`.
 Additionally, when sending data the very same value will be set for the **content-type header**.
 
-Now you can use converters to get a better suited data type: See [Big Number Converters](./big-number-converters).
+Now you can use converters to get a better suited data type: See [Big Number Converters](./converters/big-number-converters).
 
 :::note
 
