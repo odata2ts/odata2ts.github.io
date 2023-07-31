@@ -25,24 +25,39 @@ You can use the existing converters as example.
 
 ## Provided Converters
 
-The following converters are provided by `odata2ts`:
+The following converters are provided by `odata2ts`.
+
+### General Purpose
 
 - [v2-to-v4-converter](./v2-to-v4-converter)
   - V2 numeric types are converted from `string` to `number`
-  - `Edm.Int64` and `Edm.Decimal` are not converted and remain type `string`
+  - `Edm.Int64` and `Edm.Decimal` are also converted
   - `Edm.DateTime` is converted to `Edm.DateTimeOffset`, i.e. proper ISO 8601 date and time presentation
   - `Edm.Time` is by default converted to `Edm.TimeOfDay` (ISO 8601 time), but can also be relabeled as `Edm.Duration`
+- [UI5 V2 Converters](./ui5-v2-converter)
+  - type alignment with UI5 V2 ODataModel (`sap.ui.model.odata.v2.ODataModel`)
+
+### Date and Time Handling
+
 - [Common Converters](./common-converter)
   - `Edm.DateTimeOffset`: JavaScript `Date` type
   - `Edm.Duration`: simple duration object
-  - `Edm.Int64`: JavaScript `bigint` type
 - [Luxon Converters](./luxon-converter)
   - `Edm.DateTimeOffset`: Luxon's `DateTime` type
   - `Edm.Date`: Luxon's `DateTime` type
   - `Edm.TimeOfDay`: Luxon's `DateTime` type
   - `Edm.Duration`: Luxon's `Duration` type
-- [UI5 V2 Converters](./ui5-v2-converter)
-  - type alignment with UI5 V2 ODataModel (`sap.ui.model.odata.v2.ODataModel`)
+
+### Number Handling
+
+- [Common Converters](./common-converter)
+  - `Edm.Int64`: JavaScript `bigint` type
+- [BigNumber Converter](./big-number-converters)
+  - `Edm.Int64`: `BigNumber` type from bignumber.js
+  - `Edm.Decimal`: `BigNumber` type from bignumber.js
+- [Decimal Converter](./big-number-converters)
+  - `Edm.Int64`: `Decimal` type from decimal.js
+  - `Edm.Decimal`: `Decimal` type from decimal.js
 
 ## About Converters
 

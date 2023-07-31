@@ -34,6 +34,8 @@ const defaultConfig = {
   skipComments: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
+  v2ModelsWithExtraResultsWrapping: false,
+  v4BigNumberAsString: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -176,6 +178,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | converters                       | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
 | naming                           | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
 | v2ModelsWithExtraResultsWrapping | `boolean`                    | `false`           | Add an extra wrapper object around expanded entities in V2. See [extra results wrapper](#V2-extra-results-wrapper)                                                                              |
+| v4BigNumberAsString              | `boolean`                    | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#V4-big-number-handling)                                                            |
 
 ## Service Settings
 
@@ -586,6 +589,28 @@ const config = {
 
 Renaming properties this way is independent of the `allowRenaming` setting
 (see [renaming entities and properties](#renaming-entities-and-properties)).
+
+:::
+
+## V4 Big Number Handling
+
+Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
+However, these numbers might not fit into JS' number type, which might result in precision loss.
+
+OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
+precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
+then you should set the config option `v4BigNumberAsString` to `true`.
+
+Activating this option affects the type generation and will use `string` for `Edm.Int64` and `Edm.Decimal`.
+All requests are executed with the **accept header** set to `application/json;IEEE754Compatible=true`.
+Additionally, when sending data the very same value will be set for the **content-type header**.
+
+Now you can use converters to get a better suited data type: See [Big Number Converters](./converters/big-number-converters).
+
+:::note
+
+The OData V4 specification allows to set this format option on a per-request basis.
+`odata2ts` handles this format option globally, because the type generation process is affected.
 
 :::
 
