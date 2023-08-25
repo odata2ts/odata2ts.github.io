@@ -17,7 +17,7 @@ The query builder relies on the generated models and q-objects.
 You rely on the query builder as runtime dependency:
 
 ```bash npm2yarn
-npm install --save @odata2ts\odata-query-builder
+npm install --save @odata2ts/odata-query-builder
 ```
 
 ## Generation Settings
