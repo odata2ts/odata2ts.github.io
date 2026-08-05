@@ -86,25 +86,30 @@ to the query builder.
 In the most simplistic case - which might be called "read" - you just call the `query()` function
 on any entity or entity collection.
 
-Calling `query()` will eventually execute the HTTP request to the server and so it returns a `Promise`:
+`query()` does not talk to the server yet — it hands you a **command**. The request goes out when you call
+`execute()` on it, and that is what returns the `Promise`:
 
 ```ts
 // get the entire entity collection (in async-await style)
-const peopleResponse = await trippinService.people().query();
+const peopleResponse = await trippinService.people().query().execute();
 // peopleResponse: HttpResponseModel<ODataCollectionResponseV4<PersonModel>>
 
 // get a particular entity in its entirety (classical promise based style)
 trippinService
   .people("russelwhyte")
   .query()
+  .execute()
   .then((personResponse) => {
     // personResponse: HttpResponseModel<ODataModelResponseV4<PersonModel>>
   });
 
 // you can also force a sub-type by supplying it to the query via generics
-const specialPersonResponse = await trippinService.people("russelwhyte").query<SpecialPerson>();
+const specialPersonResponse = await trippinService.people("russelwhyte").query<SpecialPerson>().execute();
 // specialPersonResponse: HttpResponseModel<ODataModelResponseV4<SpecialPerson>>
 ```
+
+Holding the request before it is sent is the point of the command: see
+[the request command](#the-request-command) for what it offers.
 
 When the promise resolves we get an `HttpResponseModel` representing the response from the server.
 It contains the response `status`, the response `headers`, and the response body evaluated to JSON,
@@ -135,21 +140,24 @@ as parameter to the `query()` method. The signature of the callback function:
 - **returns**: the query builder
 
 ```ts
-await trippinService.people().query((builder, qPerson) => {
-  return (
-    builder
-      // filter and orderBy operations make use of the query object
-      .filter(qPerson.age.gt(65).or(qPerson.age.lt(18)), qPerson.lastName.contains("x"))
-      .orderBy(qPerson.lastName.asc(), qPerson.firstName.asc(), qPerson.age.desc())
-      // response shaping operations: select and expanding
-      // here we just use the keys, but still in a type-safe fashion
-      .select("lastName", "firstName", "age")
-      .expanding("bestFriend", (bfBuiler) => bfBuiler.select("lastName"))
-      .expanding("trips", (tripBuilder, qTrip) => {
-        return tripBuilder.orderBy(qTrip.budget.desc());
-      })
-  );
-});
+await trippinService
+  .people()
+  .query((builder, qPerson) => {
+    return (
+      builder
+        // filter and orderBy operations make use of the query object
+        .filter(qPerson.age.gt(65).or(qPerson.age.lt(18)), qPerson.lastName.contains("x"))
+        .orderBy(qPerson.lastName.asc(), qPerson.firstName.asc(), qPerson.age.desc())
+        // response shaping operations: select and expanding
+        // here we just use the keys, but still in a type-safe fashion
+        .select("lastName", "firstName", "age")
+        .expanding("bestFriend", (bfBuiler) => bfBuiler.select("lastName"))
+        .expanding("trips", (tripBuilder, qTrip) => {
+          return tripBuilder.orderBy(qTrip.budget.desc());
+        })
+    );
+  })
+  .execute();
 ```
 
 From this example you can see that the builder
@@ -181,10 +189,10 @@ partial update and argues with better resiliency.
 while **updating** and **deleting** requires the entity in question.
 
 ```ts
-await trippinService.people().create(model);
-await trippinService.people("russelwhyte").update(model);
-await trippinService.people("russelwhyte").patch(model);
-await trippinService.people("russelwhyte").delete();
+await trippinService.people().create(model).execute();
+await trippinService.people("russelwhyte").update(model).execute();
+await trippinService.people("russelwhyte").patch(model).execute();
+await trippinService.people("russelwhyte").delete().execute();
 ```
 
 The **reading** part has already been covered in [querying](#querying).
@@ -205,7 +213,7 @@ which only affect the editable model version (e.g. `EditablePerson`).
 import { Person, EditablePerson } from "../generated/TrippinModel"
 
 const model: EditablePerson = {...};
-await trippinService.people().create(model);
+await trippinService.people().create(model).execute();
 ```
 
 The naming in regard to "Editable" is completely configurable:
@@ -235,7 +243,7 @@ const model: EditablePerson = {
   // ...other fields...
   bestFriend: { "@id": "keithpinckney" }, // link to an existing person
 };
-await trippinService.people().create(model);
+await trippinService.people().create(model).execute();
 ```
 
 You only ever pass the key, never a full entity, and `odata2ts` builds the wire format from it. The key may
@@ -244,20 +252,26 @@ be given in its short form as above or in the general one, `{ "@id": { userName:
 **Creating a related entity along with its parent** — a _deep insert_ — passes the entity itself instead:
 
 ```ts
-await trippinService.people().create({
-  userName: "russelwhyte",
-  // created in the same request, no "@id" in sight
-  trips: [{ tripId: 42, name: "Trip to Berlin" }],
-});
+await trippinService
+  .people()
+  .create({
+    userName: "russelwhyte",
+    // created in the same request, no "@id" in sight
+    trips: [{ tripId: 42, name: "Trip to Berlin" }],
+  })
+  .execute();
 ```
 
 For a **to-many** navigation property both shapes may even be mixed within one array:
 
 ```ts
-await trippinService.people().create({
-  userName: "russelwhyte",
-  friends: [{ "@id": "keithpinckney" }, { "@id": "scottketchum" }],
-});
+await trippinService
+  .people()
+  .create({
+    userName: "russelwhyte",
+    friends: [{ "@id": "keithpinckney" }, { "@id": "scottketchum" }],
+  })
+  .execute();
 ```
 
 Both are on by default. Switch them off individually with
@@ -267,7 +281,7 @@ if you would rather not have the navigation properties on the editable models at
 To **clear** an existing (optional) association, set the field to `null` in a `patch()` (or `update()`):
 
 ```ts
-await trippinService.people("russelwhyte").patch({ bestFriend: null });
+await trippinService.people("russelwhyte").patch({ bestFriend: null }).execute();
 ```
 
 Note that `null` is only allowed for navigation properties that are nullable in the metadata; required
@@ -367,20 +381,21 @@ You find **custom operations** bound to different levels of the service hierarch
 
 ```ts
 // unbound function
-const popReponse = await trippinService.getPersonWithMostFriends();
+const popReponse = await trippinService.getPersonWithMostFriends().execute();
 // popResponse: HttpResponseModel<ODataModelResponseV4<Person>>
 
 // unbound function with parameters
-const nearResponse = await trippinService.getNearestAirport({ lat: 51.918777, lon: 8.62093 });
+const nearResponse = await trippinService.getNearestAirport({ lat: 51.918777, lon: 8.62093 }).execute();
 // nearResponse: HttpResponseModel<ODataModelResponseV4<Airport>>
 
 // entity bound action
-await trippinService.people("russelwhyte").shareTrip({ tripId: 1, userName: "russelwhyte" });
+await trippinService.people("russelwhyte").shareTrip({ tripId: 1, userName: "russelwhyte" }).execute();
 ```
 
-As with any request, you can supply a [request configuration](#request-configuration) and the topics
-of [response structures](#response-structures) and [exception handling](#exception-handling) come
-into play.
+As with any request, an operation gives you a [command](#the-request-command) rather than a response, so
+`execute()` performs it and takes the [request configuration](#request-configuration). The topics of
+[response structures](#response-structures) and [exception handling](#exception-handling) come into play
+just the same.
 
 :::note
 
@@ -409,17 +424,60 @@ but people have taken this approach.
 
 :::
 
-## Request Configuration
+## The Request Command
 
-Whatever the request - CRUD or custom - you always have the option to pass a request configuration as last
-parameter. At the utmost minimum, you should be able to set custom headers for the request.
+No operation of a generated service talks to the server by itself. Each one returns a **command**: an object
+which knows the request it would make and performs it only when you call `execute()`.
+
+```ts
+const cmd = trippinService.people("russelwhyte").patch({ firstName: "Russ" });
+
+cmd.getUrl(); // "…/People('russelwhyte')"
+cmd.getInfo(); // method, URL, headers and payload, typed as your model
+cmd.getInfoConverted(); // the same after the request converters ran: what goes on the wire
+
+const response = await cmd.execute();
+```
+
+That gives you somewhere to stand between building a request and sending it:
+
+| method                                                     | what it is for                                             |
+| ---------------------------------------------------------- | ---------------------------------------------------------- |
+| `getUrl()`                                                 | the URL the command would call                             |
+| `getInfo()`                                                | method, URL, headers and data, with your own typings on it |
+| `getInfoConverted()`                                       | the same with the request converters applied               |
+| `prependRequestConverter()` / `appendRequestConverter()`   | hook into either end of the outgoing conversion chain      |
+| `prependResponseConverter()` / `appendResponseConverter()` | the same for the response                                  |
+| `execute(requestConfig?)`                                  | perform the request                                        |
+
+A converter prepended to the request chain still sees your model, while an appended one sees the OData
+facing structure — which end you pick depends on which side of the conversion you want to work on.
+
+:::note
+
+Up to version 0.40.2 the operations performed the request themselves and there was no `execute()`.
+See [upgrading](../generator/upgrading#a-request-is-now-a-command-you-execute).
+
+:::
+
+### Request Configuration
+
+Whatever the request - CRUD or custom - you always have the option to pass a request configuration.
+It goes to `execute()`, which is what performs the request. At the utmost minimum, you should be able to
+set custom headers for the request.
 
 However, the type of the request configuration is entirely dependent on the chosen [HTTP client](./http-client/).
 Minimal example, based on the Axios client:
 
 ```ts
-trippinService.people().create(model, { headers: { myCustomHeader: "myCustomHeaderValue" } });
+await trippinService
+  .people()
+  .create(model)
+  .execute({ headers: { myCustomHeader: "myCustomHeaderValue" } });
 ```
+
+It applies to that one request only. For headers that should go out with every request, configure the
+[HTTP client](./http-client/) instead.
 
 ### Composable Functions
 
@@ -577,7 +635,7 @@ Let's see this in action:
 ```ts
 // async-await style
 try {
-  await trippinService.people().query();
+  await trippinService.people().query().execute();
 } catch (error) {
   // this error cannot be typed
   // let's cast this error to one we can work with
@@ -592,6 +650,7 @@ try {
 trippinService
   .people()
   .query()
+  .execute()
   .then((response) => {
     // ...
   })
