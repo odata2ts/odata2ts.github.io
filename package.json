@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=16.14"
+    "node": ">=20.0"
   },
   "scripts": {
     "build": "docusaurus build",
@@ -53,5 +53,5 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@4.18.0"
 }
