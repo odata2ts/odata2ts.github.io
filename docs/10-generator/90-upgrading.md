@@ -59,6 +59,98 @@ If you were affected, you had a bug — the message tells you which two names an
 The option matches every kind of type, not just entities, so each entry states which one through a `type`
 attribute. Use `TypeModel.Any` to match regardless of kind. See [Type Options](./configuration#type-options).
 
+### Binding and deep insert are on by default
+
+Both features used to be opt-in. They are what you usually want from an editable model — a navigation
+property either carries a new related entity or a reference to an existing one — so the options flipped:
+
+| before                  | now                      |
+| ----------------------- | ------------------------ |
+| `enableBindingProps`    | `disableBindingProps`    |
+| `enableDeepInsertProps` | `disableDeepInsertProps` |
+
+Both default to `false`, so the features are on unless you switch them off. Rename the options in your
+configuration; if you were relying on the previous default, set both to `true`.
+
+### A binding states the key of the entity, not its URL
+
+Where you generate a service, the editable models no longer carry the wire notation. The binding goes by
+the navigation property itself:
+
+```ts
+// before
+{ "Author@odata.bind": "Authors(1)" }
+// after
+{ Author: { "@id": 1 } }
+```
+
+The key is typed as the generated id model, so its short form is accepted just as well as the full one.
+Deep insert and binding share the one property and are told apart by `"@id"`. What goes on the wire —
+`Author@odata.bind` for 4.0, `{"@id": …}` for 4.01, `__metadata.uri` for V2 — is now the query object's
+business. See [Binding and Deep Insert](./configuration#binding-and-deep-insert).
+
+### The V2 results wrapping options were renamed and now apply everywhere
+
+V2 serialises a feed as an extra object carrying `results`, so an expanded collection valued navigation
+property arrives as `{"Copies": {"results": [...]}}`. The client used to strip that layer off by itself,
+which confined the options to `mode: models` and left a deep insert payload with no way to state it at all.
+
+The structure is now handed through untouched in both directions, and both options apply to every
+generation mode. Their names say the direction rather than the artefact:
+
+| before                                      | now                        |
+| ------------------------------------------- | -------------------------- |
+| `v2ModelsWithExtraResultsWrapping`          | `v2ResponseResultsWrapping` |
+| `v2EditableModelsWithExtraResultsWrapping`  | `v2PayloadResultsWrapping`  |
+
+There is no alias for the old names. Mind the changed behaviour as well: **a V2 client generated without
+`v2ResponseResultsWrapping` no longer has the wrapping removed for you.** If your service wraps, turn the
+option on. See [Extra Results Wrapper](./configuration#v2-extra-results-wrapper).
+
+### `Edm.Stream` properties left the models
+
+`Edm.Stream` was mapped to `string`, so a model promised a value that no server ever sends — binary content
+is not part of the JSON payload. Such properties are gone from the models and query objects, and the content
+is read and written through a generated service of its own instead. Entity types marked `HasStream` extend
+the media entity service. See [Binary Content](../odata-client/binary-content).
+
+### Collection-bound operations carry a `Collection` infix
+
+The specification allows two overloads that differ only in cardinality — one bound to `Medium`, one to
+`Collection(Medium)`. Both used to produce the same names, so the generated file declared the same class
+twice and did not compile. Q-objects and params models of **collection-bound** operations are therefore
+renamed from `<Type>_Q<Operation>` to `<Type>Collection_Q<Operation>`, and their params models along with
+them. Operations bound to a single instance and unbound operations keep their names.
+
+### A primitive collection takes the value, not a model payload
+
+`CollectionServiceV4.add()` and `update()` take the primitive value itself. They used to take it wrapped
+as `ODataModelPayloadV4`, i.e. intersected with OData control information — which has no meaning on a
+member of a primitive collection.
+
+`update()` now also sends `{ "value": [...] }` instead of the bare array. Servers that accepted the old
+shape were silently discarding the data.
+
+### The query builder types are named by cardinality
+
+`ODataQueryBuilderV2`, `ODataQueryBuilderV4` and `ExpandingODataQueryBuilderV4` no longer exist, and there
+is no alias. Which one replaces them depends on what the builder is bound to:
+
+| before                        | bound to a collection        | bound to a single model  |
+| ----------------------------- | ---------------------------- | ------------------------ |
+| `ODataQueryBuilderV2`         | `CollectionQueryBuilderV2`   | `ModelQueryBuilderV2`    |
+| `ODataQueryBuilderV4`         | `CollectionQueryBuilderV4`   | `ModelQueryBuilderV4`    |
+| `ExpandingODataQueryBuilderV4`| `ExpandingCollectionQueryBuilderV4` | `ExpandingModelQueryBuilderV4` |
+
+The `Collection…` variants carry the same members as the old types, so that is the mechanical replacement.
+Only the types changed — no runtime behaviour did. See
+[What the Builder Offers](../query-builder/overview-and-setup#what-the-builder-offers-depends-on-the-resource).
+
+### The `-name` shorthand for `--service-name` is gone
+
+It never worked as a real short flag — multi-character short flags are invalid, and only the long form was
+ever parsed reliably. Use `--service-name <serviceName>`.
+
 ## Checking your setup
 
 Two settings are worth having whatever you upgrade from:
