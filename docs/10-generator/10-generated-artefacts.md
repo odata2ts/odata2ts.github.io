@@ -119,17 +119,61 @@ The three `skip*` options only take effect in `models` or `qobjects` mode - see
 ### What that looks like in your code
 
 ```ts
-// the model and its editable counterpart, for typing what you read and what you send
-import type { Person, EditablePerson, PersonId } from "../src-generated/trippin/index.js";
-// the q-object, for filtering, ordering and selecting in a type-safe way
-import { qPerson } from "../src-generated/trippin/index.js";
-// the main service, your entry point
-import { TrippinService } from "../src-generated/trippin/index.js";
+// the editable model, for typing what you send
+import type { EditablePerson } from "../src-generated/trippin/index.js";
+// the q-object for filtering and ordering, and the main service as entry point
+import { qPerson, TrippinService } from "../src-generated/trippin/index.js";
 
 const trippin = new TrippinService(client, "https://services.odata.org/TripPinRESTierService");
+```
 
+**Querying** — `select` and `filter` work off the q-object, so a typo is a compile error rather than a
+puzzling response. `expanding` goes one level deeper: it pulls in a related entity *and* lets you narrow
+what comes back with it.
+
+```ts
 const result = await trippin
   .people()
-  .query((builder) => builder.select("userName", "firstName").filter(qPerson.firstName.eq("Russell")))
+  .query((builder) =>
+    builder
+      .select("userName", "firstName")
+      .filter(qPerson.firstName.eq("Russell"))
+      .expanding("trips", (trip) => trip.select("tripId", "name").top(5)),
+  )
   .execute();
+
+// typed all the way down: `Person` with only the selected properties
+result.data.value[0].firstName;
+```
+
+**Creating** — `create` takes the editable model, which is where the difference to `Person` shows: managed
+properties are absent, and a navigation property accepts either a new related entity or a reference to an
+existing one.
+
+```ts
+const newPerson: EditablePerson = {
+  userName: "russellwhyte",
+  firstName: "Russell",
+  lastName: "Whyte",
+  // a reference to an existing person, stated by its key
+  bestFriend: { "@id": "scottketchum" },
+  // ... or a new related entity, created along with this one
+  trips: [{ tripId: 42, name: "Trip to Berlin" }],
+};
+
+const created = await trippin.people().create(newPerson).execute();
+```
+
+**Patching** — the same editable model, but every property optional, so you send only what changes.
+
+```ts
+const person = trippin.people("russellwhyte");
+
+await person.patch({ firstName: "Russ" }).execute();
+
+// by default a patch answers 204 with no body; ask for the entity and the typing follows
+const updated = await person
+  .patch<true>({ firstName: "Russell" })
+  .execute({ headers: { Prefer: "return=representation" } });
+updated.data.firstName;
 ```
