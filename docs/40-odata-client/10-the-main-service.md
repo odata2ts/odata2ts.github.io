@@ -488,8 +488,9 @@ generated response models are typed for the version you configured, and the clie
 on every request so the service answers in the matching form.
 
 In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
-property `d`. Collections are wrapped again, like in V4, but with the property `results` (this is not
-always the case, see [extra results wrapping](#v2-extra-results-mapping)).
+property `d`. Collections are wrapped again, like in V4, but with the property `results`. The same goes
+for an expanded entity collection *inside* an entity - though not for every service, see
+[extra results wrapping](#v2-extra-results-mapping).
 
 Value Types (e.g. selecting a primitive property of an entity) are really special in V2. First you
 have the standard wrapping with `d` and then you use the name of the property in question as the key
@@ -517,14 +518,23 @@ When comparing to the [V2 spec, chapter 9](https://www.odata.org/documentation/o
 this seems to be wrong: Trips should already list the array of entities without this extra "results" wrapping.
 However, the spec itself is quite vague in this regard.
 
-When using the main service, the generated types won't contain this extra wrapping and
-`odata2ts` will remove this extra wrapping at runtime. You don't have to configure anything for that,
-it just works out-of-the-box. See [#125](https://github.com/odata2ts/odata2ts/issues/125).
+`odata2ts` hands this structure through untouched: what the service sent is what you get. So if your
+service wraps, you say so with the generator option
+[`v2ResponseResultsWrapping`](../generator/configuration#v2-extra-results-wrapper) and the generated
+models describe the response you actually receive. The option applies to every generation mode - bare
+types and a complete client alike.
 
-When only generating model types, this runtime work-around cannot work. Instead, you want the types
-to contain the extra wrapping. In this scenario, you specify an extra configuration
-`v2ModelsWithExtraResultsWrapping` and set it to `true`.
-See [#153](https://github.com/odata2ts/odata2ts/issues/153).
+:::note
+
+Earlier versions removed this wrapping at runtime and confined the option to `mode=Models`. That runtime
+work-around is gone, which is what allows a **deep insert** to state the wrapping in its payload - see the
+separate option `v2PayloadResultsWrapping`. A service answering with the wrapper does not necessarily
+expect one in a request, so the two are configured independently.
+
+:::
+
+See [#125](https://github.com/odata2ts/odata2ts/issues/125) and
+[#153](https://github.com/odata2ts/odata2ts/issues/153).
 
 ## Exception Handling
 
