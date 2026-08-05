@@ -48,4 +48,12 @@ Run the `gen-odata` script:
 npm run gen-odata
 ```
 
-You can now use the generated models in your code by importing them from the configured build folder.
+You can now use the generated models in your code. Import them through the **index files** the generator
+writes next to the artefacts — one per folder and one for the output directory as a whole:
+
+```ts
+import type { Person, EditablePerson } from "../build/trippin/index.js";
+```
+
+That way the import does not depend on which file a model ended up in; see
+[Generated Artefacts](../generator/generated-artefacts#index-files).

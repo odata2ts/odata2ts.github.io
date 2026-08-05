@@ -66,8 +66,8 @@ npm run gen-odata
 Initialize the main OData service:
 
 ```ts
-// the generate main service
-import { TrippinService } from "../build/trippin/TrippinService";
+// the generated main service, imported through the index file of the output directory
+import { TrippinService } from "../build/trippin/index.js";
 import { FetchClient } from "@odata2ts/http-client-fetch";
 
 const baseUrl = "https://services.odata.org/TripPinRESTierService"

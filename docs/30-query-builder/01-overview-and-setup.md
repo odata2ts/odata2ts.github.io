@@ -60,7 +60,7 @@ You need to provide two arguments:
 
 ```ts
 import { createQueryBuilderV4  } from "@odata2ts/odata-query-builder";
-import { QPerson } from "../generated/trippin/QTrippin"
+import { QPerson } from "../generated/trippin/index.js";
 
 const builder = createQueryBuilderV4("people", new QPerson());
 ```

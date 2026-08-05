@@ -471,7 +471,8 @@ Let's work with generics here, so whatever the type in question, we call it `T`:
 
 | Return Type           | OData Version | Response Structure                               |
 | --------------------- | ------------- | ------------------------------------------------ |
-| Collection            | V4            | `{ "@odata.count"?: number; value: Array<T> }`   |
+| Collection            | V4 (4.0)      | `{ "@odata.count"?: number; value: Array<T> }`   |
+| Collection            | V4 (4.01)     | `{ "@count"?: number; value: Array<T> }`         |
 | Entity / Complex Type | V4            | `T`                                              |
 | Value Type            | V4            | `{ value: T }`                                   |
 | Collection            | V2            | `{ d: { __count?: string; results: Array<T> } }` |
@@ -480,6 +481,11 @@ Let's work with generics here, so whatever the type in question, we call it `T`:
 
 As you can see, V4 is pretty straightforward: The `data` property will be filled with the entity or
 complex type model, or we get an additional object containing the `value` property.
+
+The two V4 rows differ only in how the **control information** is spelled: 4.01 drops the `odata.` prefix.
+Which one you get follows the [`odataVersionV4`](../generator/configuration#odata-401) option — the
+generated response models are typed for the version you configured, and the client declares that version
+on every request so the service answers in the matching form.
 
 In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
 property `d`. Collections are wrapped again, like in V4, but with the property `results` (this is not

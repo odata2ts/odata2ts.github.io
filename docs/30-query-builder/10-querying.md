@@ -44,10 +44,10 @@ path and the appropriate query object. At the end you will have to call `build()
 URI string, which will be properly encoded.
 
 ```ts
-import { createUriBuilderV2, createUriBuilderV4 } from "@odata2ts/odata-query-builder";
+import { createQueryBuilderV2, createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 
 // create the builder
-const builder = createUriBuilderV4("People", qPerson);
+const builder = createQueryBuilderV4("People", qPerson);
 // ...
 const result = builder.build();
 ```
