@@ -12,7 +12,7 @@ of artefacts that you can use in your TypeScript code.
 ## Setup
 
 The base setup for the generator is part of the getting started guide: [Generator Setup](../getting-started/generator-setup).
-So if you're already set up, go to [usage](#Usage)
+So if you're already set up, go to [usage](#usage)
 
 Install the generator as dev dependency with the weapon of your choice:
 

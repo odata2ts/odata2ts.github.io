@@ -1,7 +1,13 @@
 {
   // This file is not used in compilation. It is here just for a nice editor experience.
-  "extends": "@tsconfig/docusaurus/tsconfig.json",
+  "extends": "@docusaurus/tsconfig",
   "compilerOptions": {
-    "baseUrl": "."
-  }
+    "baseUrl": ".",
+    // without these, @theme/* and @docusaurus/* resolve to the generic stubs instead of the real props
+    "types": ["@docusaurus/module-type-aliases", "@docusaurus/theme-classic"],
+    // @docusaurus/tsconfig itself still sets the deprecated baseUrl, so this cannot be resolved
+    // on our side. Drop it once Docusaurus ships a tsconfig without it - TypeScript 7 rejects it.
+    "ignoreDeprecations": "6.0"
+  },
+  "exclude": [".docusaurus", "build"]
 }
