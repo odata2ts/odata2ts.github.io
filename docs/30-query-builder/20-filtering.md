@@ -117,14 +117,25 @@ You control this aspect via the filter expression itself, since any `QFilterExpr
 the logical operators:
 
 ```ts
-builder.filter(
-  qPerson.lastName.eq("Smith")
-    .or(qPerson.firstName.eq("Rumpelstilzchen"))
-    .not()
-)
+builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")));
 ```
 
-Result: `$filter=not(LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
+Result: `$filter=LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen'`
+
+### Grouping
+
+Combining expressions adds **no parentheses of its own**, and neither does `not`. Since OData binds `not`
+and `and` more tightly than `or`, that matters as soon as you mix them: put the grouping where you mean it
+with `group()`.
+
+```ts
+builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Rumpelstilzchen")).group().not());
+```
+
+Result: `$filter=not (LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen')`
+
+Without the `group()` the same chain yields `not LastName eq 'Smith' or FirstName eq 'Rumpelstilzchen'`,
+which asks a different question.
 
 Specification: OData V4 URL Conventions on [Logical Operators](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_LogicalOperators).
 
@@ -242,3 +253,13 @@ Also called "Lambda Functions".
 | -------- | ---------------------------------------------- | ------------------------------ | --------------------------------------------------------------------------- |
 | any      | `q.trips.any((qTrip) => qTrip.price.lt(1000))` | `Trips/any(a:a/Price lt 1000)` | True if any member of the collection attribute matches the filter criteria. |
 | all      | `q.trips.all((qTrip) => qTrip.price.lt(1000))` | `Trips/all(a:a/Price lt 1000)` | True if all members of the collection attribute match the filter criteria.  |
+
+The lambda variable is called `a` by default. Nesting one lambda inside another would then shadow it, so
+both operators take the variable name as a second argument:
+
+```ts
+qPerson.trips.any((qTrip) => qTrip.planItems.any((qItem) => qItem.confirmed.eq(true), "b"), "a");
+```
+
+Result: `Trips/any(a:a/PlanItems/any(b:b/Confirmed eq true))`
+
