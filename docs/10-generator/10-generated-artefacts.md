@@ -119,13 +119,19 @@ The three `skip*` options only take effect in `models` or `qobjects` mode - see
 ### What that looks like in your code
 
 ```ts
+import { FetchClient } from "@odata2ts/http-client-fetch";
 // the editable model, for typing what you send
 import type { EditablePerson } from "../src-generated/trippin/index.js";
 // the q-object for filtering and ordering, and the main service as entry point
 import { qPerson, TrippinService } from "../src-generated/trippin/index.js";
 
-const trippin = new TrippinService(client, "https://services.odata.org/TripPinRESTierService");
+// the HTTP client does the actual requests - fetch here, axios and jQuery are available as well
+const httpClient = new FetchClient();
+const trippin = new TrippinService(httpClient, "https://services.odata.org/TripPinRESTierService");
 ```
+
+See [HTTP Clients](../odata-client/http-client/) for the other implementations and for
+configuring headers, authentication and the like.
 
 **Querying** — `select` and `filter` work off the q-object, so a typo is a compile error rather than a
 puzzling response. `expanding` goes one level deeper: it pulls in a related entity *and* lets you narrow
