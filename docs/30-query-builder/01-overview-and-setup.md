@@ -112,10 +112,11 @@ same as querying a single entity, and the OData specification says so: `$filter`
 | V2                         | `select`, `expand`, `expanding`| the same, plus `filter`, `orderBy`, `top`, `skip`, `count` |
 
 The same split applies again inside `expanding()`: expanding a to-many navigation property gives you the
-collection builder, expanding a to-one gives you the entity one.
+collection builder, expanding a to-one gives you the entity one. `groupBy` is the exception — it stays out
+of the nested collection builder, since `$apply` is not a nested query option.
 
 V2 is more restricted still — its `$expand` syntax cannot carry nested query options at all, so the builder
-handed to `expanding()` offers `select` and nothing else.
+handed to `expanding()` offers `select`, `expand` and `expanding`, but none of the collection operations.
 
 :::note
 

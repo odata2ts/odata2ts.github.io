@@ -122,15 +122,15 @@ yarn odata2ts northwind trippin
 
 Without the config file you need to set the two required settings via options:
 
-| Setting   | Option      | Shorthand |
-| --------- | ----------- | --------- |
-| source    | --source    | -s        |
-| output    | --output    | -o        |
-| sourceUrl | --sourceUrl | -u        |
+| Setting   | Option        | Shorthand |
+| --------- | ------------- | --------- |
+| source    | --source      | -s        |
+| output    | --output      | -o        |
+| sourceUrl | --source-url  | -u        |
 
 ```shell
 yarn odata2ts -s resource/trippin.xml -o build/trippin
 ```
 
 Of course, you can always use any CLI option to override any other settings.
-See [./configuration#cli-options] for a listing of all available CLI options.
+See [CLI options](./configuration#cli-options) for a listing of all available CLI options.
