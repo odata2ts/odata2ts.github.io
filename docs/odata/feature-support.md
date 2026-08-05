@@ -105,7 +105,7 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 | Feature                          | V4  | V2  | Notes                                                                |
 | -------------------------------- | :-: | :-: | -------------------------------------------------------------------- |
-| Primitive types                  | ✅  | ✅  | See [OData Data Types](./types)                                      |
+| Primitive types                  | ✅  | ✅  | See [OData Data Types](./odata-types)                                      |
 | Converters                       | ✅  | ✅  | See [Converters](../generator/converters/)                           |
 | Enum types                       | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union      |
 | Complex types                    | ✅  | ✅  |                                                                      |
