@@ -51,6 +51,39 @@ const config = {
     // SVG is a URL instead of a React component.
     "@docusaurus/plugin-svgr",
     [
+      // Keeps the URLs of the navigation restructuring alive. Only takes effect in a
+      // production build, not under `yarn start`.
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          // converters left the generator section
+          { from: "/docs/generator/converters", to: "/docs/converters" },
+          { from: "/docs/generator/converters/v2-to-v4-converter", to: "/docs/converters/v2-to-v4-converter" },
+          { from: "/docs/generator/converters/common-converter", to: "/docs/converters/common-converter" },
+          { from: "/docs/generator/converters/big-number-converters", to: "/docs/converters/big-number-converters" },
+          { from: "/docs/generator/converters/luxon-converter", to: "/docs/converters/luxon-converter" },
+          { from: "/docs/generator/converters/ui5-v2-converter", to: "/docs/converters/ui5-v2-converter" },
+          // upgrading became a section of its own
+          { from: "/docs/generator/upgrading", to: "/docs/upgrading" },
+          // "OData - Basics" dissolved: feature support went up, the data types to the converters
+          { from: "/docs/odata/feature-support", to: "/docs/feature-support" },
+          { from: "/docs/odata/odata-types", to: "/docs/converters/odata-types" },
+          { from: "/docs/category/odata---basics", to: "/docs/feature-support" },
+          // "Query Builder" dissolved: querying and filtering joined the client,
+          // the overview became the standalone use case
+          { from: "/docs/query-builder/querying", to: "/docs/odata-client/querying" },
+          { from: "/docs/query-builder/filtering", to: "/docs/odata-client/filtering" },
+          { from: "/docs/query-builder/overview-and-setup", to: "/docs/special-use-cases/standalone-query-builder" },
+          { from: "/docs/category/query-builder", to: "/docs/odata-client/querying" },
+          // the getting started guide for that use case is gone
+          {
+            from: "/docs/getting-started/use-case_query-builder",
+            to: "/docs/special-use-cases/standalone-query-builder",
+          },
+        ],
+      },
+    ],
+    [
       "@docusaurus/plugin-content-docs",
       {
         sidebarPath: require.resolve("./sidebars.js"),

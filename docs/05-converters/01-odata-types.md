@@ -4,36 +4,44 @@ title: OData Data Types
 sidebar_position: 1
 ---
 
-### About Data Types
+# About OData's Data Types
 
-A little cheat sheet regarding OData's data types:
+The data types in OData V2 are a mess regarding date and time types. But hey, that's somehow true even for
+major languages like Java before a certain version (when Joda was still with us).
 
-| OData Type         | Version | JS format | Example                                                    |
-| ------------------ | :-----: | :-------: | ---------------------------------------------------------- |
-| Edm.String         | V2 & V4 |  string   | "Test"                                                     |
-| Edm.Boolean        | V2 & V4 |  boolean  | true                                                       |
-| Edm.Int16          | V2 & V4 |  number   | 3                                                          |
-| Edm.Int32          | V2 & V4 |  number   | 222                                                        |
-| Edm.Byte           |   V2    |  string   | "1"                                                        |
-| Edm.Byte           |   V4    |  number   | 1                                                          |
-| Edm.SByte          |   V2    |  string   |                                                            |
-| Edm.SByte          |   V4    |  number   |                                                            |
-| Edm.Int64          |   V2    |  string   |                                                            |
-| Edm.Int64          |   V4    |  number   |                                                            |
-| Edm.Single         |   V2    |  string   |                                                            |
-| Edm.Single         |   V4    |  number   |                                                            |
-| Edm.Double         |   V2    |  string   |                                                            |
-| Edm.Double         |   V4    |  number   |                                                            |
-| Edm.Decimal        |   V2    |  string   |                                                            |
-| Edm.Decimal        |   V4    |  number   |                                                            |
-| Edm.Duration       |   V4    |  string   | "P12DT12H15M"                                              |
-| Edm.Time           |   V2    |  string   | "PT12H15M"                                                 |
-| Edm.TimeOfDay      |   V4    |  string   | "12:15:00"                                                 |
-| Edm.Date           |   V4    |  string   | "2022-12-31"                                               |
-| Edm.DateTime       |   V2    |  string   | "/Date(123...)/"                                           |
-| Edm.DateTimeOffset | V2 & V4 |  string   | "2022-12-31T12:15:00+01:00"                                |
-| Edm.Binary         | V2 & V4 |  string   |                                                            |
-| Edm.Stream         |   V4    |    ---    | streams are accessed differently and thus are out of scope |
+This page is dedicated to list the data types for V2 and V4, contrast them with each other and
+illustrate them with examples; yeah well, and rant a bit about specification flaws at the end.
+
+Here are the main differences between V2 and V4 data types:
+
+| OData Type         | V2      | Format (V2)                                                      | V4      | Format (V4)                                                      |
+| ------------------ | ------- | ---------------------------------------------------------------- | ------- | ---------------------------------------------------------------- |
+| Edm.String         | string  | —                                                                | string  | —                                                                |
+| Edm.Boolean        | boolean | `true` / `false`                                                 | boolean | `true` / `false`                                                 |
+| Edm.Int16          | number  | e.g. `42`                                                        | number  | e.g. `42`                                                        |
+| Edm.Int32          | number  | e.g. `123456`                                                    | number  | e.g. `123456`                                                    |
+| Edm.Byte           | string  | e.g. `"255"`                                                     | number  | e.g. `255`                                                       |
+| Edm.SByte          | string  | e.g. `"-128"`                                                    | number  | e.g. `-128`                                                      |
+| Edm.Int64          | string  | e.g. `"9007199254740993"`                                        | number  | e.g. `9007199254740993`                                          |
+| Edm.Single         | string  | e.g. `"3.14"`                                                    | number  | e.g. `3.14`                                                      |
+| Edm.Double         | string  | e.g. `"3.1415926535"`                                            | number  | e.g. `3.1415926535`                                              |
+| Edm.Decimal        | string  | e.g. `"123.45"`                                                  | number  | e.g. `123.45`                                                    |
+| Edm.Binary         | string  | Base64-encoded string                                            | string  | Base64-encoded string                                            |
+| Edm.Stream         | —       | —                                                                | —       | Stream access, not represented as JS value                       |
+| Edm.DateTimeOffset | string  | `/Date(<milliseconds>±HHmm)/`, e.g. `/Date(1672485300000+0100)/` | string  | ISO 8601 date-time with offset, e.g. `2022-12-31T12:15:00+01:00` |
+| Edm.Date           | —       | —                                                                | string  | `yyyy-MM-dd`, e.g. `2022-12-31`                                  |
+| Edm.TimeOfDay      | —       | —                                                                | string  | `HH:mm:ss[.fffffff]`, e.g. `12:15:00`                            |
+| Edm.Duration       | —       | —                                                                | string  | ISO 8601 duration, e.g. `P12DT12H15M`                            |
+| Edm.Time           | string  | ISO 8601 duration restricted to the day part, e.g. `PT12H15M`    | —       | —                                                                |
+| Edm.DateTime       | string  | `/Date(<milliseconds>)/`, e.g. `/Date(1672485300000)/`           | —       | —                                                                |
+
+As you can see:
+
+- All values are simple in the end: When in doubt it's a string!
+  - easily serializable
+  - not cool for end user to use in raw form
+- In V2 most number types are just strings, V4 makes that better
+- Date and Time types are a story of their own
 
 ## V4 Data Types
 
@@ -58,6 +66,13 @@ A little cheat sheet regarding OData's data types:
 | Edm.Stream         | most filter operations don't work here<br/> also exclusive handling |            |                                                     |                       |
 | Edm.Geography.\*   |                                                                     |            |                                                     |                       |
 | Edm.Geometry.\*    |                                                                     |            |                                                     |                       |
+
+### Conclusions
+
+- Sensible data types especially regarding date and time types
+- The one exception are big number types: `Edm.Double` and `Edm.Decimal`
+  - V4 overreached there a bit, as Decimal and Double could lose precision unnoticed when converted to JS Number
+  - you have to use a special header to turn these types into strings again
 
 ## V2 Data Types
 
@@ -93,6 +108,8 @@ For JSON usage, see chapter 4 "Primitive Types" of the document about the
 | Edm.DateTime       | specific point in time                            | type prefix "datetime"       | datetime'2022-12-31T23:59:59'        | string                | "/Date(123...)/"            |
 | Edm.DateTimeOffset | specific point in time                            | type prefix "datetimeoffset" | datetimeoffset'2022-12-31T23:59:59Z' | string                | "2022-12-31T23:59:59+01:00" |
 | Edm.Binary         | fixed or variable length binary data              | type prefix "X" or "binary"  | binary'23A'                          | base64 encoded string | "..."                       |
+
+### Oddities
 
 Edm.DateTime is quite special in multiple ways:
 

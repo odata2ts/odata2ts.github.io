@@ -471,7 +471,7 @@ Without any converters `odata2ts` adheres to the appropriate specification.
 ### Type Converters
 
 `odata2ts` acknowledges the fact that this kind of shallow data representation (string of some format)
-is far from being optimal and offers [**converters**](./converters) to use different data types.
+is far from being optimal and offers [**converters**](../converters) to use different data types.
 
 Available converter packages:
 
@@ -480,7 +480,7 @@ Available converter packages:
 - luxon: use Luxon's `DateTime` and `Duration` types
 - ui5-v2: use same types as UI5's V2 ODataModel
 
-See [Provided Converters](./converters/#provided-converters)
+See [Provided Converters](../converters/#provided-converters)
 
 ### Roll Your Own Converter
 
@@ -490,7 +490,7 @@ Outline:
 - each converter implements interface `ValueConverter<x, y>`
 - follow conventions regarding package structure and exports
 
-See [Creating You Own Converter Module](./converters/#creating-your-own-converter-module).
+See [Creating You Own Converter Module](../converters/#creating-your-own-converter-module).
 
 ## Naming
 
@@ -753,7 +753,7 @@ Activating this option affects the type generation and will use `string` for `Ed
 All requests are executed with the **accept header** set to `application/json;IEEE754Compatible=true`.
 Additionally, when sending data the very same value will be set for the **content-type header**.
 
-Now you can use converters to get a better suited data type: See [Big Number Converters](./converters/big-number-converters).
+Now you can use converters to get a better suited data type: See [Big Number Converters](../converters/big-number-converters).
 
 :::note
 

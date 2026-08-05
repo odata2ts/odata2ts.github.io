@@ -3,7 +3,7 @@ id: converters
 sidebar_position: 20
 ---
 
-# Converters
+# Type Converters
 
 While some OData types (`Edm.String`, `Edm.Boolean`, ...) can easily and perfectly be mapped to native JS types,
 more advanced types are simply strings:
@@ -19,13 +19,122 @@ To support different converters and stay open to custom converter implementation
 `odata2ts` supports a plugin architecture. So you install only those converters you need
 and configure them in the config file.
 
+Converters are not tied to the OData client: they decide which types the **generated models** carry, so
+they are worth a look even when models are all you generate. The
+[UI5 V2 ODataModel converter](./ui5-v2-converter) is the clearest case — there `sap.ui.model.odata.v2.ODataModel`
+performs the requests and converts the data itself, and the converter exists so that the generated models
+describe what that model actually hands you rather than what sits on the wire.
+
 Furthermore, you are invited to roll your own converters.
 The `converter-api` package specifies the interfaces to implement and the data structures to return.
 You can use the existing converters as example.
 
+## About Converters
+
+Consumers of an OData service need to handle the data types known to OData and in this regard
+also need to take into account which OData version is used, because there are quite some
+differences between V2 and V4.
+
+Converters allow to use a different representation for a given data type by converting
+from and to the OData type. For example, the type `Edm.DateTimeOffset` represents a certain
+point in time by using the ISO 8601 DateTime format; we might want to use a JS Date object
+instead. So the converter would do the following conversions:
+
+- convert from the OData type to JS Date
+- convert from JS Date to the OData type
+
+With the help of converters the consumer then only needs to handle JS date objects.
+Furthermore, converters can also remedy the different representations of V2 and V4
+(see [@odata2ts/converter-v2-to-v4](https://www.npmjs.com/package/@odata2ts/converter-v2-to-v4)).
+
+### Converter Chains
+
+The given list of converters will get evaluated by `odata2ts`, so that converter chains are automatically created,
+e.g.:
+
+`Edm.Date` (OData V2) → `Edm.DateTimeOffset` (OData V4) → `Luxon DateTime`
+
+The starting point for any converter chain must be an OData type, since that's what we get from the OData service.
+So for each OData type we check if a converter was specified.
+If so, we check with the resulting data type for the next converter and so forth.
+
+## Converter Setup
+
+To use converters in the generation process of `odata2ts`, you first have to install them:
+
+```shell npm2yarn
+npm install --save @odata2ts/converter-v2-to-v4
+```
+
+Then you configure them via the config file `odata2ts.config.ts`:
+
+```ts
+import { ConfigFileOptions } from "@odata2ts/odata2ts";
+
+// minimal case: only one converter package is configured, nothing else
+const config: ConfigFileOptions = {
+  converters: ["@odata2ts/converter-v2-to-v4"],
+};
+export default config;
+```
+
+This would use the default list of converters specified in the v2-to-v4-converter module.
+To only use specific converters of that package, we require a different syntax:
+
+```ts
+  ...
+  converters: [
+    {
+      module: "@odata2ts/converter-v2-to-v4",
+      use: ["dateTimeToDateTimeOffsetConverter", "stringToNumberConverter"]
+    },
+    "@odata2ts/converter-luxon"
+  ]
+  ...
+```
+
+Each converter package must list the converters it offers and a unique identifier for each converter.
+This unique identifier is listed here via the `use` parameter.
+
+Multiple converters may specify the same source type. In this case the last specified converter wins.
+
 ## Provided Converters
 
 The following converters are provided by `odata2ts`.
+
+### By Data Type
+
+The table below lists the **OData V4** types. If your service speaks V2, reach for
+[converter-v2-to-v4](./v2-to-v4-converter) first: mapping the V2 types onto their V4 counterparts is the
+whole point of that package. `Edm.DateTime` becomes `Edm.DateTimeOffset`, `Edm.Time` becomes
+`Edm.TimeOfDay`, and the numeric types stop being strings. Once it has run, every other converter applies
+exactly as it would against a V4 service — so read the table as the second step, whichever version you are
+on. For UI5 the same groundwork is done by [converter-ui5-v2](./ui5-v2-converter), which additionally
+matches what `sap.ui.model.odata.v2.ODataModel` hands you.
+
+A converter marked **default** applies as soon as you name its package in `converters`; the others exist in
+that package but have to be requested by id through the `use` syntax shown under
+[converter setup](#converter-setup).
+
+| OData Type                 | Result Type      | 3rd Party    | Package              | Converter Id                   | Default |
+| -------------------------- | ---------------- | ------------ | -------------------- | ------------------------------ | ------- |
+| `Edm.DateTimeOffset`       | `Date`           | —            | converter-common     | dateTimeOffsetToDateConverter  | ✓       |
+| `Edm.DateTimeOffset`       | `DateTime`       | luxon        | converter-luxon      | dateTimeOffsetToLuxonConverter | ✓       |
+| `Edm.Date`                 | `DateTime`       | luxon        | converter-luxon      | dateToLuxonConverter           | ✓       |
+| `Edm.TimeOfDay`            | `DateTime`       | luxon        | converter-luxon      | timeOfDayToLuxonConverter      | ✓       |
+| `Edm.Duration`             | `SimpleDuration` | —            | converter-common     | simpleDurationConverter        | —       |
+| `Edm.Duration`             | `Duration`       | luxon        | converter-luxon      | durationToLuxonConverter       | ✓       |
+| `Edm.Int64`                | `bigint`         | —            | converter-common     | int64ToBigIntConverter         | —       |
+| `Edm.Int64`, `Edm.Decimal` | `BigNumber`      | bignumber.js | converter-big-number | bigNumberConverter             | ✓       |
+| `Edm.Int64`, `Edm.Decimal` | `Decimal`        | decimal.js   | converter-decimal    | decimalConverter               | ✓       |
+
+All packages are published under the `@odata2ts/` scope, so `converter-luxon` means
+`@odata2ts/converter-luxon`. A third party library listed above is yours to install alongside the converter
+package; `Date`, `bigint` and `SimpleDuration` need nothing, the latter being provided by
+`converter-common` itself.
+
+Should you prefer to keep a V2 `Edm.Time` as it is rather than relabel it, `converter-common` offers
+`simpleTimeConverter`, which turns it into a `SimpleTime` object.
 
 ### General Purpose
 
@@ -58,74 +167,6 @@ The following converters are provided by `odata2ts`.
 - [Decimal Converter](./big-number-converters)
   - `Edm.Int64`: `Decimal` type from decimal.js
   - `Edm.Decimal`: `Decimal` type from decimal.js
-
-## About Converters
-
-Consumers of an OData service need to handle the data types known to OData and in this regard
-also need to take into account which OData version is used, because there are quite some
-differences between V2 and V4.
-
-Converters allow to use a different representation for a given data type by converting
-from and to the OData type. For example, the type `Edm.DateTimeOffset` represents a certain
-point in time by using the ISO 8601 DateTime format; we might want to use a JS Date object
-instead. So the converter would do the following conversions:
-
-- convert from the OData type to JS Date
-- convert from JS Date to the OData type
-
-With the help of converters the consumer then only needs to handle JS date objects.
-Furthermore, converters can also remedy the different representations of V2 and V4
-(see [@odata2ts/v2-to-v4-converter](https://www.npmjs.com/package/@odata2ts/converter-v2-to-v4)).
-
-## Converter Setup
-
-To use converters in the generation process of `odata2ts`, you first have to install them:
-
-```shell npm2yarn
-npm install --save @odata2ts/v2-to-v4-converter
-```
-
-Then you configure them via the config file `odata2ts.config.ts`:
-
-```ts
-import { ConfigFileOptions } from "@odata2ts/odata2ts";
-
-// minimal case: only one converter package is configured, nothing else
-const config: ConfigFileOptions = {
-  converters: ["@odata2ts/v2-to-v4-converter"],
-};
-export default config;
-```
-
-This would use the default list of converters specified in the v2-to-v4-converter module.
-To only use specific converters of that package, we require a different syntax:
-
-```ts
-  ...
-  converters: [
-    {
-      module: "@odata2ts/v2-to-v4-converter",
-      use: ["dateTimeToDateTimeOffsetConverter", "stringToNumberConverter"]
-    },
-    "@odata2ts/luxon-converter"
-  ]
-  ...
-```
-
-Each converter package must list the converters it offers and a unique identifier for each converter.
-This unique identifier is listed here via the `use` parameter.
-
-### The Order of Converters
-
-Multiple converters may specify the same source type. In this case the last specified converter wins.
-
-### Converter Chains
-
-The given list of converters will get evaluated by `odata2ts`, so that converter chains are automatically created.
-
-The starting point for any converter chain must be an OData type, since that's what we get from the OData service.
-So for each OData type we check if a converter was specified.
-If so, we check with the resulting data type for the next converter and so forth.
 
 ## Creating Your Own Converter Module
 

@@ -83,8 +83,8 @@ export const FEATURE_LIST: Array<FeatureItem> = [
         </p>
 
         <p>
-          Find out all about <a href="./docs/query-builder/querying">querying</a> and{" "}
-          <a href="./docs/query-builder/filtering">filtering</a>.
+          Find out all about <a href="./docs/odata-client/querying">querying</a> and{" "}
+          <a href="./docs/odata-client/filtering">filtering</a>.
         </p>
       </>
     ),

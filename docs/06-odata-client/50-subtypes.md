@@ -1,7 +1,7 @@
 ---
 id: subtypes
 title: Subtypes and Type Casts
-sidebar_position: 30
+sidebar_position: 50
 ---
 
 # Subtypes and Type Casts

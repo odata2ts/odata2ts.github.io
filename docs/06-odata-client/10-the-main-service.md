@@ -166,7 +166,7 @@ From this example you can see that the builder
 - makes heavy use of the query objects to provide for type-safe filtering
 - also makes use of the bare property names, but still in a type-safe fashion
 
-You get the complete [query builder documentation](../query-builder/querying) in its own chapter.
+You get the complete [query builder documentation](./querying) in its own chapter.
 
 ## CRUD Operations
 
@@ -456,7 +456,7 @@ facing structure — which end you pick depends on which side of the conversion 
 :::note
 
 Up to version 0.40.2 the operations performed the request themselves and there was no `execute()`.
-See [upgrading](../generator/upgrading#a-request-is-now-a-command-you-execute).
+See [upgrading](../upgrading#a-request-is-now-a-command-you-execute).
 
 :::
 
