@@ -32,10 +32,11 @@ jobs:
         with:
           node-version: 24
           cache: yarn
+      # No static_site_generator here: that input makes the action inject a baseUrl into the
+      # Docusaurus config, which this site does not need - it is served from the root of
+      # odata2ts.github.io and states url and baseUrl itself. Passing it fails the step.
       - name: Setup Pages
         uses: actions/configure-pages@v6
-        with:
-          static_site_generator: docusaurus
       - name: Install dependencies
         run: yarn --immutable
       - name: Build with docusaurus
