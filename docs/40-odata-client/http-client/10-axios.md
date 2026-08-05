@@ -59,9 +59,9 @@ To use **Basic Auth** with axios, you configure the `auth` setting:
 const config: AxiosRequestConfig = {
   auth: {
     username: "jamesdoe",
-    password: "007"
-  }
-}
+    password: "007",
+  },
+};
 ```
 
 ### Automatic CSRF Token Handling
@@ -75,7 +75,7 @@ const httpClient = new AxiosClient(
   // standard config => irrelevant right now
   undefined,
   // ClientOptions
-  { useCsrfProtection: true, csrfTokenFetchUrl: "..."}
+  { useCsrfProtection: true, csrfTokenFetchUrl: "..." },
 );
 ```
 

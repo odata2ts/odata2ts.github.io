@@ -6,7 +6,7 @@ export interface FeatureItem {
   img?: any;
   screenshot?: any;
   description: React.JSX.Element;
-};
+}
 
 export const FEATURE_LIST: Array<FeatureItem> = [
   {
@@ -15,15 +15,13 @@ export const FEATURE_LIST: Array<FeatureItem> = [
     description: (
       <>
         <p>
-          Each decent OData service comes with its own metadata description.
-          This EDMX document is processed by <code>odata2ts</code> to generate different sorts of artefacts.
+          Each decent OData service comes with its own metadata description. This EDMX document is processed by{" "}
+          <code>odata2ts</code> to generate different sorts of artefacts.
         </p>
 
-        <p>
-          OData versions V2 & V4 are supported and automatically detected by virtue of the EDMX document.
-        </p>
+        <p>OData versions V2 & V4 are supported and automatically detected by virtue of the EDMX document.</p>
       </>
-    )
+    ),
   },
   {
     title: "Powerful & Type-Safe Configuration",
@@ -32,16 +30,16 @@ export const FEATURE_LIST: Array<FeatureItem> = [
     description: (
       <>
         <p>
-          The generator can be configured in a type-safe manner by facilitating the
-          TS based config file. It allows for handling multiple odata services,
-          using type converters, renaming props and more.
+          The generator can be configured in a type-safe manner by facilitating the TS based config file. It allows for
+          handling multiple odata services, using type converters, renaming props and more.
         </p>
 
         <p>
-          You can <a href={"./docs/generator/configuration"}>fine-tune most aspects</a> of the artefact generation to your needs.
+          You can <a href={"./docs/generator/configuration"}>fine-tune most aspects</a> of the artefact generation to
+          your needs.
         </p>
       </>
-    )
+    ),
   },
   {
     title: "Generating Types for OData Models",
@@ -49,15 +47,15 @@ export const FEATURE_LIST: Array<FeatureItem> = [
     description: (
       <>
         <p>
-          For each entity and complex type <code>odata2ts</code> generates TypeScript interfaces:
-          One representing a query response model, one suitable for editing operations like patch, update or create,
-          and one for the entity id type. Additionally, parameter models for any custom operation
-          are generated. <a href="./docs/getting-started/use-case_data-models">Get Started!</a>
+          For each entity and complex type <code>odata2ts</code> generates TypeScript interfaces: One representing a
+          query response model, one suitable for editing operations like patch, update or create, and one for the entity
+          id type. Additionally, parameter models for any custom operation are generated.{" "}
+          <a href="./docs/getting-started/use-case_data-models">Get Started!</a>
         </p>
       </>
-    )
+    ),
   },
-/*  {
+  /*  {
     title: "Generating Q-Objects",
     Svg: require("@site/static/img/q.svg").default,
     description: (
@@ -82,15 +80,16 @@ export const FEATURE_LIST: Array<FeatureItem> = [
       <>
         <p>
           <code>odata-query-builder</code> is a library which helps you formulate even complex OData queries with ease.
-          It uses a fluent API and makes use of the generated models and query objects to support type-safety all around.
-          Additionally, the query-builder harmonizes V2 and V4 API differences.
+          It uses a fluent API and makes use of the generated models and query objects to support type-safety all
+          around. Additionally, the query-builder harmonizes V2 and V4 API differences.
         </p>
 
         <p>
-          Find out all about <a href="./docs/query-builder/querying">querying</a> and <a href="./docs/query-builder/filtering">filtering</a>.
+          Find out all about <a href="./docs/query-builder/querying">querying</a> and{" "}
+          <a href="./docs/query-builder/filtering">filtering</a>.
         </p>
       </>
-    )
+    ),
   },
   {
     title: "Domain-Savvy OData Client",
@@ -99,16 +98,16 @@ export const FEATURE_LIST: Array<FeatureItem> = [
     description: (
       <>
         <p>
-          The full-fledged OData client supports all CRUD operations and any custom operation (function / action).
-          It offers excellent querying capabilities with the help of the query builder. You can choose between
-          three readily available http client implementations (fetch, axios, jquery), but you can also roll your own.
+          The full-fledged OData client supports all CRUD operations and any custom operation (function / action). It
+          offers excellent querying capabilities with the help of the query builder. You can choose between three
+          readily available http client implementations (fetch, axios, jquery), but you can also roll your own.
         </p>
 
         <p>
-          <a href="./docs/getting-started/use-case_full-service">Get Started!</a> or
-          read the <a href="./docs/odata-client/the-main-service">main service</a> docs.
+          <a href="./docs/getting-started/use-case_full-service">Get Started!</a> or read the{" "}
+          <a href="./docs/odata-client/the-main-service">main service</a> docs.
         </p>
       </>
-    )
-  }
+    ),
+  },
 ];

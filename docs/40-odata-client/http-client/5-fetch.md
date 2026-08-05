@@ -63,7 +63,7 @@ const client = new FetchClient(
   // standard config => irrelevant right now
   undefined,
   // ClientOptions
-  { useCsrfProtection: true, csrfTokenFetchUrl: "/Trippin"}
+  { useCsrfProtection: true, csrfTokenFetchUrl: "/Trippin" },
 );
 ```
 

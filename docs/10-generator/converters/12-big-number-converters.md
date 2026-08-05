@@ -95,7 +95,8 @@ const config: ConfigOptions = {
     {
       module: "@odata2ts/converter-common",
       use: ["int64ToBigIntConverter"],
-    }],
+    },
+  ],
 };
 
 export default config;

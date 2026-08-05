@@ -1,0 +1,13 @@
+node_modules/
+build
+.docusaurus
+
+.idea
+*.iml
+.vscode
+
+.yarn
+.yarnrc.yml
+yarn.lock
+
+.gitignore

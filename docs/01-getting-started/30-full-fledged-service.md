@@ -43,9 +43,9 @@ const config: ConfigFileOptions = {
     trippin: {
       source: "resource/trippin.xml",
       output: "build/trippin",
-    }
-  }
-}
+    },
+  },
+};
 
 export default config;
 ```
@@ -67,10 +67,10 @@ Initialize the main OData service:
 
 ```ts
 // the generated main service, imported through the index file of the output directory
-import { TrippinService } from "../build/trippin/index.js";
 import { FetchClient } from "@odata2ts/http-client-fetch";
+import { TrippinService } from "../build/trippin/index.js";
 
-const baseUrl = "https://services.odata.org/TripPinRESTierService"
+const baseUrl = "https://services.odata.org/TripPinRESTierService";
 const httpClient = new FetchClient();
 const trippinService = new TrippinService(httpClient, baseUrl);
 ```

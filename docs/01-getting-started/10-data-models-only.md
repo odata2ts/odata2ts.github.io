@@ -29,9 +29,9 @@ const config: ConfigFileOptions = {
     trippin: {
       source: "resource/trippin.xml",
       output: "build/trippin",
-    }
-  }
-}
+    },
+  },
+};
 
 export default config;
 ```
@@ -52,7 +52,7 @@ You can now use the generated models in your code. Import them through the **ind
 writes next to the artefacts — one per folder and one for the output directory as a whole:
 
 ```ts
-import type { Person, EditablePerson } from "../build/trippin/index.js";
+import type { EditablePerson, Person } from "../build/trippin/index.js";
 ```
 
 That way the import does not depend on which file a model ended up in; see

@@ -9,7 +9,8 @@ const darkCodeTheme = themes.dracula;
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: "odata2ts",
-  tagline: "Centers around a flexible and powerful generator, so that you can work with OData model types, type-safe query builders, and full-fledged, domain-specific OData clients.",
+  tagline:
+    "Centers around a flexible and powerful generator, so that you can work with OData model types, type-safe query builders, and full-fledged, domain-specific OData clients.",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -28,8 +29,8 @@ const config = {
 
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: "warn"
-    }
+      onBrokenMarkdownLinks: "warn",
+    },
   },
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -37,34 +38,32 @@ const config = {
   // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: "en",
-    locales: ["en"]
+    locales: ["en"],
   },
   plugins: [
     [
-      '@docusaurus/theme-classic',
+      "@docusaurus/theme-classic",
       {
-        customCss: require.resolve("./src/css/custom.css")
+        customCss: require.resolve("./src/css/custom.css"),
       },
     ],
     // Docusaurus 3 extracted SVGR into its own plugin; without it an imported
     // SVG is a URL instead of a React component.
-    '@docusaurus/plugin-svgr',
+    "@docusaurus/plugin-svgr",
     [
-      '@docusaurus/plugin-content-docs',
+      "@docusaurus/plugin-content-docs",
       {
         sidebarPath: require.resolve("./sidebars.js"),
         // Remove this to remove the "edit this page" links.
         // editUrl:
         //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        remarkPlugins: [
-          [require('@docusaurus/remark-plugin-npm2yarn'), {sync: true}],
-        ],
-      }
-      ],
+        remarkPlugins: [[require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }]],
+      },
+    ],
     [
-      '@docusaurus/plugin-content-pages',
+      "@docusaurus/plugin-content-pages",
       {
-        path: 'src/pages',
+        path: "src/pages",
         /*routeBasePath: '',
         include: ['**!/!*.{js,jsx,ts,tsx,md,mdx}'],
         exclude: [
@@ -81,78 +80,76 @@ const config = {
       },
     ],
   ],
-  themeConfig:
-    ({
-      // Replace with your project's social card
-      // image: 'img/docusaurus-social-card.jpg',
-      navbar: {
-        title: "odata2ts",
-        logo: {
-          alt: "odata2ts Logo",
-          src: "img/docs.png"
-        },
-        items: [
-          {
-            type: "doc",
-            docId: "intro",
-            position: "left",
-            label: "Documentation"
-          },
-          // {to: '/blog', label: 'Blog', position: 'left'},
-          {
-            href: "https://github.com/odata2ts/odata2ts",
-            label: "GitHub",
-            position: "right"
-          }
-        ]
+  themeConfig: {
+    // Replace with your project's social card
+    // image: 'img/docusaurus-social-card.jpg',
+    navbar: {
+      title: "odata2ts",
+      logo: {
+        alt: "odata2ts Logo",
+        src: "img/docs.png",
       },
-      footer: {
-        style: "dark",
-        links: [
-          {
-            title: "Docs",
-            items: [
-              {
-                label: "Documentation",
-                to: "docs/intro"
-              }
-            ]
-          },
-          {
-            title: "More",
-            items: [
-              /*     {
+      items: [
+        {
+          type: "doc",
+          docId: "intro",
+          position: "left",
+          label: "Documentation",
+        },
+        // {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          href: "https://github.com/odata2ts/odata2ts",
+          label: "GitHub",
+          position: "right",
+        },
+      ],
+    },
+    footer: {
+      style: "dark",
+      links: [
+        {
+          title: "Docs",
+          items: [
+            {
+              label: "Documentation",
+              to: "docs/intro",
+            },
+          ],
+        },
+        {
+          title: "More",
+          items: [
+            /*     {
                      label: 'Blog',
                      to: '/blog',
                    },
-              */     {
-                label: "GitHub",
-                href: "https://github.com/odata2ts/odata2ts"
-              }
-            ]
-          },
-          {
-            title: "Credits",
-            items: [
-              {
-                label: "Docs icons created by Freepik - Flaticon",
-                href: "https://www.flaticon.com/free-icons/docs"
-              },
-              {
-                label: "Built with Docusaurus",
-                href: "https://docusaurus.io/"
-              }
-            ]
-          }
-
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} odata2ts`
-      },
-      prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme
-      }
-    })
+              */ {
+              label: "GitHub",
+              href: "https://github.com/odata2ts/odata2ts",
+            },
+          ],
+        },
+        {
+          title: "Credits",
+          items: [
+            {
+              label: "Docs icons created by Freepik - Flaticon",
+              href: "https://www.flaticon.com/free-icons/docs",
+            },
+            {
+              label: "Built with Docusaurus",
+              href: "https://docusaurus.io/",
+            },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} odata2ts`,
+    },
+    prism: {
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
+    },
+  },
 };
 
 module.exports = config;

@@ -7,8 +7,8 @@ sidebar_position: 10
 
 ## Namespaces
 
-Every OData schema declares a **namespace**, and every type in it is really addressed by its *fully
-qualified* name: `Library.Catalog.Book`, not just `Book`. One service may carry several schemas, and then
+Every OData schema declares a **namespace**, and every type in it is really addressed by its _fully
+qualified_ name: `Library.Catalog.Book`, not just `Book`. One service may carry several schemas, and then
 the same simple name can legitimately appear more than once — a `Branch` in `Library.Circulation` and
 another in `PublisherRegistry` are two different types.
 
@@ -114,16 +114,16 @@ If your imports broke when upgrading, move them to the index files — or switch
 What you get depends on what the metadata declares. The names below follow the defaults, using the Trippin
 service as the example:
 
-| EDMX construct        | Models                                        | Q-Objects                            | Services                                     |
-| --------------------- | --------------------------------------------- | ------------------------------------ | -------------------------------------------- |
-| EntityType `Person`   | `Person`, `EditablePerson`, `PersonId`        | `QPerson` + `qPerson`, `QPersonId`   | `PersonService`, `PersonCollectionService`   |
-| ComplexType `Location`| `Location`, `EditableLocation`                | `QLocation` + `qLocation`            | `LocationService`, `LocationCollectionService` |
-| EnumType `Feature`    | `Feature`                                     | —                                    | —                                            |
-| unbound operation `GetNearestAirport` | `GetNearestAirportParams`     | `QGetNearestAirport`                 | method on the main service                   |
-| bound operation `Person/ShareTrip` | `Person_ShareTripParams`         | `Person_QShareTrip`                  | method on `PersonService`                    |
-| EntitySet `People`    | —                                             | —                                    | getter on the main service                   |
-| Singleton `Me`        | —                                             | —                                    | getter on the main service                   |
-| the service itself    | —                                             | —                                    | `TrippinService`, the entry point            |
+| EDMX construct                        | Models                                 | Q-Objects                          | Services                                       |
+| ------------------------------------- | -------------------------------------- | ---------------------------------- | ---------------------------------------------- |
+| EntityType `Person`                   | `Person`, `EditablePerson`, `PersonId` | `QPerson` + `qPerson`, `QPersonId` | `PersonService`, `PersonCollectionService`     |
+| ComplexType `Location`                | `Location`, `EditableLocation`         | `QLocation` + `qLocation`          | `LocationService`, `LocationCollectionService` |
+| EnumType `Feature`                    | `Feature`                              | —                                  | —                                              |
+| unbound operation `GetNearestAirport` | `GetNearestAirportParams`              | `QGetNearestAirport`               | method on the main service                     |
+| bound operation `Person/ShareTrip`    | `Person_ShareTripParams`               | `Person_QShareTrip`                | method on `PersonService`                      |
+| EntitySet `People`                    | —                                      | —                                  | getter on the main service                     |
+| Singleton `Me`                        | —                                      | —                                  | getter on the main service                     |
+| the service itself                    | —                                      | —                                  | `TrippinService`, the entry point              |
 
 The **editable model** is what create, update and patch take: managed properties are gone from it, and the
 navigation properties accept a related entity or a reference to an existing one. The **id model** is the key
@@ -132,14 +132,14 @@ e.g. `People('russellwhyte')`.
 
 Several options take artefacts away again:
 
-| Option                 | Removes                                                            |
-| ---------------------- | ------------------------------------------------------------------ |
-| `mode: "models"`       | all q-objects and services                                         |
-| `mode: "qobjects"`     | all services                                                       |
-| `skipEditableModels`   | the editable models                                                |
-| `skipIdModels`         | the id models and id functions                                     |
-| `skipOperations`       | the parameter models and the q-functions / q-actions               |
-| `skipComments`         | the doc comments on model properties                               |
+| Option               | Removes                                              |
+| -------------------- | ---------------------------------------------------- |
+| `mode: "models"`     | all q-objects and services                           |
+| `mode: "qobjects"`   | all services                                         |
+| `skipEditableModels` | the editable models                                  |
+| `skipIdModels`       | the id models and id functions                       |
+| `skipOperations`     | the parameter models and the q-functions / q-actions |
+| `skipComments`       | the doc comments on model properties                 |
 
 The three `skip*` options only take effect in `models` or `qobjects` mode - see
 [fine-tuning artefact generation](./configuration#fine-tuning-artefact-generation).
@@ -162,7 +162,7 @@ See [HTTP Clients](../odata-client/http-client/) for the other implementations a
 configuring headers, authentication and the like.
 
 **Querying** — `select` and `filter` work off the q-object, so a typo is a compile error rather than a
-puzzling response. `expanding` goes one level deeper: it pulls in a related entity *and* lets you narrow
+puzzling response. `expanding` goes one level deeper: it pulls in a related entity _and_ lets you narrow
 what comes back with it.
 
 ```ts

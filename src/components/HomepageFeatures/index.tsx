@@ -1,16 +1,18 @@
-import React from "react";
-import clsx from "clsx";
-import styles from "./styles.module.css";
 import { FEATURE_LIST, FeatureItem } from "@site/src/components/HomepageFeatures/features";
-
-
+import clsx from "clsx";
+import React from "react";
+import styles from "./styles.module.css";
 
 function Feature({ title, Svg, img, screenshot, description }: FeatureItem) {
   return (
     <div className={clsx("col col--4")}>
       <div className={styles.featureImgWrapper}>
         {img || screenshot ? (
-          <img src={img || screenshot} className={screenshot ? styles.featureScreenshot : styles.featureImg} role="img" />
+          <img
+            src={img || screenshot}
+            className={screenshot ? styles.featureScreenshot : styles.featureImg}
+            role="img"
+          />
         ) : Svg ? (
           <Svg className={styles.featureImg} role="img" />
         ) : null}
