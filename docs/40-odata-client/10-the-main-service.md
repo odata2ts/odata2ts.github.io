@@ -216,10 +216,12 @@ in the future though: See [#140](https://github.com/odata2ts/odata2ts/issues/140
 
 ### Managing Associations
 
-When creating or updating an entity you often need to link it to an already existing, related entity —
-e.g. setting a person's `bestFriend` to an existing person. For this, the editable model exposes each
-navigation property (whose target is addressable, i.e. has a key) as an optional field that accepts the
-**minimal key** of the target entity — the same `XxxId` type used by [`createKey()`](#createkey):
+When creating or updating an entity you often need to deal with its related entities: either **link** one
+that already exists, or **create** it along with its parent. The editable model covers both — each
+navigation property accepts either shape, and the `"@id"` property is what tells them apart.
+
+**Linking an existing entity** takes its key, the same `XxxId` type used by [`createKey()`](#createkey),
+wrapped in `"@id"`:
 
 ```ts
 import { EditablePerson } from "../generated/TrippinModel";
@@ -227,20 +229,36 @@ import { EditablePerson } from "../generated/TrippinModel";
 const model: EditablePerson = {
   userName: "russelwhyte",
   // ...other fields...
-  bestFriend: { userName: "keithpinckney" }, // link to an existing person
+  bestFriend: { "@id": "keithpinckney" }, // link to an existing person
 };
 await trippinService.people().create(model);
 ```
 
-You only ever pass the key — never a full entity. `odata2ts` builds the correct wire format for you.
-For a **to-many** navigation property, pass an array of keys:
+You only ever pass the key, never a full entity, and `odata2ts` builds the wire format from it. The key may
+be given in its short form as above or in the general one, `{ "@id": { userName: "keithpinckney" } }`.
+
+**Creating a related entity along with its parent** — a *deep insert* — passes the entity itself instead:
 
 ```ts
 await trippinService.people().create({
   userName: "russelwhyte",
-  friends: [{ userName: "keithpinckney" }, { userName: "scottketchum" }],
+  // created in the same request, no "@id" in sight
+  trips: [{ tripId: 42, name: "Trip to Berlin" }],
 });
 ```
+
+For a **to-many** navigation property both shapes may even be mixed within one array:
+
+```ts
+await trippinService.people().create({
+  userName: "russelwhyte",
+  friends: [{ "@id": "keithpinckney" }, { "@id": "scottketchum" }],
+});
+```
+
+Both are on by default. Switch them off individually with
+[`disableBindingProps`](../generator/configuration#binding-and-deep-insert) and `disableDeepInsertProps`
+if you would rather not have the navigation properties on the editable models at all.
 
 To **clear** an existing (optional) association, set the field to `null` in a `patch()` (or `update()`):
 
@@ -254,17 +272,13 @@ management, which is not yet supported — see [#38](https://github.com/odata2ts
 
 :::note
 
-**You do not need to know or care whether your service implements OData 4.0 or 4.01.** Under the hood,
-`odata2ts` always emits the OData 4.0 wire convention (`<navProp>@odata.bind`) for V4 services, which a
-spec-compliant 4.01 service must still accept. For V2 services, the link-reference form
-(`{ "<NavProp>": { "__metadata": { "uri": "..." } } }`) is used instead. Either way, your code stays the
-same.
+**Your code does not change with the protocol version.** What goes on the wire does: a binding is spelled
+`<navProp>@odata.bind` carrying a URL for OData 4.0, `{"@id": …}` for 4.01, and
+`{ "<NavProp>": { "__metadata": { "uri": "..." } } }` for V2. Which of the two V4 spellings is emitted
+follows the [`odataVersionV4`](../generator/configuration#odata-401) option; you keep writing `"@id"` with
+the key either way.
 
 :::
-
-This also does **not** cover _deep insert_ (creating a brand-new related entity in the same request as its
-parent) — that is a separate, open feature request: see
-[#237](https://github.com/odata2ts/odata2ts/issues/237).
 
 ### Responses
 
