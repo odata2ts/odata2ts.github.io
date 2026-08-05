@@ -53,6 +53,31 @@ the server's, not the client's.
 
 :::
 
+## Not every HTTP client can do both
+
+Reading binary data is one thing for the generated service and quite another for the transport underneath
+it. What actually works depends on the [HTTP client](./http-client/) you plugged in:
+
+| Client                                | `getBlob` / `updateBlob`      | `getStream` / `updateStream` |
+| ------------------------------------- | ----------------------------- | ---------------------------- |
+| [Fetch](./http-client/fetch)          | ✅                            | ✅                           |
+| [Axios](./http-client/axios)          | ✅ in the browser only        | ❌                           |
+| [jQuery](./http-client/jquery)        | ✅                            | ❌                           |
+
+The reasons are in the transports, not in `odata2ts`:
+
+- **Axios streams nothing.** Its XHR adapter has no streaming API, and its http adapter neither takes a
+  `ReadableStream` as request body nor hands one back.
+- **Axios reads binary only in the browser.** Without `XMLHttpRequest` it falls back to the http adapter,
+  which decodes the response as text — a `Blob` can never come out of that. Note the asymmetry: *sending*
+  binary works on either adapter, only a response expecting binary back is refused.
+- **jQuery streams nothing either.** `XMLHttpRequest`, which its `ajax` method builds on, has no
+  streaming API at all, in either direction.
+
+Where a client cannot do it, the request is refused up front with an error saying so, rather than
+returning something unusable. **Use the Fetch client if you deal with binary content**, and especially if
+you deal with it outside the browser.
+
 ## What the metadata has to say
 
 A media entity needs `HasStream="true"` on the entity type, and a stream property needs the type
