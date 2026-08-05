@@ -108,14 +108,50 @@ Response structure example:
 ]
 ```
 
+### Selecting Everything
+
+The wildcard `"*"` selects all structural properties and combines with other select items:
+
+```ts
+builder.select("*", "bestFriend")
+```
+
+Non-encoded result: `$select=*,bestFriend`
+
+Mind the difference between the versions: in V4 complex and navigation content named in `$select` is
+inlined, while V2's `$select` only shapes the response and never pulls anything in — there you still need
+`expand` or `expanding`.
+
 ### Deep Select
 
-A deep select (something like `$select=bestFriend/lastName`) is not possible via the `select`
-operation of the query builder. It's considered to not being needed.
+A deep select (something like `$select=bestFriend/lastName`) is not written through the `select`
+operation of the query builder.
 
 In V4 you use the `expanding` operation of the query builder and then `select` those props you need.
 And it works the same way for V2 when using `odata2ts`: Behind the scenes the V4 syntax is translated
 to a deep select including the necessary expand. See [complex expanding in V2](#complex-expanding-in-v2).
+
+`expanding` works on complex properties as well. Since a complex type is part of the entity rather than
+related to it, the result lands in `$select` instead of `$expand`:
+
+```ts
+builder.expanding("address", (addressBuilder) => addressBuilder.select("street"))
+```
+
+Non-encoded result: `$select=Address($select=street)`
+
+A complex **collection** additionally takes the collection operations, which end up in the same select path:
+
+```ts
+builder.expanding("altAddresses", (addressBuilder, qAddress) =>
+  addressBuilder
+    .select("street")
+    .filter(qAddress.street.startsWith("H"))
+    .top(1)
+)
+```
+
+Non-encoded result: `$select=AltAddresses($select=street;$filter=startswith(street,'H');$top=1)`
 
 ### Selecting Something the Type Does Not Know
 
@@ -160,7 +196,8 @@ You write a callback function, which will receive an own query builder as first 
 and the appropriate query object as second parameter. With the help of the builder
 you can further `select` & `expand`.
 
-In addition, V4 also allows to use `filter`, `orderBy`, `skip` and `top` on expanded collections.
+In addition, V4 allows `filter`, `orderBy`, `skip`, `top`, `count` and `search` on an expanded collection.
+`groupBy` is the one collection operation that stays out — `$apply` is not a nested query option.
 
 ```ts
 builder.expanding("trips", (tripsBuilder, qTrip) =>
@@ -171,7 +208,7 @@ builder.expanding("trips", (tripsBuilder, qTrip) =>
 )
 ```
 
-Non-encoded result: `$expand=Trips(select=Budget;orderby=Trips desc;top=1)`
+Non-encoded result: `$expand=Trips($select=Budget;$orderby=Budget desc;$top=1)`
 
 :::note
 
