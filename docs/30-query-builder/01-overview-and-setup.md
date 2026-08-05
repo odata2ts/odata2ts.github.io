@@ -99,3 +99,27 @@ The Trippin service demonstrates this quite clearly:
 
 So we might navigate to `/People('russelwhyte')/BestFriend` to get to a very specific `Person` entity.
 The path itself cannot be known in advance.
+
+## What the Builder Offers Depends on the Resource
+
+The builder is typed by **cardinality**, not only by protocol version. Querying a collection is not the
+same as querying a single entity, and the OData specification says so: `$filter`, `$orderby`, `$top`,
+`$skip` and `$count` narrow a set, which a single entity is not. So they are simply absent there.
+
+|                            | single entity                  | collection                                              |
+| -------------------------- | ------------------------------ | ------------------------------------------------------- |
+| V4                         | `select`, `expand`, `expanding`| the same, plus `filter`, `orderBy`, `top`, `skip`, `count`, `search`, `groupBy` |
+| V2                         | `select`, `expand`, `expanding`| the same, plus `filter`, `orderBy`, `top`, `skip`, `count` |
+
+The same split applies again inside `expanding()`: expanding a to-many navigation property gives you the
+collection builder, expanding a to-one gives you the entity one.
+
+V2 is more restricted still — its `$expand` syntax cannot carry nested query options at all, so the builder
+handed to `expanding()` offers `select` and nothing else.
+
+:::note
+
+If a method you expected is missing, this is usually why. It is not an omission but the resource telling
+you that the option would have no meaning on it.
+
+:::

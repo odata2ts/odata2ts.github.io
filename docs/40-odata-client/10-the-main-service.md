@@ -417,6 +417,39 @@ Minimal example, based on the Axios client:
 trippinService.people().create(model, { headers: { "myCustomHeader": "myCustomHeaderValue" } });
 ```
 
+### Composable Functions
+
+A function whose result is a collection or an entity can be **composable**: query options apply to what it
+returns, as if it were an entity set. `compose()` hands you the service of the returned type:
+
+```ts
+const result = await libraryService
+  .newReleases()
+  .compose()
+  .query((builder, qMedium) => builder.select("title").filter(qMedium.language.eq("de")))
+  .execute();
+```
+
+Whether a server honours that is its own decision — composability is declared in the metadata, but not
+every implementation follows through on every combination.
+
+### Long Queries: Sending a GET as POST
+
+A generously built `$filter` can outgrow the maximum request line a server accepts, at which point the
+request fails before it is even parsed. OData answers that with `POST <resource>/$query`, which carries
+the query string in the body instead. `asPostRequest()` switches a request over:
+
+```ts
+const result = await libraryService
+  .media()
+  .query((builder, qMedium) => builder.filter(qMedium.id.in(...thousandsOfIds)))
+  .asPostRequest()
+  .execute();
+```
+
+The URL loses its query string, the method becomes `POST`, and the body goes out as `text/plain`. Nothing
+else about the call changes — the response is typed exactly as it would have been.
+
 ## Response Structures
 
 `odata2ts` enforces a conventionalized response structure which starts with the `HttpResponseModel`.
