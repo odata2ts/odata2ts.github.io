@@ -2181,7 +2181,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-client-redirects@npm:3.10.2":
+"@docusaurus/plugin-client-redirects@npm:^3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/plugin-client-redirects@npm:3.10.2"
   dependencies:
@@ -9445,7 +9445,7 @@ __metadata:
   dependencies:
     "@docusaurus/core": "npm:3.10.2"
     "@docusaurus/module-type-aliases": "npm:3.10.2"
-    "@docusaurus/plugin-client-redirects": "npm:3.10.2"
+    "@docusaurus/plugin-client-redirects": "npm:^3.10.2"
     "@docusaurus/plugin-content-docs": "npm:^3.10.2"
     "@docusaurus/plugin-content-pages": "npm:^3.10.2"
     "@docusaurus/plugin-svgr": "npm:^3.10.2"
