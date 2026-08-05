@@ -117,6 +117,20 @@ In V4 you use the `expanding` operation of the query builder and then `select` t
 And it works the same way for V2 when using `odata2ts`: Behind the scenes the V4 syntax is translated
 to a deep select including the necessary expand. See [complex expanding in V2](#complex-expanding-in-v2).
 
+### Selecting Something the Type Does Not Know
+
+`select()` and `expand()` accept only the properties of the query object, which is the point of them. Where
+you need something the generated type has no name for — a property an open type carries at runtime, or one
+the metadata does not declare — wrap it in a `QSelectExpression`:
+
+```ts
+import { QSelectExpression } from "@odata2ts/odata-query-objects";
+
+builder.select("lastName", new QSelectExpression("SomeDynamicProperty"));
+```
+
+The string goes into the query as it is, so nothing checks it — that is the trade you are making.
+
 ## Expand
 
 By default, associated entities are not included in response structures (in contrast to ComplexTypes).
