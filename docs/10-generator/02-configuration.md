@@ -35,8 +35,8 @@ const defaultConfig = {
   enablePrimitivePropertyServices: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
-  v2ModelsWithExtraResultsWrapping: false,
-  v2EditableModelsWithExtraResultsWrapping: false,
+  v2ResponseResultsWrapping: false,
+  v2PayloadResultsWrapping: false,
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
@@ -191,8 +191,8 @@ Here is the list of all **base settings** of the config file. By and large this 
 | enableNativeInOperator           | `boolean`                    | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions; V4 only. See [the in operator](#the-in-operator)                                                             |
 | odataVersionV4                   | `"4.0" \| "4.01"`            | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                    |
 | disableAutomaticNameClashResolution | `boolean`                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                   |
-| v2ModelsWithExtraResultsWrapping | `boolean`                    | `false`           | Add an extra wrapper object around expanded entities in V2. See [extra results wrapper](#V2-extra-results-wrapper)                                                                              |
-| v2EditableModelsWithExtraResultsWrapping | `boolean`            | `false`           | The same for the editable models, i.e. for the payload of a deep insert. See [extra results wrapper](#V2-extra-results-wrapper)                                                                 |
+| v2ResponseResultsWrapping        | `boolean`                    | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#V2-extra-results-wrapper)                                       |
+| v2PayloadResultsWrapping         | `boolean`                    | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#V2-extra-results-wrapper)                                                             |
 | v4BigNumberAsString              | `boolean`                    | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#V4-big-number-handling)                                                            |
 
 ## Service Settings
@@ -783,18 +783,29 @@ export interface Category {
 }
 ```
 
-You need to add a special configuration if
+Which of the two your service uses cannot be told from its metadata, so you state it yourself:
 
-- your OData service adds this extra results wrapper
-- you're only generating types
+| Option                      | What it states                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `v2ResponseResultsWrapping` | responses carry the wrapper, so the generated models describe it               |
+| `v2PayloadResultsWrapping`  | a request payload has to carry it, i.e. the nested collection of a deep insert |
 
-You simply set the base setting `v2ModelsWithExtraResultsWrapping` to `true` and the second version gets generated.
-This setting only takes effect, when `mode=Models` and the OData service in question is V2.
+Both default to `false` and both take effect in **every generation mode**: `odata2ts` hands the structure
+through exactly as it was received or given, so a service which wraps needs `v2ResponseResultsWrapping`
+whether you generate bare types or a complete client.
 
-There is a counterpart for the **editable** models, i.e. for the payload a deep insert sends:
-`v2EditableModelsWithExtraResultsWrapping`. It is a separate option on purpose, since a service which
-answers with the extra wrapper does not necessarily expect one in a request.
+:::note
 
-If you're generating more than just the types, then `odata2ts` already got you covered.
-It changes this detail at runtime and converts the second version to the first version on-the-fly.
-So it works out-of-the-box.
+Earlier versions of `odata2ts` removed this wrapper from a response by themselves, and the options only
+took effect with `mode=Models`. That runtime work-around is gone - the structure now survives, which is
+what lets a deep insert state it in the first place.
+
+:::
+
+They are two options on purpose, and real services show why: Apache Olingo 2 accepts a deep insert in
+either shape, while CAP's V2 adapter answers **with** the wrapper and refuses a payload carrying it
+("Value must be an array"). What a service sends therefore says nothing about what it accepts.
+See [#237](https://github.com/odata2ts/odata2ts/issues/237).
+
+The wrapper is a matter of navigation properties, since it is how V2 serialises a feed. A collection of a
+primitive or of a complex type arrives as a plain array either way, and neither option changes that.
