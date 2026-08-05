@@ -42,7 +42,7 @@ inventoried in the [OData V4 feature matrix][spec-v4] and its [V1–V3 counterpa
 | `$compute`                    | ❌  | ➖  |                                                                           |
 | `$skiptoken`                  | 🔶  | 🔶  | Never built by the client, which is correct; the next link is exposed and followed manually |
 | `$format`                     | ➖  | ➖  | JSON-only client — negotiated through the `Accept` header                 |
-| Custom query options          | 🔶  | 🔶  | Not part of the query builder; possible through the HTTP client's request configuration |
+| Custom query options          | ✅  | ✅  | Not through the query builder but through the HTTP client's request configuration      |
 
 The builder only offers what the resource admits: `$filter`, `$orderby`, `$top`, `$skip` and `$count` exist
 on a **collection** query, not on a single entity, and `$search` and `groupBy` are V4 collections only.
@@ -110,11 +110,12 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 | Enum types                       | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union      |
 | Complex types                    | ✅  | ✅  |                                                                      |
 | Inheritance and type casts       | ✅  | 🔶  | V4 addresses derived types by cast segment; V2 renders the hierarchy but cannot serialise it |
-| Open types                       | 🔶  | ➖  | Declared properties are typed; dynamic ones are not                  |
+| Open types                       | ✅  | ➖  | The declared properties are typed; the dynamic ones cannot be, since nothing announces them |
 | `IEEE754Compatible`              | ✅  | ➖  | [`v4BigNumberAsString`](../generator/configuration#v4-big-number-handling) |
 | 4.01 short-form control info     | ✅  | ➖  | [`odataVersionV4`](../generator/configuration#odata-401) selects one spelling, requests and responses alike |
 | `metadata=full` / `none`         | 🔶  | ➖  | Through a manual `Accept` header; the extra control information stays untyped |
 | Instance annotations             | 🔶  | 🔶  | Passed through untyped                                               |
+| Vocabulary annotations           | ❌  | ❌  | Not evaluated at all — neither `Core.*` nor `Capabilities.*` nor any other term; the same effects have to be configured by hand |
 | `results` wrapping               | ➖  | ✅  | See [extra results wrapper](../generator/configuration#v2-extra-results-wrapper) |
 
 ## Deliberately Out of Scope
@@ -125,8 +126,6 @@ Not gaps but decisions:
   is nothing to fetch and interpret at runtime — no `$metadata` or service document handling.
 - **Atom / XML payloads.** JSON only.
 - **`$format`.** Format negotiation belongs in the `Accept` header.
-- **Vocabulary evaluation.** Annotations such as `Core.Computed` or `Capabilities.*` are not read; the same
-  effects are reached through explicit configuration.
 
 [spec-v4]: https://github.com/odata2ts/test-reference-model/blob/main/feature-matrix/odata-v4.md
 [spec-v2]: https://github.com/odata2ts/test-reference-model/blob/main/feature-matrix/odata-v1-v3.md
