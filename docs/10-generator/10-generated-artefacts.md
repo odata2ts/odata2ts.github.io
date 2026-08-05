@@ -5,21 +5,6 @@ sidebar_position: 10
 
 # Generated Artefacts
 
-## Artefact Listing
-
-- Model Types
-  - per EntityType & ComplexType: Model representation used for query responses
-  - per EntityType & ComplexType: Editable model version used for requests (create, update, and patch)
-  - per EntityType: Model representing the entity id
-  - per Function / Action: Model representing all parameters of that operation
-- Q-Objects
-  - per EntityType, ComplexType and any form of collection: one QueryObject
-  - per EntityType: one id function to format and parse entity paths, e.g. `/Person(userName='russellwhyte')`
-  - per function or action: QFunction or QAction to handle operation calls
-- OData Client Service
-  - one main odata service as entry point
-  - per EntityType, ComplexType, and any form of collection: one service
-
 ## File Layout
 
 By default the artefacts of one model live together in a **folder of their own**, one level below a folder
@@ -83,14 +68,30 @@ src-generated/library/
 └── QLibrary.ts         ← all q-objects
 ```
 
-The folder layout entails cyclic imports between the models. Those are perfectly valid within OData, and
-any common ESM or bundler setup resolves them — but not all do. SAP UI5 in combination with the TS Babel
-plugin is the known case, as is any other bundler unable to handle cyclic dependencies. Bundling removes
-the cycles.
+Whether the folder layout leads to cyclic imports depends on your data model — a bidirectional link
+between two entities is enough, and those are common. Such cycles are perfectly valid within OData, and any
+common ESM or bundler setup resolves them. Some cannot: SAP UI5 in combination with the TS Babel plugin is
+the known case, as is any other bundler unable to handle cyclic dependencies. Bundling removes the cycles,
+so that is the setting to reach for there.
 
 :::note
 
-Up to v0.x `bundledFileGeneration` defaulted to `true`, i.e. the bundled layout was what you got. If your
-imports broke when upgrading, move them to the index files — or switch the option back on.
+Up to version 0.41.0 `bundledFileGeneration` defaulted to `true`, i.e. the bundled layout was what you got.
+If your imports broke when upgrading, move them to the index files — or switch the option back on.
 
 :::
+
+## Artefact Listing
+
+- Model Types
+  - per EntityType & ComplexType: Model representation used for query responses
+  - per EntityType & ComplexType: Editable model version used for requests (create, update, and patch)
+  - per EntityType: Model representing the entity id
+  - per Function / Action: Model representing all parameters of that operation
+- Q-Objects
+  - per EntityType, ComplexType and any form of collection: one QueryObject
+  - per EntityType: one id function to format and parse entity paths, e.g. `/Person(userName='russellwhyte')`
+  - per function or action: QFunction or QAction to handle operation calls
+- OData Client Service
+  - one main odata service as entry point
+  - per EntityType, ComplexType, and any form of collection: one service
