@@ -67,7 +67,9 @@ const config = {
           { from: "/docs/generator/upgrading", to: "/docs/upgrading" },
           // "OData - Basics" dissolved: feature support went up, the data types to the converters
           { from: "/docs/odata/feature-support", to: "/docs/feature-support" },
-          { from: "/docs/odata/odata-types", to: "/docs/converters/odata-types" },
+          { from: "/docs/odata/odata-types", to: "/odata-concepts/odata-types" },
+          // ... and again when it became a concept of its own
+          { from: "/docs/converters/odata-types", to: "/odata-concepts/odata-types" },
           { from: "/docs/category/odata---basics", to: "/docs/feature-support" },
           // "Query Builder" dissolved: querying and filtering joined the client,
           // the overview became the standalone use case
@@ -91,6 +93,17 @@ const config = {
         // editUrl:
         //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         remarkPlugins: [[require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }]],
+      },
+    ],
+    [
+      // A second docs instance, serving the navbar entry next to "Documentation".
+      // It carries what is about OData itself rather than about odata2ts.
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "concepts",
+        path: "odata-concepts",
+        routeBasePath: "odata-concepts",
+        sidebarPath: require.resolve("./sidebarsConcepts.js"),
       },
     ],
     [
@@ -128,6 +141,13 @@ const config = {
           docId: "intro",
           position: "left",
           label: "Documentation",
+        },
+        {
+          type: "docSidebar",
+          sidebarId: "conceptsSidebar",
+          docsPluginId: "concepts",
+          position: "left",
+          label: "OData Concepts",
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
