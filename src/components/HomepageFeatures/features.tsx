@@ -57,7 +57,6 @@ export const FEATURE_LIST: Array<FeatureItem> = [
   },
   /*  {
     title: "Generating Q-Objects",
-    Svg: require("@site/static/img/q.svg").default,
     description: (
       <>
         <p>
@@ -74,7 +73,6 @@ export const FEATURE_LIST: Array<FeatureItem> = [
   },*/
   {
     title: "Building OData Queries",
-    // Svg: require("@site/static/img/q.svg").default,
     screenshot: require("@site/static/img/query-builder.png").default,
     description: (
       <>
@@ -93,7 +91,6 @@ export const FEATURE_LIST: Array<FeatureItem> = [
   },
   {
     title: "Domain-Savvy OData Client",
-    // Svg: require("@site/static/img/q.svg").default,
     screenshot: require("@site/static/img/trippinService-auto-completion.png").default,
     description: (
       <>

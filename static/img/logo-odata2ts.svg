@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 250 250"
+   width="250"
+   height="250"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="logo-odata2ts.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   inkscape:export-filename="logo-odata2ts.png"
+   inkscape:export-xdpi="76.799995"
+   inkscape:export-ydpi="76.799995"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     id="namedview10"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.1071428"
+     inkscape:cx="60.0339"
+     inkscape:cy="149.25424"
+     inkscape:window-width="1920"
+     inkscape:window-height="1129"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg10" />
+  <title
+     id="title1">odata2ts</title>
+  <desc
+     id="desc1">Klassisches Datenbank-Icon mit drei gestapelten Scheiben, umschlossen von geschweiften Klammern als Sinnbild für Code.</desc>
+  <!-- Code: umschließende geschweifte Klammern -->
+  <path
+     d="m 225,137.48699 q -5.33626,0.41624 -8.04094,2.28928 -2.70467,1.87306 -4.67836,6.34756 -1.90058,4.37045 -2.70467,11.03017 -0.58481,4.99481 -0.58481,17.27368 0,20.18731 -1.31578,28.19979 -1.24269,8.01248 -4.67837,12.79917 -3.43566,4.89074 -10.08772,7.70031 Q 188.45029,225 178.87427,225 H 175 v -24.97399 q 7.82163,0 10.23392,-1.45681 2.41228,-1.35275 3.50877,-4.05827 1.16959,-2.60146 1.16959,-8.94901 0.0731,-6.34756 0.65789,-24.24558 0.3655,-10.82206 1.97369,-17.27368 1.60818,-6.55567 4.23976,-11.03018 2.70469,-4.57856 6.87135,-8.01248 -5.40935,-4.99479 -7.89474,-9.78147 -3.43567,-6.86785 -4.67836,-17.481795 -0.80409,-7.284079 -1.16959,-32.049949 -0.0731,-7.804371 -1.02339,-10.405828 -0.87719,-2.601457 -3.28947,-3.954214 Q 183.26023,49.869928 175,49.869928 V 25 h 3.87427 q 9.86842,0 15.13158,2.185224 5.26316,2.185224 8.84503,7.492195 3.58187,5.202914 4.82456,12.903226 1.31578,7.596255 1.31578,24.037462 0,19.042665 1.0965,24.869928 1.60819,8.324665 4.89766,11.966705 3.28948,3.53798 10.01462,4.05827 z"
+     id="text2"
+     style="font-weight:700;font-size:224.164px;font-family:Arial, Helvetica, sans-serif;fill:#3178c6;stroke-width:0.63792"
+     inkscape:label="brace-right"
+     aria-label="}" />
+  <!-- Daten: Zylinder nach Vorlage db.svg, Farbe blau durch orange ersetzt -->
+  <g
+     transform="matrix(2.7572829,0,0,5.0877583,-78.571598,-139.4293)"
+     id="g10"
+     inkscape:label="database">
+    <ellipse
+       fill="#e8791e"
+       cx="73.818748"
+       cy="65.482941"
+       rx="18.122034"
+       ry="4.8661017"
+       id="ellipse3"
+       style="display:inline"
+       inkscape:label="bottom" />
+    <ellipse
+       fill="#e8791e"
+       cx="73.830505"
+       cy="38.464333"
+       rx="18.122034"
+       ry="4.8661017"
+       id="ellipse2"
+       style="display:inline"
+       inkscape:label="top" />
+    <rect
+       fill="#e8791e"
+       width="36.244064"
+       height="26.502975"
+       x="55.708473"
+       y="38.618515"
+       id="rect3"
+       style="display:inline"
+       inkscape:label="bg" />
+    <g
+       id="g6"
+       inkscape:label="disc-bottom">
+      <ellipse
+         fill="#ffffff"
+         cx="73.830505"
+         cy="58.407501"
+         rx="18.122034"
+         ry="4.8661017"
+         id="ellipse4" />
+      <rect
+         fill="#ffffff"
+         width="36.220551"
+         height="2.6567647"
+         x="55.708469"
+         y="55.750736"
+         id="rect5" />
+      <ellipse
+         fill="#e8791e"
+         cx="73.818748"
+         cy="55.750736"
+         rx="18.122034"
+         ry="4.8661017"
+         id="ellipse6" />
+    </g>
+    <g
+       transform="translate(0.01176262,-9.774466)"
+       id="g9"
+       style="display:inline"
+       inkscape:label="disc-top">
+      <ellipse
+         fill="#ffffff"
+         cx="73.830505"
+         cy="58.407501"
+         rx="18.122034"
+         ry="4.8661017"
+         id="ellipse7" />
+      <rect
+         fill="#ffffff"
+         width="36.220551"
+         height="2.6567647"
+         x="55.708469"
+         y="55.750736"
+         id="rect8"
+         style="display:inline" />
+      <ellipse
+         fill="#e8791e"
+         cx="73.818748"
+         cy="55.750736"
+         rx="18.122034"
+         ry="4.8661017"
+         id="ellipse9"
+         style="display:inline" />
+    </g>
+  </g>
+  <path
+     d="m 25,137.48699 v -24.97398 q 5.336257,-0.41624 8.040935,-2.28928 2.704679,-1.87305 4.678364,-6.2435 1.973684,-4.474505 2.704678,-11.134235 0.584796,-4.994796 0.584796,-17.377732 0,-20.187305 1.315788,-28.095734 1.315791,-8.012487 4.751463,-12.799167 3.435672,-4.89074 10.01462,-7.700313 Q 61.549708,25 71.125731,25 H 75 v 24.869928 q -8.114034,0 -10.453216,1.352757 -2.266082,1.2487 -3.362573,3.954215 -1.096492,2.601457 -1.096492,9.05307 0,6.555672 -0.657894,24.869928 -0.365497,10.301769 -1.900584,16.753382 -1.535088,6.34756 -3.947369,10.50989 Q 51.24269,120.5255 46.34503,125 q 4.312865,3.53798 7.017543,8.32467 2.777778,4.68262 4.239767,11.4464 1.461988,6.76379 1.900585,18.10614 0.511695,17.27367 0.511695,22.06036 0,6.86784 1.169591,9.57336 1.169591,2.70552 3.508772,4.05827 Q 67.105264,200.02601 75,200.02601 V 225 h -3.874269 q -9.86842,0 -15.131578,-2.28928 -5.263159,-2.18522 -8.918129,-7.38814 -3.581872,-5.2029 -4.824562,-12.90322 -1.242689,-7.59626 -1.242689,-24.03746 0,-19.14673 -1.169591,-24.86994 -1.608187,-8.32465 -4.897661,-11.86263 Q 31.725146,138.00729 25,137.48699 Z"
+     id="text1"
+     style="font-weight:700;font-size:224.164px;font-family:Arial, Helvetica, sans-serif;fill:#3178c6;stroke-width:0.63792"
+     aria-label="{"
+     inkscape:label="brace-left" />
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>odata2ts</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

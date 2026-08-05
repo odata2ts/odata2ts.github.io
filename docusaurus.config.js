@@ -11,7 +11,7 @@ const config = {
   title: "odata2ts",
   tagline:
     "Centers around a flexible and powerful generator, so that you can work with OData model types, type-safe query builders, and full-fledged, domain-specific OData clients.",
-  favicon: "img/favicon.ico",
+  favicon: "img/odata2ts.ico",
 
   // Set the production url of your site here
   url: "https://odata2ts.github.io",
@@ -87,7 +87,7 @@ const config = {
       title: "odata2ts",
       logo: {
         alt: "odata2ts Logo",
-        src: "img/docs.png",
+        src: "img/logo-odata2ts.svg",
       },
       items: [
         {
@@ -132,10 +132,6 @@ const config = {
         {
           title: "Credits",
           items: [
-            {
-              label: "Docs icons created by Freepik - Flaticon",
-              href: "https://www.flaticon.com/free-icons/docs",
-            },
             {
               label: "Built with Docusaurus",
               href: "https://docusaurus.io/",
