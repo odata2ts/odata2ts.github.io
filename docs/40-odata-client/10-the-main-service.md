@@ -94,9 +94,12 @@ const peopleResponse = await trippinService.people().query();
 // peopleResponse: HttpResponseModel<ODataCollectionResponseV4<PersonModel>>
 
 // get a particular entity in its entirety (classical promise based style)
-trippinService.people("russelwhyte").query().then((personResponse) => {
-  // personResponse: HttpResponseModel<ODataModelResponseV4<PersonModel>>
-});
+trippinService
+  .people("russelwhyte")
+  .query()
+  .then((personResponse) => {
+    // personResponse: HttpResponseModel<ODataModelResponseV4<PersonModel>>
+  });
 
 // you can also force a sub-type by supplying it to the query via generics
 const specialPersonResponse = await trippinService.people("russelwhyte").query<SpecialPerson>();
@@ -133,19 +136,20 @@ as parameter to the `query()` method. The signature of the callback function:
 
 ```ts
 await trippinService.people().query((builder, qPerson) => {
-  return builder
-    // filter and orderBy operations make use of the query object
-    .filter(qPerson.age.gt(65).or(qPerson.age.lt(18)), qPerson.lastName.contains("x"))
-    .orderBy(qPerson.lastName.asc(), qPerson.firstName.asc(), qPerson.age.desc())
-    // response shaping operations: select and expanding
-    // here we just use the keys, but still in a type-safe fashion
-    .select("lastName", "firstName", "age")
-    .expanding("bestFriend", (bfBuiler) => bfBuiler.select("lastName"))
-    .expanding("trips", (tripBuilder, qTrip) => {
-      return tripBuilder.orderBy(qTrip.budget.desc())
-    })
-  }
-);
+  return (
+    builder
+      // filter and orderBy operations make use of the query object
+      .filter(qPerson.age.gt(65).or(qPerson.age.lt(18)), qPerson.lastName.contains("x"))
+      .orderBy(qPerson.lastName.asc(), qPerson.firstName.asc(), qPerson.age.desc())
+      // response shaping operations: select and expanding
+      // here we just use the keys, but still in a type-safe fashion
+      .select("lastName", "firstName", "age")
+      .expanding("bestFriend", (bfBuiler) => bfBuiler.select("lastName"))
+      .expanding("trips", (tripBuilder, qTrip) => {
+        return tripBuilder.orderBy(qTrip.budget.desc());
+      })
+  );
+});
 ```
 
 From this example you can see that the builder
@@ -237,7 +241,7 @@ await trippinService.people().create(model);
 You only ever pass the key, never a full entity, and `odata2ts` builds the wire format from it. The key may
 be given in its short form as above or in the general one, `{ "@id": { userName: "keithpinckney" } }`.
 
-**Creating a related entity along with its parent** — a *deep insert* — passes the entity itself instead:
+**Creating a related entity along with its parent** — a _deep insert_ — passes the entity itself instead:
 
 ```ts
 await trippinService.people().create({
@@ -319,7 +323,7 @@ const personUrlComplex = trippinService.people().createKey({ userName: "russelwh
 // personUrlComplex = "People(UserName='russelwhyte')"
 
 // complex version is required for composite keys
-const result = myService.translations().createKey({ key: "myKey", language: "en"  });
+const result = myService.translations().createKey({ key: "myKey", language: "en" });
 // result = "Translation(Key='myKey',Language='en')"
 ```
 
@@ -367,11 +371,11 @@ const popReponse = await trippinService.getPersonWithMostFriends();
 // popResponse: HttpResponseModel<ODataModelResponseV4<Person>>
 
 // unbound function with parameters
-const nearResponse = await trippinService.getNearestAirport({ lat:51.918777, lon: 8.620930 });
+const nearResponse = await trippinService.getNearestAirport({ lat: 51.918777, lon: 8.62093 });
 // nearResponse: HttpResponseModel<ODataModelResponseV4<Airport>>
 
 // entity bound action
-await trippinService.people("russelwhyte").shareTrip({tripId: 1, userName: "russelwhyte"});
+await trippinService.people("russelwhyte").shareTrip({ tripId: 1, userName: "russelwhyte" });
 ```
 
 As with any request, you can supply a [request configuration](#request-configuration) and the topics
@@ -414,7 +418,7 @@ However, the type of the request configuration is entirely dependent on the chos
 Minimal example, based on the Axios client:
 
 ```ts
-trippinService.people().create(model, { headers: { "myCustomHeader": "myCustomHeaderValue" } });
+trippinService.people().create(model, { headers: { myCustomHeader: "myCustomHeaderValue" } });
 ```
 
 ### Composable Functions
@@ -489,7 +493,7 @@ on every request so the service answers in the matching form.
 
 In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
 property `d`. Collections are wrapped again, like in V4, but with the property `results`. The same goes
-for an expanded entity collection *inside* an entity - though not for every service, see
+for an expanded entity collection _inside_ an entity - though not for every service, see
 [extra results wrapping](#v2-extra-results-mapping).
 
 Value Types (e.g. selecting a primitive property of an entity) are really special in V2. First you
@@ -574,7 +578,8 @@ Let's see this in action:
 // async-await style
 try {
   await trippinService.people().query();
-} catch(error) { // this error cannot be typed
+} catch (error) {
+  // this error cannot be typed
   // let's cast this error to one we can work with
   const theError = error as ODataClientError;
   // as example, handle validation failures
@@ -584,7 +589,9 @@ try {
 }
 
 // classical promise style
-trippinService.people().query()
+trippinService
+  .people()
+  .query()
   .then((response) => {
     // ...
   })

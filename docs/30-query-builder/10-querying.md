@@ -58,9 +58,7 @@ To not break the fluent API style, your expressions can evaluate to `null` or `u
 and will get filtered out automatically. This applies to all operations of the query builder.
 
 ```ts
-builder
-  .select("lastName", isAgeRelevant ? "age" : undefined)
-  .filter(null)
+builder.select("lastName", isAgeRelevant ? "age" : undefined).filter(null);
 ```
 
 Result, if `age` doesn't matter: `$select=LastName`
@@ -71,11 +69,7 @@ You can call all operations multiple times. This will just keep adding stuff.
 Only in the case of `skip`, `top` and `count` this will overwrite the previous value.
 
 ```ts
-builder
-  .select("lastName")
-  .select("age")
-  .filter(qPerson.age.gt(18))
-  .filter(qPerson.age.lowerThan(66))
+builder.select("lastName").select("age").filter(qPerson.age.gt(18)).filter(qPerson.age.lowerThan(66));
 ```
 
 Non-encoded result: `$select=LastName,Age&$filter=Age gt 18 AND Age lt 66`
@@ -93,7 +87,7 @@ the following properties:
 By using `select` you only pick those properties you care about.
 
 ```ts
-builder.select("lastName", "firstName")
+builder.select("lastName", "firstName");
 ```
 
 The non-encoded result: `$select=lastName,firstName`<br/>
@@ -103,9 +97,9 @@ Response structure example:
 [
   {
     lastName: "Tester",
-    firstName: "Heinz"
-  }
-]
+    firstName: "Heinz",
+  },
+];
 ```
 
 ### Selecting Everything
@@ -113,7 +107,7 @@ Response structure example:
 The wildcard `"*"` selects all structural properties and combines with other select items:
 
 ```ts
-builder.select("*", "bestFriend")
+builder.select("*", "bestFriend");
 ```
 
 Non-encoded result: `$select=*,bestFriend`
@@ -135,7 +129,7 @@ to a deep select including the necessary expand. See [complex expanding in V2](#
 related to it, the result lands in `$select` instead of `$expand`:
 
 ```ts
-builder.expanding("address", (addressBuilder) => addressBuilder.select("street"))
+builder.expanding("address", (addressBuilder) => addressBuilder.select("street"));
 ```
 
 Non-encoded result: `$select=Address($select=street)`
@@ -144,11 +138,8 @@ A complex **collection** additionally takes the collection operations, which end
 
 ```ts
 builder.expanding("altAddresses", (addressBuilder, qAddress) =>
-  addressBuilder
-    .select("street")
-    .filter(qAddress.street.startsWith("H"))
-    .top(1)
-)
+  addressBuilder.select("street").filter(qAddress.street.startsWith("H")).top(1),
+);
 ```
 
 Non-encoded result: `$select=AltAddresses($select=street;$filter=startswith(street,'H');$top=1)`
@@ -182,7 +173,7 @@ The query builder offers two different methods: `expand` and `expanding`.
 Use `expand` to expand the complete entity behind a property.
 
 ```ts
-builder.expand("trips", "bestFriend")
+builder.expand("trips", "bestFriend");
 ```
 
 Non-encoded result: `$expand=Trips,BestFriend`
@@ -200,12 +191,7 @@ In addition, V4 allows `filter`, `orderBy`, `skip`, `top`, `count` and `search` 
 `groupBy` is the one collection operation that stays out — `$apply` is not a nested query option.
 
 ```ts
-builder.expanding("trips", (tripsBuilder, qTrip) =>
-  tripsBuilder
-    .select("budget")
-    .orderBy(qTrip.budget.desc())
-    .top(1)
-)
+builder.expanding("trips", (tripsBuilder, qTrip) => tripsBuilder.select("budget").orderBy(qTrip.budget.desc()).top(1));
 ```
 
 Non-encoded result: `$expand=Trips($select=Budget;$orderby=Budget desc;$top=1)`
@@ -227,11 +213,7 @@ But `select`, `expand` and `expanding` work just the same.
 The translation into V2 results in a completely different query string though.
 
 ```ts
-builder
-  .expanding("supplier", (catBuilder, qSupplier) =>
-    catBuilder
-      .select("name", "id")
-  )
+builder.expanding("supplier", (catBuilder, qSupplier) => catBuilder.select("name", "id"));
 ```
 
 Non-encoded result: `$expand=supplier&$select=supplier/name,supplier/id`
@@ -245,13 +227,12 @@ They are the functional counterparts to each known entity.
 And each property of such an object brings its own type specific filter operations:
 
 ```ts
-builder
-  .filter(
-    // lastName will only offer string based operations and requires string as argument
-    qPerson.lastName.eq("Smith"),
-    // age as number property only accepts numbers
-    qPerson.age.gt(18)
-  )
+builder.filter(
+  // lastName will only offer string based operations and requires string as argument
+  qPerson.lastName.eq("Smith"),
+  // age as number property only accepts numbers
+  qPerson.age.gt(18),
+);
 ```
 
 Non-encoded result: `$filter=LastName eq 'Smith' and Age gt 18`
@@ -278,7 +259,7 @@ When querying on collections you can use the `top` operation to limit the result
 To only retrieve a maximum of three records:
 
 ```ts
-builder.top(3)
+builder.top(3);
 ```
 
 Result: `$top=3`
@@ -292,7 +273,7 @@ of the data slice. You would need this to implement pagination or something like
 To retrieve results from the 11th item onwards:
 
 ```ts
-builder.skip(10)
+builder.skip(10);
 ```
 
 Result: `$skip=10`
@@ -304,7 +285,7 @@ When querying on collections you can use the `orderBy` operation to sort the res
 You use the generated `query-object` directly:
 
 ```ts
-builder.orderBy(qPerson.lastName.desc(), qPerson.firstName.asc())
+builder.orderBy(qPerson.lastName.desc(), qPerson.firstName.asc());
 ```
 
 Result: `$orderby=lastName desc,firstName asc`
@@ -337,7 +318,6 @@ To use the other logical operators you'll need a utility called `searchTerm`
 import { searchTerm } from "@odata2ts/odata-query-objects";
 
 builder.search(searchTerm("operation").or("odata v4").not()).build();
-
 ```
 
 Result: `$search=NOT(operation OR "odata v4")`
@@ -348,7 +328,7 @@ Currently, the query builder only supports a very simple `groupBy` operation whi
 use of the advanced `apply` operation, which is a V4 only feature.
 
 ```ts
-builder.groupBy("name", "age").build()
+builder.groupBy("name", "age").build();
 ```
 
 Result: `$apply=groupby((name,age))`

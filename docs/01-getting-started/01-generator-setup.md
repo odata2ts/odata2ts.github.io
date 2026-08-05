@@ -27,9 +27,9 @@ const config: ConfigFileOptions = {
       sourceUrl: "https://services.odata.org/TripPinRESTierService",
       source: "resource/trippin.xml",
       output: "build/trippin",
-    }
-  }
-}
+    },
+  },
+};
 
 export default config;
 ```

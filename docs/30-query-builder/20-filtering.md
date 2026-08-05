@@ -26,7 +26,7 @@ builder
     // here we see the query object "qPerson" in action and its string property "lastName"
     qPerson.lastName.startsWith("Why"),
     // each property offers only functionlity suited to its data type
-    qPerson.age.plus(5).lt(30)
+    qPerson.age.plus(5).lt(30),
   )
   .build();
 ```
@@ -81,7 +81,7 @@ The following descriptions of filter operators and functions are using concrete 
 However, you can also compare properties with each other:
 
 ```ts
-builder.filter(qPerson.lastName.eq(qPerson.firstName))
+builder.filter(qPerson.lastName.eq(qPerson.firstName));
 ```
 
 So whenever you meet any function or operator which expects a value, you can also use another property instead.
@@ -262,4 +262,3 @@ qPerson.trips.any((qTrip) => qTrip.planItems.any((qItem) => qItem.confirmed.eq(t
 ```
 
 Result: `Trips/any(a:a/PlanItems/any(b:b/Confirmed eq true))`
-

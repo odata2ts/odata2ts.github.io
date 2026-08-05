@@ -24,5 +24,7 @@ jobs:
         run: yarn --immutable
       - name: Type check
         run: yarn typecheck
+      - name: Check formatting
+        run: yarn check-format
       - name: Build with docusaurus
         run: yarn build

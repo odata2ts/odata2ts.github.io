@@ -23,9 +23,10 @@ the structure that scales for large models and the one most setups want.
 
    ```ts
    // before
-   import { Book, EditableBook } from "./src-generated/library/LibraryModel";
+
    // after
    import { Book, EditableBook } from "./src-generated/library/library-catalog/index.js";
+   import { Book, EditableBook } from "./src-generated/library/LibraryModel";
    ```
 
    Where your model has a single namespace, the root barrel exports everything directly and
@@ -98,10 +99,10 @@ which confined the options to `mode: models` and left a deep insert payload with
 The structure is now handed through untouched in both directions, and both options apply to every
 generation mode. Their names say the direction rather than the artefact:
 
-| before                                      | now                        |
-| ------------------------------------------- | -------------------------- |
-| `v2ModelsWithExtraResultsWrapping`          | `v2ResponseResultsWrapping` |
-| `v2EditableModelsWithExtraResultsWrapping`  | `v2PayloadResultsWrapping`  |
+| before                                     | now                         |
+| ------------------------------------------ | --------------------------- |
+| `v2ModelsWithExtraResultsWrapping`         | `v2ResponseResultsWrapping` |
+| `v2EditableModelsWithExtraResultsWrapping` | `v2PayloadResultsWrapping`  |
 
 There is no alias for the old names. Mind the changed behaviour as well: **a V2 client generated without
 `v2ResponseResultsWrapping` no longer has the wrapping removed for you.** If your service wraps, turn the
@@ -136,11 +137,11 @@ shape were silently discarding the data.
 `ODataQueryBuilderV2`, `ODataQueryBuilderV4` and `ExpandingODataQueryBuilderV4` no longer exist, and there
 is no alias. Which one replaces them depends on what the builder is bound to:
 
-| before                        | bound to a collection        | bound to a single model  |
-| ----------------------------- | ---------------------------- | ------------------------ |
-| `ODataQueryBuilderV2`         | `CollectionQueryBuilderV2`   | `ModelQueryBuilderV2`    |
-| `ODataQueryBuilderV4`         | `CollectionQueryBuilderV4`   | `ModelQueryBuilderV4`    |
-| `ExpandingODataQueryBuilderV4`| `ExpandingCollectionQueryBuilderV4` | `ExpandingModelQueryBuilderV4` |
+| before                         | bound to a collection               | bound to a single model        |
+| ------------------------------ | ----------------------------------- | ------------------------------ |
+| `ODataQueryBuilderV2`          | `CollectionQueryBuilderV2`          | `ModelQueryBuilderV2`          |
+| `ODataQueryBuilderV4`          | `CollectionQueryBuilderV4`          | `ModelQueryBuilderV4`          |
+| `ExpandingODataQueryBuilderV4` | `ExpandingCollectionQueryBuilderV4` | `ExpandingModelQueryBuilderV4` |
 
 The `Collection…` variants carry the same members as the old types, so that is the mechanical replacement.
 Only the types changed — no runtime behaviour did. See

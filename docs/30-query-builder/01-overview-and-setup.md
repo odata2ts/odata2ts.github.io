@@ -59,7 +59,7 @@ You need to provide two arguments:
 2. the `query-object` representing this resource
 
 ```ts
-import { createQueryBuilderV4  } from "@odata2ts/odata-query-builder";
+import { createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QPerson } from "../generated/trippin/index.js";
 
 const builder = createQueryBuilderV4("people", new QPerson());
@@ -106,10 +106,10 @@ The builder is typed by **cardinality**, not only by protocol version. Querying 
 same as querying a single entity, and the OData specification says so: `$filter`, `$orderby`, `$top`,
 `$skip` and `$count` narrow a set, which a single entity is not. So they are simply absent there.
 
-|                            | single entity                  | collection                                              |
-| -------------------------- | ------------------------------ | ------------------------------------------------------- |
-| V4                         | `select`, `expand`, `expanding`| the same, plus `filter`, `orderBy`, `top`, `skip`, `count`, `search`, `groupBy` |
-| V2                         | `select`, `expand`, `expanding`| the same, plus `filter`, `orderBy`, `top`, `skip`, `count` |
+|     | single entity                   | collection                                                                      |
+| --- | ------------------------------- | ------------------------------------------------------------------------------- |
+| V4  | `select`, `expand`, `expanding` | the same, plus `filter`, `orderBy`, `top`, `skip`, `count`, `search`, `groupBy` |
+| V2  | `select`, `expand`, `expanding` | the same, plus `filter`, `orderBy`, `top`, `skip`, `count`                      |
 
 The same split applies again inside `expanding()`: expanding a to-many navigation property gives you the
 collection builder, expanding a to-one gives you the entity one. `groupBy` is the exception — it stays out

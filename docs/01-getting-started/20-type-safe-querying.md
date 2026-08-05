@@ -36,9 +36,9 @@ const config: ConfigFileOptions = {
     trippin: {
       source: "resource/trippin.xml",
       output: "build/trippin",
-    }
-  }
-}
+    },
+  },
+};
 
 export default config;
 ```
@@ -65,10 +65,7 @@ createQueryBuilderV4("People", qPerson)
   .filter(qPerson.userName.equals("russellwhyte"))
   .expand("homeAddress") // => typesafe: only expandable properties are allowed
   .expanding("trips", (builder, qTrip) => {
-    builder
-      .select("tripId", "budget", "description")
-      .top(1)
-      .filter(qTrip.budget.gt(1000));
+    builder.select("tripId", "budget", "description").top(1).filter(qTrip.budget.gt(1000));
   })
   .build();
 ```

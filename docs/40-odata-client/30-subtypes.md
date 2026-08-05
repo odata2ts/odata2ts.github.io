@@ -48,10 +48,7 @@ q-object carries a **cast property** per subtype property, named `Q<Subtype>_<Pr
 const result = await libraryService
   .media()
   .query((builder, qMedium) =>
-    builder
-      .select("title", "QBook_pageCount")
-      .expand("QBook_publisher")
-      .filter(qMedium.QBook_pageCount.gt(300)),
+    builder.select("title", "QBook_pageCount").expand("QBook_publisher").filter(qMedium.QBook_pageCount.gt(300)),
   )
   .execute();
 ```

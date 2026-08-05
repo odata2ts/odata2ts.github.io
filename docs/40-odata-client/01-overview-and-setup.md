@@ -65,9 +65,9 @@ const config: ConfigFileOptions = {
     trippin: {
       source: "resource/trippin.xml",
       output: "build/trippin",
-    }
-  }
-}
+    },
+  },
+};
 
 export default config;
 ```
@@ -79,11 +79,12 @@ which points to the root of your OData service:
 
 ```ts
 // the generated main service
-import { TrippinService } from "../build/trippin/TrippinService";
+
 // the chosen http client implementation
 import { AxiosClient } from "@odata2ts/http-client-axios";
+import { TrippinService } from "../build/trippin/TrippinService";
 
-const baseUrl = "https://services.odata.org/TripPinRESTierService"
+const baseUrl = "https://services.odata.org/TripPinRESTierService";
 // initialize and, optionally, configure the http client
 const httpClient = new AxiosClient();
 // initialize the client service

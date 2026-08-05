@@ -92,8 +92,8 @@ import { ConfigFileOptions } from "@odata2ts/odata2ts";
 
 // minimal case: only one converter package is configured, nothing else
 const config: ConfigFileOptions = {
-  converters: ["@odata2ts/v2-to-v4-converter"]
-}
+  converters: ["@odata2ts/v2-to-v4-converter"],
+};
 export default config;
 ```
 
@@ -178,8 +178,8 @@ export const myConverter: ValueConverter<string, Date> = {
   },
   convertTo: (value: ParamValueModel<Date>): ParamValueModel<string> => {
     return !value ? value : value.toISOString();
-  }
-}
+  },
+};
 ```
 
 The `ParamValueModel<Type>` makes sure that `null` and `undefined` are valid values:
@@ -210,13 +210,11 @@ The export name must match the id of the converter.
 
 ```ts
 import { ConverterPackage } from "@odata2ts/converter-api";
-import { myConverter } from "./MyConverter"
+import { myConverter } from "./MyConverter";
 
 export const config: ConverterPackage = {
   id: "MyConverters",
-  converters: [myConverter]
-}
-export {
-  myConverter
-}
+  converters: [myConverter],
+};
+export { myConverter };
 ```
