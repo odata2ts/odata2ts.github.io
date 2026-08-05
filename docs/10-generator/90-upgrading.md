@@ -132,6 +132,47 @@ member of a primitive collection.
 `update()` now also sends `{ "value": [...] }` instead of the bare array. Servers that accepted the old
 shape were silently discarding the data.
 
+### The `-name` shorthand for `--service-name` is gone
+
+It never worked as a real short flag — multi-character short flags are invalid, and only the long form was
+ever parsed reliably. Use `--service-name <serviceName>`.
+
+## Coming from 0.40.2 and earlier
+
+These landed in 0.41.0. If you are already on that version, you have them.
+
+### A request is now a command you execute
+
+Every operation of a generated service returns a command object instead of performing the request straight
+away. Nothing happens until you call `execute()`:
+
+```ts
+// before
+const person = await trippin.people(id).query();
+await trippin.people().create(newPerson);
+// after
+const person = await trippin.people(id).query().execute();
+await trippin.people().create(newPerson).execute();
+```
+
+That one call is the whole migration, and the compiler finds every site for you: what you get back is a
+command, not a response, so the old code stops type-checking rather than silently doing nothing.
+
+What you gain is a handle on the request before it goes out:
+
+- `getUrl()` and `getInfo()` — the URL, method, headers and payload, with your own typings on the data
+- `getInfoConverted()` — the same after the request converters have run, i.e. what actually goes on the wire
+- `prependRequestConverter()` / `appendRequestConverter()` and the two response counterparts — hook your own
+  conversion into either end of the chain
+- `execute(requestConfig?)` — perform it, optionally with per-request client configuration
+
+`execute()` is also where a request configuration goes now, so a one-off header no longer needs a separate
+client:
+
+```ts
+await person.patch({ firstName: "Russ" }).execute({ headers: { Prefer: "return=representation" } });
+```
+
 ### The query builder types are named by cardinality
 
 `ODataQueryBuilderV2`, `ODataQueryBuilderV4` and `ExpandingODataQueryBuilderV4` no longer exist, and there
@@ -147,10 +188,21 @@ The `Collection…` variants carry the same members as the old types, so that is
 Only the types changed — no runtime behaviour did. See
 [What the Builder Offers](../query-builder/overview-and-setup#what-the-builder-offers-depends-on-the-resource).
 
-### The `-name` shorthand for `--service-name` is gone
+### `QAction` and `QFunction` changed shape
 
-It never worked as a real short flag — multi-character short flags are invalid, and only the long form was
-ever parsed reliably. Use `--service-name <serviceName>`.
+Both now carry the response structure as a second type parameter, and `QFunction` lost the constructor
+arguments describing the return type — it takes the name alone. Two version specific subclasses arrived
+with it, `QFunctionV2` and `QFunctionV4`, which is what the generator emits from now on.
+
+This only concerns you if you wrote query objects for operations by hand. **Regenerating is the answer** —
+these classes are generator output, and hand-written ones will not compile against the new signatures.
+
+### `OperationReturnType`, `ResponseHelper` and `ReturnTypes` are gone
+
+They described how to unpack an operation response. Response conversion now lives in the converters the
+command object assembles, so there is nothing left for them to do and no replacement to import. If you
+referenced them, you were reproducing what the generated service already does — drop the code and read the
+result off `execute()`.
 
 ## Checking your setup
 
