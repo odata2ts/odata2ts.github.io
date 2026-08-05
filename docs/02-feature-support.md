@@ -28,21 +28,21 @@ inventoried in the [OData V4 feature matrix][spec-v4] and its [V1–V3 counterpa
 
 ## System Query Options
 
-| Option                        | V4  | V2  | Notes                                                                                                        |
-| ----------------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------ |
-| `$select`                     | ✅  | ✅  | Top-level properties; `select("*")` produces the wildcard                                                    |
-| `$expand`                     | ✅  | ✅  | [`expand()`](../query-builder/querying#expand) for plain expansion                                           |
-| `$expand` with nested options | ✅  | ➖  | [`expanding()`](../query-builder/querying#complex-expanding); V2's syntax cannot carry nested options at all |
-| `$filter`                     | ✅  | ✅  | See [Filtering](#filtering)                                                                                  |
-| `$orderby`                    | ✅  | ✅  | Property paths with `asc()` / `desc()`, multiple criteria                                                    |
-| `$top` / `$skip`              | ✅  | ✅  |                                                                                                              |
-| `$count`                      | ✅  | ✅  | V4: `@odata.count` on the response model; V2: `__count`                                                      |
-| `$search`                     | ✅  | ➖  | Terms and phrases are distinguished automatically                                                            |
-| `$apply` (aggregation)        | 🔶  | ➖  | `groupBy()` only — no `aggregate`, `topcount`, `compute`                                                     |
-| `$compute`                    | ❌  | ➖  |                                                                                                              |
-| `$skiptoken`                  | 🔶  | 🔶  | Never built by the client, which is correct; the next link is exposed and followed manually                  |
-| `$format`                     | ➖  | ➖  | JSON-only client — negotiated through the `Accept` header                                                    |
-| Custom query options          | ✅  | ✅  | Not through the query builder but through the HTTP client's request configuration                            |
+| Option                        | V4  | V2  | Notes                                                                                                      |
+| ----------------------------- | :-: | :-: | ---------------------------------------------------------------------------------------------------------- |
+| `$select`                     | ✅  | ✅  | Top-level properties; `select("*")` produces the wildcard                                                  |
+| `$expand`                     | ✅  | ✅  | [`expand()`](./odata-client/querying#expand) for plain expansion                                           |
+| `$expand` with nested options | ✅  | ➖  | [`expanding()`](./odata-client/querying#complex-expanding); V2's syntax cannot carry nested options at all |
+| `$filter`                     | ✅  | ✅  | See [Filtering](#filtering)                                                                                |
+| `$orderby`                    | ✅  | ✅  | Property paths with `asc()` / `desc()`, multiple criteria                                                  |
+| `$top` / `$skip`              | ✅  | ✅  |                                                                                                            |
+| `$count`                      | ✅  | ✅  | V4: `@odata.count` on the response model; V2: `__count`                                                    |
+| `$search`                     | ✅  | ➖  | Terms and phrases are distinguished automatically                                                          |
+| `$apply` (aggregation)        | 🔶  | ➖  | `groupBy()` only — no `aggregate`, `topcount`, `compute`                                                   |
+| `$compute`                    | ❌  | ➖  |                                                                                                            |
+| `$skiptoken`                  | 🔶  | 🔶  | Never built by the client, which is correct; the next link is exposed and followed manually                |
+| `$format`                     | ➖  | ➖  | JSON-only client — negotiated through the `Accept` header                                                  |
+| Custom query options          | ✅  | ✅  | Not through the query builder but through the HTTP client's request configuration                          |
 
 The builder only offers what the resource admits: `$filter`, `$orderby`, `$top`, `$skip` and `$count` exist
 on a **collection** query, not on a single entity, and `$search` and `groupBy` are V4 collections only.
@@ -53,7 +53,7 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 | --------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Comparison operators  | ✅  | ✅  | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, plus `isNull` / `isNotNull`                                                                                        |
 | Logical operators     | ✅  | ✅  | `and`, `or`, `not`                                                                                                                                     |
-| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](../generator/configuration#the-in-operator)      |
+| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](./generator/configuration#the-in-operator)       |
 | String functions      | 🔶  | 🔶  | `contains`, `startsWith`, `endsWith`, `indexOf`, `length`, `concat`, `toLower`, `toUpper`, `trim`, `matchesPattern`; `substring` and `has` are missing |
 | Arithmetic            | ✅  | ✅  | `add`, `sub`, `mul`, `div`, `mod`                                                                                                                      |
 | Number functions      | ✅  | ✅  | `round`, `floor`, `ceiling`                                                                                                                            |
@@ -65,21 +65,21 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 ## Reading and Writing
 
-| Feature                            | V4  | V2  | Notes                                                                                                     |
-| ---------------------------------- | :-: | :-: | --------------------------------------------------------------------------------------------------------- |
-| Read entity / collection           | ✅  | ✅  | Typed response models per version                                                                         |
-| Create, update, patch, delete      | ✅  | ✅  | V2 sends `MERGE` where the protocol demands it                                                            |
-| `$select` / `$expand` on a write   | ✅  | ✅  | The same builder as on a read                                                                             |
-| Editable models                    | ✅  | ✅  | Managed properties are excluded — see [managed properties](../generator/configuration#managed-properties) |
-| Binding an existing entity         | ✅  | ✅  | By key; rendered as `@odata.bind` (4.0), `{"@id": …}` (4.01) or `__metadata.uri` (V2)                     |
-| Deep insert / deep update          | ✅  | ✅  | Related entities inside the parent's payload                                                              |
-| Return representation              | ✅  | ➖  | `patch<true>()` plus `Prefer: return=representation`                                                      |
-| Individual property access         | ✅  | ✅  | Opt-in via [`enablePrimitivePropertyServices`](../generator/configuration#primitive-property-services)    |
-| Optimistic concurrency (ETag)      | ❌  | ❌  | No `If-Match` workflow; possible through manual headers                                                   |
-| Relationship management via `$ref` | ❌  | ➖  |                                                                                                           |
-| Batch requests                     | ❌  | ❌  | Out of scope of the HTTP client design                                                                    |
-| Delta / change tracking            | ❌  | ➖  |                                                                                                           |
-| Asynchronous requests              | ❌  | ➖  |                                                                                                           |
+| Feature                            | V4  | V2  | Notes                                                                                                    |
+| ---------------------------------- | :-: | :-: | -------------------------------------------------------------------------------------------------------- |
+| Read entity / collection           | ✅  | ✅  | Typed response models per version                                                                        |
+| Create, update, patch, delete      | ✅  | ✅  | V2 sends `MERGE` where the protocol demands it                                                           |
+| `$select` / `$expand` on a write   | ✅  | ✅  | The same builder as on a read                                                                            |
+| Editable models                    | ✅  | ✅  | Managed properties are excluded — see [managed properties](./generator/configuration#managed-properties) |
+| Binding an existing entity         | ✅  | ✅  | By key; rendered as `@odata.bind` (4.0), `{"@id": …}` (4.01) or `__metadata.uri` (V2)                    |
+| Deep insert / deep update          | ✅  | ✅  | Related entities inside the parent's payload                                                             |
+| Return representation              | ✅  | ➖  | `patch<true>()` plus `Prefer: return=representation`                                                     |
+| Individual property access         | ✅  | ✅  | Opt-in via [`enablePrimitivePropertyServices`](./generator/configuration#primitive-property-services)    |
+| Optimistic concurrency (ETag)      | ❌  | ❌  | No `If-Match` workflow; possible through manual headers                                                  |
+| Relationship management via `$ref` | ❌  | ➖  |                                                                                                          |
+| Batch requests                     | ❌  | ❌  | Out of scope of the HTTP client design                                                                   |
+| Delta / change tracking            | ❌  | ➖  |                                                                                                          |
+| Asynchronous requests              | ❌  | ➖  |                                                                                                          |
 
 ## Operations
 
@@ -105,18 +105,18 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 | Feature                      | V4  | V2  | Notes                                                                                                                           |
 | ---------------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------- |
-| Primitive types              | ✅  | ✅  | See [OData Data Types](./odata-types)                                                                                           |
-| Converters                   | ✅  | ✅  | See [Converters](../generator/converters/)                                                                                      |
+| Primitive types              | ✅  | ✅  | See [OData Data Types](./converters/odata-types)                                                                                |
+| Converters                   | ✅  | ✅  | See [Converters](./converters)                                                                                                  |
 | Enum types                   | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union                                                                 |
 | Complex types                | ✅  | ✅  |                                                                                                                                 |
 | Inheritance and type casts   | ✅  | 🔶  | V4 addresses derived types by cast segment; V2 renders the hierarchy but cannot serialise it                                    |
 | Open types                   | ✅  | ➖  | The declared properties are typed; the dynamic ones cannot be, since nothing announces them                                     |
-| `IEEE754Compatible`          | ✅  | ➖  | [`v4BigNumberAsString`](../generator/configuration#v4-big-number-handling)                                                      |
-| 4.01 short-form control info | ✅  | ➖  | [`odataVersionV4`](../generator/configuration#odata-401) selects one spelling, requests and responses alike                     |
+| `IEEE754Compatible`          | ✅  | ➖  | [`v4BigNumberAsString`](./generator/configuration#v4-big-number-handling)                                                       |
+| 4.01 short-form control info | ✅  | ➖  | [`odataVersionV4`](./generator/configuration#odata-401) selects one spelling, requests and responses alike                      |
 | `metadata=full` / `none`     | 🔶  | ➖  | Through a manual `Accept` header; the extra control information stays untyped                                                   |
 | Instance annotations         | 🔶  | 🔶  | Passed through untyped                                                                                                          |
 | Vocabulary annotations       | ❌  | ❌  | Not evaluated at all — neither `Core.*` nor `Capabilities.*` nor any other term; the same effects have to be configured by hand |
-| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](../generator/configuration#v2-extra-results-wrapper)                                                |
+| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](./generator/configuration#v2-extra-results-wrapper)                                                 |
 
 ## Deliberately Out of Scope
 

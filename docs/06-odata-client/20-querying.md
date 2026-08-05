@@ -1,6 +1,6 @@
 ---
 id: querying
-sidebar_position: 10
+sidebar_position: 20
 ---
 
 # Querying
@@ -21,11 +21,21 @@ On the other hand you also get the ability to shape the response structure:
 
 This feature of OData can have a huge impact. A well crafted API could easily be used to
 serve very different clients: Each client would only select and expand the relevant information.
+Selecting and expanding really means that the client has the power to shape the response structure.
+[GraphQL](https://graphql.org/) should come to mind...
 
 Last but not least V4 defines additional functionality:
 
 - [search](#search): free-text search capabilities (logic is defined by server)
 - apply: complex feature; allows to simulate a [group-by](#groupby) clause
+
+:::caution
+
+Be aware that an OData service does not have to implement all querying functionalities.
+When using an unsupported operation, then the server should respond with `501: Not Implemented`
+(since the world's not perfect, you might face `500: Server Error` instead).
+
+:::
 
 ## General Usage
 
@@ -76,6 +86,31 @@ builder.select("lastName").select("age").filter(qPerson.age.gt(18)).filter(qPers
 ```
 
 Non-encoded result: `$select=LastName,Age&$filter=Age gt 18 AND Age lt 66`
+
+### What the Builder Offers Depends on the Resource
+
+The builder is typed by **cardinality**, not only by protocol version. Querying a collection is not the
+same as querying a single entity, and the OData specification says so: `$filter`, `$orderby`, `$top`,
+`$skip` and `$count` narrow a set, which a single entity is not. So they are simply absent there.
+
+|     | single entity                   | collection                                                                      |
+| --- | ------------------------------- | ------------------------------------------------------------------------------- |
+| V4  | `select`, `expand`, `expanding` | the same, plus `filter`, `orderBy`, `top`, `skip`, `count`, `search`, `groupBy` |
+| V2  | `select`, `expand`, `expanding` | the same, plus `filter`, `orderBy`, `top`, `skip`, `count`                      |
+
+The same split applies again inside `expanding()`: expanding a to-many navigation property gives you the
+collection builder, expanding a to-one gives you the entity one. `groupBy` is the exception — it stays out
+of the nested collection builder, since `$apply` is not a nested query option.
+
+V2 is more restricted still — its `$expand` syntax cannot carry nested query options at all, so the builder
+handed to `expanding()` offers `select`, `expand` and `expanding`, but none of the collection operations.
+
+:::note
+
+If a method you expected is missing, this is usually why. It is not an omission but the resource telling
+you that the option would have no meaning on it.
+
+:::
 
 ## Select
 

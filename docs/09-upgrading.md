@@ -1,7 +1,7 @@
 ---
 id: upgrading
 title: Upgrading
-sidebar_position: 90
+sidebar_position: 9
 ---
 
 # Upgrading
@@ -31,7 +31,7 @@ the structure that scales for large models and the one most setups want.
 
    Where your model has a single namespace, the root barrel exports everything directly and
    `./src-generated/library/index.js` is all you need. With several namespaces the root barrel exposes
-   each under its own name — see [Generated Artefacts](./generated-artefacts#index-files).
+   each under its own name — see [Generated Artefacts](./generator/generated-artefacts#index-files).
 
 2. **Keep the old layout**: set `bundledFileGeneration: true` in your configuration. That is the right
    answer if your bundler cannot resolve cyclic imports — SAP UI5 with the TS Babel plugin is the known
@@ -51,14 +51,14 @@ Two situations that used to produce output no longer do:
   ```
 
 - **Two types colliding within one namespace.** Same idea one level up, resolved with
-  [`byTypeAndName`](./configuration#type-options).
+  [`byTypeAndName`](./generator/configuration#type-options).
 
 If you were affected, you had a bug — the message tells you which two names and what to do.
 
 ### `entitiesByName` is now `byTypeAndName`
 
 The option matches every kind of type, not just entities, so each entry states which one through a `type`
-attribute. Use `TypeModel.Any` to match regardless of kind. See [Type Options](./configuration#type-options).
+attribute. Use `TypeModel.Any` to match regardless of kind. See [Type Options](./generator/configuration#type-options).
 
 ### Binding and deep insert are on by default
 
@@ -88,7 +88,7 @@ the navigation property itself:
 The key is typed as the generated id model, so its short form is accepted just as well as the full one.
 Deep insert and binding share the one property and are told apart by `"@id"`. What goes on the wire —
 `Author@odata.bind` for 4.0, `{"@id": …}` for 4.01, `__metadata.uri` for V2 — is now the query object's
-business. See [Binding and Deep Insert](./configuration#binding-and-deep-insert).
+business. See [Binding and Deep Insert](./generator/configuration#binding-and-deep-insert).
 
 ### The V2 results wrapping options were renamed and now apply everywhere
 
@@ -106,14 +106,14 @@ generation mode. Their names say the direction rather than the artefact:
 
 There is no alias for the old names. Mind the changed behaviour as well: **a V2 client generated without
 `v2ResponseResultsWrapping` no longer has the wrapping removed for you.** If your service wraps, turn the
-option on. See [Extra Results Wrapper](./configuration#v2-extra-results-wrapper).
+option on. See [Extra Results Wrapper](./generator/configuration#v2-extra-results-wrapper).
 
 ### `Edm.Stream` properties left the models
 
 `Edm.Stream` was mapped to `string`, so a model promised a value that no server ever sends — binary content
 is not part of the JSON payload. Such properties are gone from the models and query objects, and the content
 is read and written through a generated service of its own instead. Entity types marked `HasStream` extend
-the media entity service. See [Binary Content](../odata-client/binary-content).
+the media entity service. See [Binary Content](./odata-client/binary-content).
 
 ### Collection-bound operations carry a `Collection` infix
 
@@ -186,7 +186,7 @@ is no alias. Which one replaces them depends on what the builder is bound to:
 
 The `Collection…` variants carry the same members as the old types, so that is the mechanical replacement.
 Only the types changed — no runtime behaviour did. See
-[What the Builder Offers](../query-builder/overview-and-setup#what-the-builder-offers-depends-on-the-resource).
+[What the Builder Offers](./odata-client/querying#what-the-builder-offers-depends-on-the-resource).
 
 ### `QAction` and `QFunction` changed shape
 

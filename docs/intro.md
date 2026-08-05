@@ -10,8 +10,7 @@ to generate different sorts of typed artefacts which you use in your TypeScript 
 Main use cases:
 
 - You want typings for the request and response models of your OData service
-- You want a modern query builder to formulate complex queries
-- You want full-fledged OData client as means to interact with your OData service
+- You want a full-fledged OData client as means to interact with your OData service
 
 ## Modularity
 
@@ -20,8 +19,8 @@ which you always need to install as dev dependency and configure as part of your
 
 Apart from that `odata2ts` is build in a modular way to support different use cases.
 If you're only interested in typings than you're good to go, you only need the generator.
-More advanced use cases and artefacts will involve additional runtime dependencies, e.g.
-`@odata2ts/odata-query-builder` or `@odata2ts/odata-service`.
+The full-fledged client involves additional runtime dependencies, above all
+`@odata2ts/odata-service`.
 
 The [Getting Started Guide](./category/getting-started) walks you through installation and
 configuration based on one of the main use cases.
@@ -53,11 +52,11 @@ This is where all generated artefacts and provided libraries come together.
 
 Feature Highlights:
 
-- powerful, fluent and type-safe [query builder](./category/query-builder)
+- powerful, fluent and type-safe [querying](./odata-client/querying) and [filtering](./odata-client/filtering)
 - type-safe CRUD operations
 - type-safe (unbound or bound) functions and actions
 - configurable [HTTP client](./odata-client/http-client/) (fetch, Axios, ...)
-- use [type converters](./generator/converters/) to interact with data types of your choice
+- use [type converters](./converters/) to interact with data types of your choice
   - use provided ones: v2-to-v4-converter, luxon-converter
   - roll your own
 - allow [renaming of entity properties](./generator/configuration#renaming-entities-and-properties)
