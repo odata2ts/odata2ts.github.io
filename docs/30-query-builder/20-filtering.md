@@ -18,7 +18,7 @@ entities and complex types.
 Each property of such a `Query Object` provides all the filter methods available for its data type.
 
 ```ts
-import { QPerson } from "../generated/trippin/QTrippin";
+import { QPerson } from "../generated/trippin/index.js";
 
 const qPerson = new QPerson();
 builder

@@ -56,8 +56,9 @@ npm run gen-odata
 Create the builder by providing the path to the resource and the generated query object:
 
 ```ts
-import { createUriBuilderV4 } from "@odata2ts/odata-uri-builder";
-import { qPerson } from "../build/QTrippin"
+import { createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+// through the generated index file, so the import survives a change of the file layout
+import { qPerson } from "../build/trippin/index.js";
 
 createQueryBuilderV4("People", qPerson)
   .select("lastName", "age") // => typesafe: only model attributes are allowed
@@ -72,4 +73,4 @@ createQueryBuilderV4("People", qPerson)
   .build();
 ```
 
-For V2, you use the factory function `createUriBuilderV2`.
+For V2, you use the factory function `createQueryBuilderV2`.
