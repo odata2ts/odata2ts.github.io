@@ -83,15 +83,53 @@ If your imports broke when upgrading, move them to the index files — or switch
 
 ## Artefact Listing
 
-- Model Types
-  - per EntityType & ComplexType: Model representation used for query responses
-  - per EntityType & ComplexType: Editable model version used for requests (create, update, and patch)
-  - per EntityType: Model representing the entity id
-  - per Function / Action: Model representing all parameters of that operation
-- Q-Objects
-  - per EntityType, ComplexType and any form of collection: one QueryObject
-  - per EntityType: one id function to format and parse entity paths, e.g. `/Person(userName='russellwhyte')`
-  - per function or action: QFunction or QAction to handle operation calls
-- OData Client Service
-  - one main odata service as entry point
-  - per EntityType, ComplexType, and any form of collection: one service
+What you get depends on what the metadata declares. The names below follow the defaults, using the Trippin
+service as the example:
+
+| EDMX construct        | Models                                        | Q-Objects                            | Services                                     |
+| --------------------- | --------------------------------------------- | ------------------------------------ | -------------------------------------------- |
+| EntityType `Person`   | `Person`, `EditablePerson`, `PersonId`        | `QPerson` + `qPerson`, `QPersonId`   | `PersonService`, `PersonCollectionService`   |
+| ComplexType `Location`| `Location`, `EditableLocation`                | `QLocation` + `qLocation`            | `LocationService`, `LocationCollectionService` |
+| EnumType `Feature`    | `Feature`                                     | —                                    | —                                            |
+| unbound operation `GetNearestAirport` | `GetNearestAirportParams`     | `QGetNearestAirport`                 | method on the main service                   |
+| bound operation `Person/ShareTrip` | `Person_ShareTripParams`         | `Person_QShareTrip`                  | method on `PersonService`                    |
+| EntitySet `People`    | —                                             | —                                    | getter on the main service                   |
+| Singleton `Me`        | —                                             | —                                    | getter on the main service                   |
+| the service itself    | —                                             | —                                    | `TrippinService`, the entry point            |
+
+The **editable model** is what create, update and patch take: managed properties are gone from it, and the
+navigation properties accept a related entity or a reference to an existing one. The **id model** is the key
+in its minimal form, and the **id function** (`QPersonId`) formats and parses the entity path built from it,
+e.g. `People('russellwhyte')`.
+
+Several options take artefacts away again:
+
+| Option                 | Removes                                                            |
+| ---------------------- | ------------------------------------------------------------------ |
+| `mode: "models"`       | all q-objects and services                                         |
+| `mode: "qobjects"`     | all services                                                       |
+| `skipEditableModels`   | the editable models                                                |
+| `skipIdModels`         | the id models and id functions                                     |
+| `skipOperations`       | the parameter models and the q-functions / q-actions               |
+| `skipComments`         | the doc comments on model properties                               |
+
+The three `skip*` options only take effect in `models` or `qobjects` mode - see
+[fine-tuning artefact generation](./configuration#fine-tuning-artefact-generation).
+
+### What that looks like in your code
+
+```ts
+// the model and its editable counterpart, for typing what you read and what you send
+import type { Person, EditablePerson, PersonId } from "../src-generated/trippin/index.js";
+// the q-object, for filtering, ordering and selecting in a type-safe way
+import { qPerson } from "../src-generated/trippin/index.js";
+// the main service, your entry point
+import { TrippinService } from "../src-generated/trippin/index.js";
+
+const trippin = new TrippinService(client, "https://services.odata.org/TripPinRESTierService");
+
+const result = await trippin
+  .people()
+  .query((builder) => builder.select("userName", "firstName").filter(qPerson.firstName.eq("Russell")))
+  .execute();
+```
