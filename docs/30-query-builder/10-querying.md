@@ -36,7 +36,10 @@ When using the query builder in the context of generated OData client, the build
 and we only need to return it. Here is the minimal example:
 
 ```ts
-await mainService.entity().query((builder, qObject) => builder);
+await mainService
+  .entity()
+  .query((builder, qObject) => builder)
+  .execute();
 ```
 
 When using the query builder on its own, you call the appropriate factory function and provide the
