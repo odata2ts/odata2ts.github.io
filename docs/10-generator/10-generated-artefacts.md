@@ -5,6 +5,34 @@ sidebar_position: 10
 
 # Generated Artefacts
 
+## Namespaces
+
+Every OData schema declares a **namespace**, and every type in it is really addressed by its *fully
+qualified* name: `Library.Catalog.Book`, not just `Book`. One service may carry several schemas, and then
+the same simple name can legitimately appear more than once — a `Branch` in `Library.Circulation` and
+another in `PublisherRegistry` are two different types.
+
+`odata2ts` works with the fully qualified name internally but generates from the plain one, because
+`Library.Catalog.Book` is no name for a TypeScript interface. The namespace survives in two places:
+
+- as a **folder** in the generated output, so the two `Branch` types never share a directory
+- in the **index files**, where a root barrel re-exports each namespace under its own name once there is
+  more than one — see [Index Files](#index-files)
+
+Where that is not enough — because the bundled layout puts everything in one file, or because you simply
+want to tell them apart when reading — give one of them a name of its own, see
+[name clashes](./configuration#name-clashes).
+
+### Aliases
+
+A schema may declare an **alias** next to its namespace, a shorthand that references within the metadata
+may use instead of the full one: `Self.Book` rather than `Library.Catalog.Book`.
+
+`odata2ts` reads the alias and resolves references written either way, so an alias in your metadata needs
+no attention. It is also accepted where you address a type yourself: an entry in
+[`byTypeAndName`](./configuration#type-options) may name the type by its simple name, its fully qualified
+name or its aliased one.
+
 ## File Layout
 
 By default the artefacts of one model live together in a **folder of their own**, one level below a folder
