@@ -183,14 +183,14 @@ Here is the list of all **base settings** of the config file. By and large this 
 | skipComments                     | `boolean`                    | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                           |
 | converters                       | `Array<TypeConverterConfig>` | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                            |
 | naming                           | `OverridableNamingOptions`   | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                              |
-| enablePrimitivePropertyServices  | `boolean`                    | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property. See [primitive property services](#primitive-property-services)                              |
+| enablePrimitivePropertyServices  | `boolean`                    | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property. Doesn't affect stream properties which get their own service. See [primitive property services](#primitive-property-services) |
 | bundledFileGeneration            | `boolean`                    | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout)                                                                         |
 | enumType                         | `"string" \| "numeric" \| "string-union"` | `"string"` | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                          |
 | disableBindingProps              | `boolean`                    | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                             |
 | disableDeepInsertProps           | `boolean`                    | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                    |
 | enableNativeInOperator           | `boolean`                    | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions; V4 only. See [the in operator](#the-in-operator)                                                             |
 | odataVersionV4                   | `"4.0" \| "4.01"`            | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                    |
-| disableAutomaticNameClashResolution | `boolean`                 | `false`           | Turn off the counter odata2ts appends when one name results from several types. See [name clashes](#name-clashes)                                                                               |
+| disableAutomaticNameClashResolution | `boolean`                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                   |
 | v2ModelsWithExtraResultsWrapping | `boolean`                    | `false`           | Add an extra wrapper object around expanded entities in V2. See [extra results wrapper](#V2-extra-results-wrapper)                                                                              |
 | v2EditableModelsWithExtraResultsWrapping | `boolean`            | `false`           | The same for the editable models, i.e. for the payload of a deep insert. See [extra results wrapper](#V2-extra-results-wrapper)                                                                 |
 | v4BigNumberAsString              | `boolean`                    | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#V4-big-number-handling)                                                            |
@@ -322,8 +322,8 @@ models, q-objects and services - which removes the cycles.
 
 :::note
 
-Up to v0.x `bundledFileGeneration` defaulted to `true`. If your imports broke when upgrading, either switch
-the option back on or move your imports to the generated index files.
+Up to version 0.41.0 `bundledFileGeneration` defaulted to `true`. If your imports broke when upgrading,
+either switch the option back on or move your imports to the generated index files.
 
 :::
 
@@ -355,13 +355,6 @@ interchangeably:
 
 The `"@id"` property is what tells the two apart. Switch them off individually with `disableBindingProps`
 and `disableDeepInsertProps`.
-
-:::note
-
-Up to v0.x both were opt-in, named `enableBindingProps` and `enableDeepInsertProps`. Rename them in your
-config; to keep the previous behaviour, set both to `true`.
-
-:::
 
 ## Primitive Property Services
 
@@ -400,11 +393,20 @@ deployed and more compatible one. Setting `"4.01"` affects three things:
 ## Name Clashes
 
 OData scopes names by namespace, so the same name may legitimately occur twice. `odata2ts` works with the
-fully qualified name internally but generates from the plain one, which can therefore collide. Where it
-does, a counter is appended: `Branch` and `Branch2`.
+fully qualified name internally but generates from the plain one, which can therefore collide.
 
-Set `disableAutomaticNameClashResolution` to `true` to turn that off - the generation then fails on a clash
-instead, and you resolve it yourself via [`byTypeAndName`](#type-options) using the fully qualified name.
+How that is handled depends on the [file layout](#file-layout):
+
+- **bundled**: everything shares one file per artefact kind, so the plain names have to be unique. A
+  counter is appended to resolve it: `Branch` and `Branch2`. Set `disableAutomaticNameClashResolution` to
+  `true` to turn that off - the generation then fails on a clash instead, and you resolve it yourself via
+  [`byTypeAndName`](#type-options) using the fully qualified name.
+- **folder per model** (the default): each namespace has a folder of its own and the index files re-export
+  each of them under its own name, so the same name in two namespaces needs no resolution at all. Within
+  one namespace it is fatal and generation stops - and it cannot happen by accident, since OData already
+  requires those names to be unique. It only arises from renaming.
+
+`disableAutomaticNameClashResolution` is therefore only relevant with `bundledFileGeneration`.
 
 A clash that no automatism can resolve is a **renaming** clash: two distinct OData names collapsing onto one
 TypeScript name, e.g. `Location_` and `Location` under camelCase. Only you can say which of the two keeps
