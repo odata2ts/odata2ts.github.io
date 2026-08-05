@@ -12,9 +12,8 @@ sidebar_position: 2
 In the background `odata2ts` has a [defaultConfig](https://github.com/odata2ts/odata2ts/blob/main/packages/odata2ts/src/defaultConfig.ts),
 so that you only need to provide those settings which diverge from that.
 
-<p>
-  <details>
-    <summary>Default Configuration</summary>
+<details>
+<summary>Default Configuration</summary>
 
 ```ts
 import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2ts";
@@ -122,8 +121,7 @@ const defaultConfig = {
 }
 ```
 
-  </details>
-</p>
+</details>
 
 ### Configuration Hierarchy
 
@@ -141,14 +139,12 @@ All settings starting from the `services` attribute are only valid for a specifi
 for its generation run. Service specific settings may override any default or base setting and allow
 for reconfiguring entities and properties.
 
-<p>
-  <details>
-    <summary>Some visual aid: A picture can say more than a thousand words...</summary>
+<details>
+<summary>Some visual aid: A picture can say more than a thousand words...</summary>
 
 ![Base vs Service Settings](../../static/img/base-and-service-settings.png)
 
-  </details>
-</p>
+</details>
 
 Options specified on the command line always win over other configuration possibilities.
 Most base settings are available as CLI options.
@@ -191,9 +187,9 @@ Here is the list of all **base settings** of the config file. By and large this 
 | enableNativeInOperator           | `boolean`                    | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions; V4 only. See [the in operator](#the-in-operator)                                                             |
 | odataVersionV4                   | `"4.0" \| "4.01"`            | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                    |
 | disableAutomaticNameClashResolution | `boolean`                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                   |
-| v2ResponseResultsWrapping        | `boolean`                    | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#V2-extra-results-wrapper)                                       |
-| v2PayloadResultsWrapping         | `boolean`                    | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#V2-extra-results-wrapper)                                                             |
-| v4BigNumberAsString              | `boolean`                    | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#V4-big-number-handling)                                                            |
+| v2ResponseResultsWrapping        | `boolean`                    | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#v2-extra-results-wrapper)                                       |
+| v2PayloadResultsWrapping         | `boolean`                    | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#v2-extra-results-wrapper)                                                             |
+| v4BigNumberAsString              | `boolean`                    | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#v4-big-number-handling)                                                            |
 
 ## Service Settings
 

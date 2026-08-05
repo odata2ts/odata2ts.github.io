@@ -5,7 +5,7 @@ export interface FeatureItem {
   Svg?: React.ComponentType<React.ComponentProps<"svg">>;
   img?: any;
   screenshot?: any;
-  description: JSX.Element;
+  description: React.JSX.Element;
 };
 
 export const FEATURE_LIST: Array<FeatureItem> = [
