@@ -43,8 +43,8 @@ const defaultConfig = {
   enumType: "string",
   enableNativeInOperator: false,
   odataVersionV4: "4.0",
-  enableBindingProps: false,
-  enableDeepInsertProps: false,
+  disableBindingProps: false,
+  disableDeepInsertProps: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -186,8 +186,8 @@ Here is the list of all **base settings** of the config file. By and large this 
 | enablePrimitivePropertyServices  | `boolean`                    | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property. See [primitive property services](#primitive-property-services)                              |
 | bundledFileGeneration            | `boolean`                    | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout)                                                                         |
 | enumType                         | `"string" \| "numeric" \| "string-union"` | `"string"` | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                          |
-| enableBindingProps               | `boolean`                    | `false`           | Allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                   |
-| enableDeepInsertProps            | `boolean`                    | `false`           | Allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                          |
+| disableBindingProps              | `boolean`                    | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                             |
+| disableDeepInsertProps           | `boolean`                    | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                    |
 | enableNativeInOperator           | `boolean`                    | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions; V4 only. See [the in operator](#the-in-operator)                                                             |
 | odataVersionV4                   | `"4.0" \| "4.01"`            | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                    |
 | disableAutomaticNameClashResolution | `boolean`                 | `false`           | Turn off the counter odata2ts appends when one name results from several types. See [name clashes](#name-clashes)                                                                               |
@@ -341,18 +341,27 @@ something at runtime that a union type does not provide.
 
 ## Binding and Deep Insert
 
-Two opt-in options which add navigation properties to the **editable** models:
+The **editable** models carry the navigation properties, in two shapes which a caller can use
+interchangeably:
 
-- `enableBindingProps` lets you link an already existing entity by its key:
-  `{ Author: { "@id": 1 } }`. The query objects turn that key into the URL of the entity and into the
-  notation of the targeted OData version - `Author@odata.bind` for 4.0, `{"@id": …}` for 4.01 and
-  `__metadata.uri` for V2. A binding is only generated where the metadata states the target entity set
-  and the related entity has an id model, so `skipIdModels` takes it away.
-- `enableDeepInsertProps` types the navigation properties as the editable model of the related entity,
-  which is what a deep insert (POST) or deep update (PATCH / PUT) sends: the related entities travel
-  within the payload of their parent.
+- **binding**: link an already existing entity by its key, `{ Author: { "@id": 1 } }`. The query objects
+  turn that key into the URL of the entity and into the notation of the targeted OData version -
+  `Author@odata.bind` for 4.0, `{"@id": …}` for 4.01 and `__metadata.uri` for V2. A binding is only
+  generated where the metadata states the target entity set and the related entity has an id model, so
+  `skipIdModels` takes it away.
+- **deep insert**: pass the related entity itself, typed as its editable model. That is what a deep insert
+  (POST) or deep update (PATCH / PUT) sends - the related entities travel within the payload of their
+  parent.
 
-With both enabled a navigation property accepts either shape, and the `"@id"` property tells them apart.
+The `"@id"` property is what tells the two apart. Switch them off individually with `disableBindingProps`
+and `disableDeepInsertProps`.
+
+:::note
+
+Up to v0.x both were opt-in, named `enableBindingProps` and `enableDeepInsertProps`. Rename them in your
+config; to keep the previous behaviour, set both to `true`.
+
+:::
 
 ## Primitive Property Services
 
