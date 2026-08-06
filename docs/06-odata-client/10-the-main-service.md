@@ -463,11 +463,10 @@ See [upgrading](../upgrading#a-request-is-now-a-command-you-execute).
 ### Request Configuration
 
 Whatever the request - CRUD or custom - you always have the option to pass a request configuration.
-It goes to `execute()`, which is what performs the request. At the utmost minimum, you should be able to
-set custom headers for the request.
+It goes to `execute()`, which is what performs the request.
 
-However, the type of the request configuration is entirely dependent on the chosen [HTTP client](./http-client/).
-Minimal example, based on the Axios client:
+Two fields are common to every [HTTP client](./http-client/) and therefore need nothing else from you:
+`headers` and `params`.
 
 ```ts
 await trippinService
@@ -476,8 +475,20 @@ await trippinService
   .execute({ headers: { myCustomHeader: "myCustomHeaderValue" } });
 ```
 
-It applies to that one request only. For headers that should go out with every request, configure the
-[HTTP client](./http-client/) instead.
+Beyond those two, the configuration is whatever the chosen HTTP client accepts, and the generated service
+has no way of knowing which client it was handed. So name the client's config type on the call:
+
+```ts
+import { FetchRequestConfig } from "@odata2ts/http-client-fetch";
+
+await trippinService.people().query().execute<FetchRequestConfig>({ credentials: "include", cache: "no-store" });
+```
+
+Each HTTP client documents its own config type: `FetchRequestConfig`, `AxiosRequestConfig` and
+`JQueryRequestConfig` respectively - all of them extending the common `ODataRequestConfig`.
+
+A configuration applies to that one request only. For headers that should go out with every request,
+configure the [HTTP client](./http-client/) instead.
 
 ### Composable Functions
 
