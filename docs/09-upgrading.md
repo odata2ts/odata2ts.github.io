@@ -8,6 +8,41 @@ sidebar_position: 9
 
 What changes between releases in ways that need something from you. Everything else is additive.
 
+## Coming from 0.42.0
+
+### Services are no longer generic over the HTTP client
+
+Every generated service used to carry the HTTP client as a type parameter, for one reason only: so that
+`execute()` could type the request configuration as whatever the chosen client accepts. That type
+parameter is gone.
+
+Wherever it was inferred — which is every `new TrippinService(httpClient, baseUrl)` — nothing changes.
+It only shows where you wrote a service type out, for instance to hold one in a field or hand it to a
+function:
+
+```ts
+// before
+let service: TrippinService<FetchClient>;
+// after
+let service: TrippinService;
+```
+
+The service is now assignable regardless of the client, so this also stops the type parameter from
+spreading through your own signatures.
+
+For `execute()` the common fields `headers` and `params` remain available without any type argument.
+A field belonging to a specific client now needs that client's config type on the call — imported from
+the client's own package, here `FetchRequestConfig` from `@odata2ts/http-client-fetch`:
+
+```ts
+// before
+await cmd.execute({ credentials: "include" });
+// after
+await cmd.execute<FetchRequestConfig>({ credentials: "include" });
+```
+
+See [Request Configuration](./odata-client/the-main-service#request-configuration).
+
 ## Coming from 0.41.0 and earlier
 
 ### The generated file layout changed
