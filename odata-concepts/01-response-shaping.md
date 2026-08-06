@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Response Shaping
 
-Most HTTP APIs answer with whatever the endpoint was built to return. The shape of a response is the
+Most REST APIs answer with whatever the endpoint was built to return. The shape of a response is the
 server's decision, made at design time and identical for everyone who calls it.
 
 OData turns that around. A request states which properties it wants and which related entities should come
@@ -53,8 +53,8 @@ producing it was done, paid for and thrown away. Point an endpoint built for a l
 does not carry enough, so something has to ask a second time. Over-fetching wastes; under-fetching costs a
 round trip.
 
-Neither can arise when the request defines the response. What comes back is what was asked for, so the
-question of whether the endpoint happens to fit this particular caller stops being a question.
+Neither can arise when the request defines the response. What comes back is what was asked for, so whether
+the endpoint happens to fit this particular caller stops being a question.
 
 ## Less on the Wire
 
@@ -64,9 +64,3 @@ enough, not even read from the store.
 The effect grows with the gap between what an entity holds and what a caller needs: wide entities, long
 text, anything binary, relationships that are expensive to resolve. It is felt most where bandwidth is
 scarce or latency is high — mobile clients, metered connections, anything crossing a continent.
-
-## How It Is Expressed
-
-This page is about the idea. Its mechanics — which options exist, how to select properties, how to expand
-related entities and how to shape what comes back with them — are documented under
-[querying](pathname:///docs/odata-client/querying).
