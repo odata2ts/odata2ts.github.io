@@ -21,8 +21,8 @@ concerns are out of scope, as is the Atom/XML format — `odata2ts` speaks JSON 
 :::note
 
 This page states what `odata2ts` does. What the **protocol** offers, independent of any implementation, is
-inventoried in the [OData V4 feature matrix][spec-v4] and its [V1–V3 counterpart][spec-v2] in the
-`test-reference-model` repository.
+inventoried in the [OData V4 feature matrix][spec-v4] and its [V1–V3 counterpart][spec-v2] under
+OData Concepts.
 
 :::
 
@@ -105,7 +105,7 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 | Feature                      | V4  | V2  | Notes                                                                                                                           |
 | ---------------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------- |
-| Primitive types              | ✅  | ✅  | See [OData Data Types](./converters/odata-types)                                                                                |
+| Primitive types              | ✅  | ✅  | See [OData Data Types](pathname:///odata-concepts/odata-types)                                                                  |
 | Converters                   | ✅  | ✅  | See [Converters](./converters)                                                                                                  |
 | Enum types                   | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union                                                                 |
 | Complex types                | ✅  | ✅  |                                                                                                                                 |
@@ -127,5 +127,5 @@ Not gaps but decisions:
 - **Atom / XML payloads.** JSON only.
 - **`$format`.** Format negotiation belongs in the `Accept` header.
 
-[spec-v4]: https://github.com/odata2ts/test-reference-model/blob/main/feature-matrix/odata-v4.md
-[spec-v2]: https://github.com/odata2ts/test-reference-model/blob/main/feature-matrix/odata-v1-v3.md
+[spec-v4]: pathname:///odata-concepts/odata-v4-feature-matrix
+[spec-v2]: pathname:///odata-concepts/odata-v1-v3-feature-matrix

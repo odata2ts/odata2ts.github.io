@@ -1,7 +1,7 @@
 ---
 id: odata-types
 title: OData Data Types
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # About OData's Data Types
@@ -42,37 +42,6 @@ As you can see:
   - not cool for end user to use in raw form
 - In V2 most number types are just strings, V4 makes that better
 - Date and Time types are a story of their own
-
-## V4 Data Types
-
-| OData V4 Type      | Description                                                         | URL format | URL Example                                         | JSON type             |
-| ------------------ | ------------------------------------------------------------------- | ---------- | :-------------------------------------------------- | --------------------- |
-| Edm.Boolean        | boolean value                                                       | literal    | true<br/>false                                      | boolean               |
-| Edm.String         | string value                                                        | quoted     | 'Some Test'                                         | string                |
-| Edm.Byte           | unsigned 8-bit integer value                                        | literal    | 1                                                   | number                |
-| Edm.SByte          | signed 8-bit integer value                                          | literal    | -1                                                  | number                |
-| Edm.Int16          | signed 16-bit integer value                                         | literal    | 123                                                 | number                |
-| Edm.Int32          | signed 32-bit integer value                                         | literal    | 123                                                 | number                |
-| Edm.Int64          | signed 64-bit integer value                                         | literal    | 123                                                 | number                |
-| Edm.Single         | floating point number with 7 digits precision                       | literal    | 1.1                                                 | number                |
-| Edm.Double         | floating point number with 15 digits precision                      | literal    | 1.2                                                 | number                |
-| Edm.Decimal        | numeric values with arbitrary precision and scale                   | literal    | 12.22                                               | number                |
-| Edm.Guid           | 16-byte (128-bit) unique identifier value                           | literal    | ...                                                 | string                |
-| Edm.Duration       | duration                                                            | literal    | PT12H59M10S<br/> P1Y<br/> PT12.123S                 | string                |
-| Edm.TimeOfDay      | specific time of day                                                | literal    | 12:59:10<br/>12:15<br/> 12:15:03.123                | string                |
-| Edm.Date           | specific day                                                        | literal    | 2022-12-31                                          | string                |
-| Edm.DateTimeOffset | specific point in time                                              | literal    | 2022-12-31T23:59:59Z<br/> 2022-12-31T23:59:59+02:00 | string                |
-| Edm.Binary         | fixed or variable length binary data                                |            |                                                     | base64 encoded string |
-| Edm.Stream         | most filter operations don't work here<br/> also exclusive handling |            |                                                     |                       |
-| Edm.Geography.\*   |                                                                     |            |                                                     |                       |
-| Edm.Geometry.\*    |                                                                     |            |                                                     |                       |
-
-### Conclusions
-
-- Sensible data types especially regarding date and time types
-- The one exception are big number types: `Edm.Double` and `Edm.Decimal`
-  - V4 overreached there a bit, as Decimal and Double could lose precision unnoticed when converted to JS Number
-  - you have to use a special header to turn these types into strings again
 
 ## V2 Data Types
 
@@ -128,3 +97,34 @@ Second, a duration might be able to represent a time of day, in the sense that a
 12 minutes might also represent "06:12", but both data types usually have different restrictions.
 Time of day requires the specification of hours and minutes, while duration might specify any of its
 parts, e.g. only seconds "PT12S".
+
+## V4 Data Types
+
+| OData V4 Type      | Description                                                         | URL format | URL Example                                         | JSON type             |
+| ------------------ | ------------------------------------------------------------------- | ---------- | :-------------------------------------------------- | --------------------- |
+| Edm.Boolean        | boolean value                                                       | literal    | true<br/>false                                      | boolean               |
+| Edm.String         | string value                                                        | quoted     | 'Some Test'                                         | string                |
+| Edm.Byte           | unsigned 8-bit integer value                                        | literal    | 1                                                   | number                |
+| Edm.SByte          | signed 8-bit integer value                                          | literal    | -1                                                  | number                |
+| Edm.Int16          | signed 16-bit integer value                                         | literal    | 123                                                 | number                |
+| Edm.Int32          | signed 32-bit integer value                                         | literal    | 123                                                 | number                |
+| Edm.Int64          | signed 64-bit integer value                                         | literal    | 123                                                 | number                |
+| Edm.Single         | floating point number with 7 digits precision                       | literal    | 1.1                                                 | number                |
+| Edm.Double         | floating point number with 15 digits precision                      | literal    | 1.2                                                 | number                |
+| Edm.Decimal        | numeric values with arbitrary precision and scale                   | literal    | 12.22                                               | number                |
+| Edm.Guid           | 16-byte (128-bit) unique identifier value                           | literal    | ...                                                 | string                |
+| Edm.Duration       | duration                                                            | literal    | PT12H59M10S<br/> P1Y<br/> PT12.123S                 | string                |
+| Edm.TimeOfDay      | specific time of day                                                | literal    | 12:59:10<br/>12:15<br/> 12:15:03.123                | string                |
+| Edm.Date           | specific day                                                        | literal    | 2022-12-31                                          | string                |
+| Edm.DateTimeOffset | specific point in time                                              | literal    | 2022-12-31T23:59:59Z<br/> 2022-12-31T23:59:59+02:00 | string                |
+| Edm.Binary         | fixed or variable length binary data                                |            |                                                     | base64 encoded string |
+| Edm.Stream         | most filter operations don't work here<br/> also exclusive handling |            |                                                     |                       |
+| Edm.Geography.\*   |                                                                     |            |                                                     |                       |
+| Edm.Geometry.\*    |                                                                     |            |                                                     |                       |
+
+### Conclusions
+
+- Sensible data types especially regarding date and time types
+- The one exception are big number types: `Edm.Double` and `Edm.Decimal`
+  - V4 overreached there a bit, as Decimal and Double could lose precision unnoticed when converted to JS Number
+  - you have to use a special header to turn these types into strings again
