@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:weekly"],
+  "dependencyDashboard": true,
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Docusaurus and its ecosystem packages must move as one - a partial upgrade mixes plugin and core versions and breaks the build. Never automerge: CI can prove that the site still builds, not that it still looks right",
+      "matchPackageNames": ["@docusaurus/**", "@mdx-js/**", "prism-react-renderer"],
+      "groupName": "docusaurus",
+      "automerge": false
+    },
+    {
+      "description": "React and its types belong together, and @types/react additionally sits in 'resolutions' - a lone update there would fight the grouped one",
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "groupName": "react"
+    },
+    {
+      "description": "Group all prettier-related packages together",
+      "matchPackageNames": ["prettier", "prettier-plugin-packagejson", "@ianvs/prettier-plugin-sort-imports"],
+      "groupName": "prettier"
+    },
+    {
+      "description": "TypeScript is a manually evaluated upgrade here: @docusaurus/tsconfig still sets the deprecated baseUrl, which TypeScript 7 rejects (see the note in tsconfig.json) - the jump needs a Docusaurus release first",
+      "matchPackageNames": ["typescript"],
+      "dependencyDashboardApproval": true,
+      "automerge": false
+    },
+    {
+      "description": "Automerge safe devDependency patch/minor updates once CI is green",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "dev dependencies (patch/minor)",
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Never automerge major updates - always requires manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}
