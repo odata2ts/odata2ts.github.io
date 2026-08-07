@@ -190,6 +190,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                                    |
 | v2ResponseResultsWrapping           | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#v2-extra-results-wrapper)                                                                        |
 | v2PayloadResultsWrapping            | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#v2-extra-results-wrapper)                                                                                              |
+| v2ResponseAsV4                      | `boolean`                                 | `false`           | Reshape every response of a V2 service as its V4 equivalent, so consumers only ever deal with the V4 shape. V2 only, ignored for V4. See [V2 responses as V4](#v2-responses-as-v4)                                               |
 | v4BigNumberAsString                 | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#v4-big-number-handling)                                                                                             |
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                                          |
 
@@ -807,6 +808,49 @@ See [#237](https://github.com/odata2ts/odata2ts/issues/237).
 
 The wrapper is a matter of navigation properties, since it is how V2 serialises a feed. A collection of a
 primitive or of a complex type arrives as a plain array either way, and neither option changes that.
+
+## V2 Responses As V4
+
+A V2 service answers in its own JSON verbose shape - collections wrapped as `{d: {results: [...]}}`,
+entities as `{d: {...entity, __metadata: {uri, type, etag}}}`, an unexpanded navigation property carrying a
+`{__deferred: {uri}}` placeholder instead of simply being absent. Setting `v2ResponseAsV4` to `true`
+reshapes every response of that service as its V4 equivalent instead:
+
+```ts
+export interface Category {
+  // V2, the default
+  products: Array<Product> | DeferredContent;
+}
+
+export interface Category {
+  // v2ResponseAsV4
+  products: Array<Product>;
+}
+```
+
+- a collection becomes `{value: [...], "@odata.count"?, "@odata.nextLink"?}`
+- an entity is returned bare, with `__metadata` turned into `@odata.id` / `@odata.type` / `@odata.etag`
+- a navigation property that hasn't been expanded is simply left out, exactly as a real V4 service would
+  send it - not stated as `DeferredContent` at all, since there is nothing to narrow against
+- the reshaping applies recursively, so an expanded navigation property is reshaped the very same way,
+  however deep
+
+The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
+`ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
+deals with the V4 shape - the same client code works against a V2 or a V4 service without knowing which.
+
+Bindings and deep inserts already went by the version-neutral notation before this option existed
+(`{"@id": key}`, turned into whatever the wire needs by [`QBinding`](#binding-and-deep-insert)), so
+`v2ResponseAsV4` only ever touches responses.
+
+:::note
+
+Turn off `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` (the default) when using this option:
+an expanded collection valued navigation property is always a plain array under `v2ResponseAsV4`, so
+stating the `results` wrapper in the generated types would describe traffic this client no longer sends or
+receives.
+
+:::
 
 ## Flattened Complex Types
 
