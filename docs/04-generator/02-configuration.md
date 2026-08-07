@@ -39,6 +39,7 @@ const defaultConfig = {
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
+  unflattenComplexTypes: false,
   enumType: "string",
   enableNativeInOperator: false,
   odataVersionV4: "4.0",
@@ -190,6 +191,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | v2ResponseResultsWrapping           | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#v2-extra-results-wrapper)                                                                        |
 | v2PayloadResultsWrapping            | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#v2-extra-results-wrapper)                                                                                              |
 | v4BigNumberAsString                 | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#v4-big-number-handling)                                                                                             |
+| unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                                          |
 
 ## Service Settings
 
@@ -805,3 +807,67 @@ See [#237](https://github.com/odata2ts/odata2ts/issues/237).
 
 The wrapper is a matter of navigation properties, since it is how V2 serialises a feed. A collection of a
 primitive or of a complex type arrives as a plain array either way, and neither option changes that.
+
+## Flattened Complex Types
+
+Not every service maps a structured element to a `<ComplexType>`. SAP CAP unfolds it into one property per
+leaf, joined by an underscore, so a `PostalAddress` sitting on `Member.Address` reaches you as four
+separate properties - `Address_Street`, `Address_City`, `Address_PostalCode`, `Address_Country` - and
+nothing in the metadata says that those four belong together. That is the shape CAP recommends; its
+structured mode (`cds.odata.structs`) is deprecated.
+
+Setting `unflattenComplexTypes` to `true` groups them back into one complex property:
+
+```ts
+const member = (await service.Members(1).query().execute()).data;
+
+member.Address_City; // off (default)
+member.Address.City; // on
+```
+
+The service still knows nothing but the flat properties, so the client keeps speaking that form on the
+wire. Request and response payloads are converted in both directions and query paths are rewritten:
+
+```ts
+service
+  .Members()
+  .query((builder, qMember) =>
+    builder
+      .filter(qMember.Address.props.City.eq("Hamburg"))
+      .expanding("Address", (address) => address.select("Street", "City")),
+  );
+// $filter=Address_City eq 'Hamburg'&$select=Address_Street,Address_City
+```
+
+A complex property is reached via `expanding()` rather than a deep `$select`, in V4 as well as in V2. For a
+flattened one no nested clause is produced at all, only the flat paths of its leaves; selecting the
+property as a whole (`select("Address")`) selects every leaf it owns. Setting it to `null` in a payload
+nulls each of them, since it has no representation of its own to clear.
+
+### What gets grouped
+
+A flattened foreign key looks exactly like a flattened complex type - CAP writes `Publisher_Id` next to the
+navigation property `Publisher`. Grouping is therefore careful rather than eager and leaves a group alone
+where
+
+- its name is that of a navigation property,
+- it would swallow a key property, which every URL of the entity addresses by name,
+- a segment is empty: CAP's `Location_` sits right next to `Location_Id` and neither is a structured
+  element,
+- or it consists of nothing but an `Id`.
+
+The last rule is what reads `Publisher_Id` as the foreign key it is. Its price is that a complex type made
+up of a single property named `Id` goes unrecognised - whereas `Publisher_Id` next to `Publisher_Name` is a
+group again.
+
+Where the metadata declares a `<ComplexType>` whose properties match the group exactly, that type is used
+with its own name. CAP does emit them wherever the type appears in a position that has no column
+equivalent, such as a collection or an operation parameter, so the generated client usually speaks the
+vocabulary of the service rather than an invented one. Only where no declared type matches is one
+synthesized, named after the model and the group (`Member_Address`).
+
+:::note
+
+The separator is the underscore, which is what CAP uses, and it is not configurable.
+
+:::
