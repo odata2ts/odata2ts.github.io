@@ -1,7 +1,7 @@
 ---
 id: standalone-query-builder
 title: Standalone Query Builder
-sidebar_position: 1
+sidebar_position: 90
 ---
 
 # Standalone Query Builder

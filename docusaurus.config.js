@@ -75,12 +75,16 @@ const config = {
           // the overview became the standalone use case
           { from: "/docs/query-builder/querying", to: "/docs/odata-client/querying" },
           { from: "/docs/query-builder/filtering", to: "/docs/odata-client/filtering" },
-          { from: "/docs/query-builder/overview-and-setup", to: "/docs/special-use-cases/standalone-query-builder" },
+          { from: "/docs/query-builder/overview-and-setup", to: "framework-integration/standalone-query-builder" },
+          {
+            from: "/docs/special-use-cases/standalone-query-builder",
+            to: "/docs/framework-integration/standalone-query-builder",
+          },
           { from: "/docs/category/query-builder", to: "/docs/odata-client/querying" },
           // the getting started guide for that use case is gone
           {
             from: "/docs/getting-started/use-case_query-builder",
-            to: "/docs/special-use-cases/standalone-query-builder",
+            to: "/docs/framework-integration/standalone-query-builder",
           },
         ],
       },
