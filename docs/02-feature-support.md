@@ -49,19 +49,19 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 ## Filtering
 
-| Group                 | V4  | V2  | Notes                                                                                                                                                  |
-| --------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Comparison operators  | ✅  | ✅  | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, plus `isNull` / `isNotNull`                                                                                        |
-| Logical operators     | ✅  | ✅  | `and`, `or`, `not`                                                                                                                                     |
-| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](./generator/configuration#the-in-operator)       |
-| String functions      | 🔶  | 🔶  | `contains`, `startsWith`, `endsWith`, `indexOf`, `length`, `concat`, `toLower`, `toUpper`, `trim`, `matchesPattern`; `substring` and `has` are missing |
-| Arithmetic            | ✅  | ✅  | `add`, `sub`, `mul`, `div`, `mod`                                                                                                                      |
-| Number functions      | ✅  | ✅  | `round`, `floor`, `ceiling`                                                                                                                            |
-| Date & time functions | 🔶  | 🔶  | The component functions (`year`, `month`, `day`, `hour`, …); `now`, `totalseconds` and date arithmetic are missing                                     |
-| Lambda operators      | ✅  | ➖  | `any()` / `all()` over collections                                                                                                                     |
-| `cast` / `isof`       | ❌  | ➖  |                                                                                                                                                        |
-| Geo functions         | ❌  | ➖  | Geo types are typed as `string`                                                                                                                        |
-| Custom expressions    | ✅  | ✅  | An escape hatch for anything the builder does not model                                                                                                |
+| Group                 | V4  | V2  | Notes                                                                                                                                                         |
+| --------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Comparison operators  | ✅  | ✅  | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, plus `isNull` / `isNotNull`                                                                                               |
+| Logical operators     | ✅  | ✅  | `and`, `or`, `not`                                                                                                                                            |
+| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](./generator/configuration#using-the-native-in-operator) |
+| String functions      | 🔶  | 🔶  | `contains`, `startsWith`, `endsWith`, `indexOf`, `length`, `concat`, `toLower`, `toUpper`, `trim`, `matchesPattern`; `substring` and `has` are missing        |
+| Arithmetic            | ✅  | ✅  | `add`, `sub`, `mul`, `div`, `mod`                                                                                                                             |
+| Number functions      | ✅  | ✅  | `round`, `floor`, `ceiling`                                                                                                                                   |
+| Date & time functions | 🔶  | 🔶  | The component functions (`year`, `month`, `day`, `hour`, …); `now`, `totalseconds` and date arithmetic are missing                                            |
+| Lambda operators      | ✅  | ➖  | `any()` / `all()` over collections                                                                                                                            |
+| `cast` / `isof`       | ❌  | ➖  |                                                                                                                                                               |
+| Geo functions         | ❌  | ➖  | Geo types are typed as `string`                                                                                                                               |
+| Custom expressions    | ✅  | ✅  | An escape hatch for anything the builder does not model                                                                                                       |
 
 ## Reading and Writing
 
@@ -111,12 +111,12 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 | Complex types                | ✅  | ✅  |                                                                                                                                 |
 | Inheritance and type casts   | ✅  | 🔶  | V4 addresses derived types by cast segment; V2 renders the hierarchy but cannot serialise it                                    |
 | Open types                   | ✅  | ➖  | The declared properties are typed; the dynamic ones cannot be, since nothing announces them                                     |
-| `IEEE754Compatible`          | ✅  | ➖  | [`v4BigNumberAsString`](./generator/configuration#v4-big-number-handling)                                                       |
+| `IEEE754Compatible`          | ✅  | ➖  | [`v4.bigNumberAsString`](./generator/configuration#big-number-handling)                                                         |
 | 4.01 short-form control info | ✅  | ➖  | [`odataVersionV4`](./generator/configuration#odata-401) selects one spelling, requests and responses alike                      |
 | `metadata=full` / `none`     | 🔶  | ➖  | Through a manual `Accept` header; the extra control information stays untyped                                                   |
 | Instance annotations         | 🔶  | 🔶  | Passed through untyped                                                                                                          |
 | Vocabulary annotations       | ❌  | ❌  | Not evaluated at all — neither `Core.*` nor `Capabilities.*` nor any other term; the same effects have to be configured by hand |
-| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](./generator/configuration#v2-extra-results-wrapper)                                                 |
+| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](./generator/configuration#extra-results-wrapper)                                                    |
 
 ## Deliberately Out of Scope
 
