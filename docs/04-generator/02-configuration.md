@@ -34,15 +34,20 @@ const defaultConfig = {
   enablePrimitivePropertyServices: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
-  v2ResponseResultsWrapping: false,
-  v2PayloadResultsWrapping: false,
-  v4BigNumberAsString: false,
+  v2: {
+    responseResultsWrapping: false,
+    payloadResultsWrapping: false,
+    responseAsV4: false,
+  },
+  v4: {
+    bigNumberAsString: false,
+    odataVersion: "4.0",
+    enableNativeInOperator: false,
+  },
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
   enumType: "string",
-  enableNativeInOperator: false,
-  odataVersionV4: "4.0",
   disableBindingProps: false,
   disableDeepInsertProps: false,
   naming: {
@@ -162,37 +167,37 @@ Consider using the config file for all your configurations.
 
 Here is the list of all **base settings** of the config file. By and large this matches the [CLI options](#cli-options).
 
-| Base Setting                        | Type                                      | Default Value     | Description                                                                                                                                                                                                                      |
-| ----------------------------------- | ----------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceUrlConfig                     | `UrlSourceConfiguration`                  | `{}`              | Configuration of the request to download the metadata file. See [downloading-metadata](#downloading-metadata)                                                                                                                    |
-| refreshFile                         | `boolean`                                 | `false`           | Download metadata file even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                                                                      |
-| mode                                | `Modes`                                   | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                                                           |
-| emitMode                            | `EmitModes`                               | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                                                         |
-| prettier                            | `boolean`                                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                                                               |
-| tsconfig                            | `string`                                  | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                                                               |
-| allowRenaming                       | `boolean`                                 | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                                                        |
-| disableAutoManagedKey               | `boolean`                                 | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties)                                  |
-| debug                               | `boolean`                                 | `false`           | Add debug information                                                                                                                                                                                                            |
-| serviceName                         | `string`                                  |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                                                  |
-| skipEditableModels                  | `boolean`                                 | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                         |
-| skipIdModels                        | `boolean`                                 | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                                               |
-| skipOperations                      | `boolean`                                 | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                          |
-| skipComments                        | `boolean`                                 | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                                                            |
-| converters                          | `Array<TypeConverterConfig>`              | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                                                             |
-| naming                              | `OverridableNamingOptions`                | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                                                               |
-| enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property. Doesn't affect stream properties which get their own service. See [primitive property services](#primitive-property-services) |
-| bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout)                                                                                                          |
-| enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                                                            |
-| disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                                              |
-| disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                                                     |
-| enableNativeInOperator              | `boolean`                                 | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions; V4 only. See [the in operator](#the-in-operator)                                                                                              |
-| odataVersionV4                      | `"4.0" \| "4.01"`                         | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                                                     |
-| disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                                    |
-| v2ResponseResultsWrapping           | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#v2-extra-results-wrapper)                                                                        |
-| v2PayloadResultsWrapping            | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#v2-extra-results-wrapper)                                                                                              |
-| v2ResponseAsV4                      | `boolean`                                 | `false`           | Reshape every response of a V2 service as its V4 equivalent, so consumers only ever deal with the V4 shape. V2 only, ignored for V4. See [V2 responses as V4](#v2-responses-as-v4)                                               |
-| v4BigNumberAsString                 | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#v4-big-number-handling)                                                                                             |
-| unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                                          |
+| Base Setting                        | Type                                      | Default Value     | Description                                                                                                                                                                                      |
+| ----------------------------------- | ----------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| sourceUrlConfig                     | `UrlSourceConfiguration`                  | `{}`              | Configuration of the request to download the metadata file. See [downloading-metadata](#downloading-metadata)                                                                                    |
+| refreshFile                         | `boolean`                                 | `false`           | Download metadata file even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                                      |
+| mode                                | `Modes`                                   | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                           |
+| emitMode                            | `EmitModes`                               | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                         |
+| prettier                            | `boolean`                                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                               |
+| tsconfig                            | `string`                                  | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                               |
+| allowRenaming                       | `boolean`                                 | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                        |
+| disableAutoManagedKey               | `boolean`                                 | `false`           | odata2ts will automatically decide if a key prop is managed on the server side and therefore not editable; here you can turn off this automatism. See [managed properties](#managed-properties)  |
+| debug                               | `boolean`                                 | `false`           | Turn off adding `ts-nocheck` to all generated artefacts; prints out debug information                                                                                                            |
+| serviceName                         | `string`                                  |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                  |
+| skipEditableModels                  | `boolean`                                 | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
+| skipIdModels                        | `boolean`                                 | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                               |
+| skipOperations                      | `boolean`                                 | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                          |
+| skipComments                        | `boolean`                                 | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                            |
+| converters                          | `Array<TypeConverterConfig>`              | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                             |
+| naming                              | `OverridableNamingOptions`                | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                               |
+| bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                          |
+| enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                            |
+| unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                          |
+| disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
+| disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                     |
+| disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
+| enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
+| v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
+| v4.enableNativeInOperator           | `boolean`                                 | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions.See [the in operator](#using-the-native-in-operator)                                                           |
+| v4.odataVersion                     | `"4.0" \| "4.01"`                         | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                     |
+| v2.responseResultsWrapping          | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#extra-results-wrapper)                                           |
+| v2.payloadResultsWrapping           | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#extra-results-wrapper)                                                                 |
+| v2.responseAsV4                     | `boolean`                                 | `false`           | Reshape every response of a V2 service as its V4 equivalent, so consumers only ever deal with the V4 shape. See [V2 responses as V4](#use-v4-response-shapes)                                    |
 
 ## Service Settings
 
@@ -295,122 +300,16 @@ which has an enum representation in the config file (`import { Modes } from "@od
 If you're only interested in `models` or `qobjects`, you might want to skip the generation of
 certain artefacts. The following options are available as base-settings:
 
-- skipComments:
+- `skipComments`
   - dispense with comments for each model property
-- skipEditableModels:
+- `skipEditableModels`
   - don't create entity representations needed for create, update and patch operations
-- skipIdModels:
+- `skipIdModels`
   - don't create types representing the ID of each entity type
   - don't create q-id functions, helpful for formatting and parsing entity paths
-- skipOperations:
+- `skipOperations`
   - don't create types representing function or action parameters
   - don't create q-functions or q-actions which help to handle those operation calls
-
-## File Layout
-
-By default `odata2ts` generates a **folder per model**, each holding that model's artefacts, plus `index.ts`
-barrel files: one per namespace and one at the root of the output directory. Importing from those barrels is
-the most robust way to consume the generated code, since it does not depend on where an individual artefact
-ends up.
-
-That layout entails cyclic imports, which are perfectly valid within OData and which any common ESM or
-bundler setup resolves. Some setups cannot: SAP UI5 in combination with the TS Babel plugin is the known
-case, and the same goes for any other bundler unable to handle cyclic dependencies. Set
-`bundledFileGeneration` to `true` there, and the generation is bundled into one file per kind of artefact -
-models, q-objects and services - which removes the cycles.
-
-:::note
-
-Up to version 0.41.0 `bundledFileGeneration` defaulted to `true`. If your imports broke when upgrading,
-either switch the option back on or move your imports to the generated index files.
-
-:::
-
-## Enum Representation
-
-The `enumType` option controls how enums surface in TypeScript:
-
-- `"string"` (default): a string enum, i.e. `enum Feature { Feature1 = "Feature1" }`
-- `"numeric"`: a numeric enum, i.e. `enum Feature { Feature1 = 1 }`, using the values from the metadata
-- `"string-union"`: a plain union of string literals, i.e. `type Feature = "Feature1" | "Feature2"`
-
-The wire format is unaffected: OData transports the member name in every case. With `"string-union"` the
-generator additionally emits the member list as a constant of the same name, since the query objects need
-something at runtime that a union type does not provide.
-
-## Binding and Deep Insert
-
-The **editable** models carry the navigation properties, in two shapes which a caller can use
-interchangeably:
-
-- **binding**: link an already existing entity by its key, `{ Author: { "@id": 1 } }`. The query objects
-  turn that key into the URL of the entity and into the notation of the targeted OData version -
-  `Author@odata.bind` for 4.0, `{"@id": …}` for 4.01 and `__metadata.uri` for V2. A binding is only
-  generated where the metadata states the target entity set and the related entity has an id model, so
-  `skipIdModels` takes it away.
-- **deep insert**: pass the related entity itself, typed as its editable model. That is what a deep insert
-  (POST) or deep update (PATCH / PUT) sends - the related entities travel within the payload of their
-  parent.
-
-The `"@id"` property is what tells the two apart. Switch them off individually with `disableBindingProps`
-and `disableDeepInsertProps`.
-
-## Primitive Property Services
-
-With OData you can address a single primitive property as a resource of its own, reading, updating and
-deleting it. Usually you would not - a request for the whole entity fetches more relevant information in
-one go - which is why `enablePrimitivePropertyServices` is off by default.
-
-Services for `Edm.Stream` properties and media entities are generated regardless of this setting.
-
-:::note
-
-Not every server serves individual properties. Check yours before switching this on.
-
-:::
-
-## The `in` Operator
-
-By default the query builder emulates `in` by rolling it out into a series of equals-expressions, which
-works against any V4 service as well as V2. Set `enableNativeInOperator` to `true` to use the native
-operator instead, resulting in shorter queries: `$filter=Language in ('de','en')` rather than
-`$filter=(Language eq 'de' or Language eq 'en')`.
-
-This is V4 only and requires the service to support it.
-
-## OData 4.01
-
-`odataVersionV4` selects which minor version of OData V4 to target. It defaults to `"4.0"`, the more widely
-deployed and more compatible one. Setting `"4.01"` affects three things:
-
-- the notation of a binding, see [binding and deep insert](#binding-and-deep-insert)
-- the control information in responses: 4.01 uses the short form (`@count`), 4.0 the prefixed one
-  (`@odata.count`) - the generated response models follow accordingly
-- the `OData-Version` header, which is declared on every request so that the service answers in the
-  matching form
-
-## Name Clashes
-
-OData scopes names by namespace, so the same name may legitimately occur twice. `odata2ts` works with the
-fully qualified name internally but generates from the plain one, which can therefore collide.
-
-How that is handled depends on the [file layout](#file-layout):
-
-- **bundled**: everything shares one file per artefact kind, so the plain names have to be unique. A
-  counter is appended to resolve it: `Branch` and `Branch2`. Set `disableAutomaticNameClashResolution` to
-  `true` to turn that off - the generation then fails on a clash instead, and you resolve it yourself via
-  [`byTypeAndName`](#type-options) using the fully qualified name.
-- **folder per model** (the default): each namespace has a folder of its own and the index files re-export
-  each of them under its own name, so the same name in two namespaces needs no resolution at all. Within
-  one namespace it is fatal and generation stops - and it cannot happen by accident, since OData already
-  requires those names to be unique. It only arises from renaming.
-
-`disableAutomaticNameClashResolution` is therefore only relevant with `bundledFileGeneration`.
-
-A clash that no automatism can resolve is a **renaming** clash: two distinct OData names collapsing onto one
-TypeScript name, e.g. `Location_` and `Location` under camelCase. Only you can say which of the two keeps
-the plain name, so generation stops with a message naming both and pointing at `propertiesByName` or
-`byTypeAndName`.
 
 ## Emit Modes
 
@@ -443,6 +342,277 @@ of the `gen-src` folder in your `tsconfig.json`.
 
 `odata2ts` allows to prettify the generated TS files via [prettier](https://prettier.io/).
 When installed and configured, you just set the option `prettier` to `true`.
+
+## File Layout & Cyclic Imports
+
+By default `odata2ts` generates a **folder per model**, each holding that model's artefacts, plus `index.ts`
+barrel files: one per namespace and one at the root of the output directory. Importing from those barrels is
+the most robust way to consume the generated code, since it does not depend on where an individual artefact
+ends up.
+
+That layout may entail cyclic imports which are perfectly valid within an OData model, just think of a bidirectional
+link between two services. Modern module loader can resolve this anyway, well, as long as both imports don't reference
+each other at the top level. However, some setups cannot: SAP UI5 in combination with the TS Babel plugin is the known
+case right now. Set `bundledFileGeneration` to `true` in those situations, and the generation is bundled into one file
+per kind of artefact (models, q-objects and services) which prevents any import cycles by design.
+
+:::note
+
+Up to version 0.41.0 `bundledFileGeneration` defaulted to `true`. If your imports broke when upgrading,
+either switch the option back on or move your imports to the generated index files.
+
+:::
+
+### Name Clashes
+
+OData scopes names by namespace, so the same name may legitimately occur multiple times in different namespaces.
+`odata2ts` works with the fully qualified name internally but generates from the plain one, which can therefore collide.
+
+How that is handled depends on the [file layout](#file-layout--cyclic-imports):
+
+- **folder per model** (the default): each namespace has a folder of its own and the index files re-export
+  each of them under its own name, so the same name in two namespaces needs no resolution at all. Within
+  one namespace it is fatal and generation stops - and it cannot happen by accident, since OData already
+  requires those names to be unique. It only arises from renaming.
+- **bundled**: everything shares one file per artefact kind, so the plain names have to be unique. A
+  counter is appended to resolve it: `Branch` and `Branch2`. Set `disableAutomaticNameClashResolution` to
+  `true` to turn that off - the generation then fails on a clash instead, and you resolve it yourself via
+  [`byTypeAndName`](#type-options) using the fully qualified name.
+
+`disableAutomaticNameClashResolution` is therefore only relevant with `bundledFileGeneration`.
+
+A clash that no automatism can resolve is a **renaming** clash: two distinct OData names collapsing onto one
+TypeScript name, e.g. `Location_` and `Location` under camelCase. Only you can say which of the two keeps
+the plain name, so generation stops with a message naming both and pointing at `propertiesByName` or
+`byTypeAndName`.
+
+## Enum Representation
+
+The `enumType` option controls how enums surface in TypeScript:
+
+- `"string"` (default): a string enum, i.e. `enum Feature { Feature1 = "Feature1" }`
+- `"numeric"`: a numeric enum, i.e. `enum Feature { Feature1 = 1 }`, using the values from the metadata
+- `"string-union"`: a plain union of string literals, i.e. `type Feature = "Feature1" | "Feature2"`
+
+The wire format is unaffected: OData transports the member name in every case. With `"string-union"` the
+generator additionally emits the member list as a constant of the same name, since the query objects need
+something at runtime that a union type does not provide.
+
+## Binding and Deep Insert
+
+The **editable models** - the models you pass to modification requests (POST, PUT, PATCH) - carry
+the navigation properties in two shapes to support two ways of manipulating entity associations:
+
+- `Binding`: link an already existing entity by its key, `{ Author: { "@id": 1 } }`. The query objects
+  turn that key into the URL of the entity and into the notation of the targeted OData version -
+  `Author@odata.bind` for 4.0, `{"@id": …}` for 4.01 and `__metadata.uri` for V2.
+  - the id type is exactly the id type of the entity, so it supports the short form and complex keys
+  - the heavy string lifting odata2ts performs here for you is the translation from the key to the entity URL
+- `Deep Insert` / `Deep Update`: pass the related entity as part of the parent entity to realise
+  a deep insert (POST) or deep update (PATCH / PUT)
+  - all name mappings and conversions are applied to the nested entity or entities as well
+  - probably the most intuitive way
+
+In regard to server support, `Binding` comes out-of-the-box with all tested server frameworks (ASPNet, CAP and Olingo),
+while `Deep Insert` and `Deep Update` have a mixed story. For ASPNet you need to implement manually on the DB layer,
+while CAP supports this out-of-the-box again, but with the important limitation that this only works
+for `Composition` not regular `Association` (CAP specific distinction).
+
+CAP also supports an alternative as it additionally maps the key of the associated entity
+as simple property, e.g. if the entity has a navigation property `BestFriend` then you automatically
+get `BestFriend_ID`. Setting a new id on this property is effectively the same as `Binding`.
+
+You can switch off both features individually with `disableBindingProps`
+and `disableDeepInsertProps`.
+
+## Flattened Complex Types
+
+Not every service maps a structured element to a `<ComplexType>`. SAP CAP unfolds it into one property per
+leaf, joined by an underscore, so a `PostalAddress` sitting on `Member.Address` reaches you as four
+separate properties - `Address_Street`, `Address_City`, `Address_PostalCode`, `Address_Country`.
+That is the shape CAP recommends.
+
+When setting `unflattenComplexTypes` to `true` odata2ts helps out here by grouping them back into one complex
+property:
+
+```ts
+const member = (await service.Members(1).query().execute()).data;
+
+member.Address_City; // off (default)
+member.addressCity; // off (default) with renaming
+member.address.city; // on with renaming
+```
+
+Request and response payloads are converted in both directions and query paths are rewritten,
+so that you have one consistent API surface which is the complex type. How CAP actually works becomes an
+implementation detail again:
+
+```ts
+service
+  .Members()
+  .query((builder, qMember) =>
+    builder.expanding("address", (address, qAddress) =>
+      address.select("street", "city").filter(qAddress.city.eq("Hamburg")),
+    ),
+  );
+// $filter=Address_City eq 'Hamburg'&$select=Address_Street,Address_City
+```
+
+### Grouping Heuristic
+
+Grouping is done automatically using the following heuristic:
+
+- find properties which contain an underscore
+- if a name part references a navigation property, don't touch it
+- if the last part ends with `_Id`, don't touch it
+  - except there are more properties with the same prefix part, then they also get grouped
+- if the last part is empty, e.g. `Location_`, don't touch it
+
+Where the metadata declares a `<ComplexType>` whose properties match the group exactly, that type is used
+with its own name. Only where no declared type matches is one
+synthesized, named after the model and the group (`Member_Address`).
+
+:::note
+
+The separator is the underscore, which is what CAP uses, and it is not configurable.
+
+:::
+
+## Primitive Property Services
+
+With OData you can address a single primitive property as a resource of its own, reading, updating and
+deleting it. Usually you would not - a request for the whole entity fetches more relevant information in
+one go - which is why `enablePrimitivePropertyServices` is off by default.
+
+Services for `Edm.Stream` properties and media entities are generated regardless of this setting.
+
+:::note
+
+Not every server serves individual properties. Check yours before switching this on.
+
+:::
+
+## V4 Specific Options
+
+### Big Number Handling
+
+Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
+However, these numbers might not fit into JS' number type, which might result in precision loss.
+
+OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
+precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
+then you should set the config option `v4.bigNumberAsString` to `true`.
+
+Activating this option affects the type generation and will use `string` for `Edm.Int64` and `Edm.Decimal`.
+All requests are executed with the **accept header** set to `application/json;IEEE754Compatible=true`.
+Additionally, when sending data the very same value will be set for the **content-type header**.
+
+Now you can use converters to get a better suited data type: See [Big Number Converters](../converters/big-number-converters).
+
+:::note
+
+The OData V4 specification allows to set this format option on a per-request basis.
+`odata2ts` handles this format option globally, because the type generation process is affected.
+
+:::
+
+### Using the native `in` Operator
+
+By default the query builder emulates `in` by rolling it out into a series of equals-expressions, which
+works against any V4 service as well as V2. Set `v4.enableNativeInOperator` to `true` to use the native
+operator instead, resulting in shorter queries: `$filter=Language in ('de','en')` rather than
+`$filter=(Language eq 'de' or Language eq 'en')`. Of course, the server must support this.
+
+### OData 4.01
+
+`v4.odataVersion` selects which minor version of OData V4 to target. It defaults to `"4.0"`, the more widely
+deployed and more compatible one. Setting `"4.01"` affects three things:
+
+- the notation of bindings, see [binding and deep insert](#binding-and-deep-insert)
+- the control information in requests & responses: 4.01 uses the short form (`@context`), 4.0 the prefixed one
+  (`@odata.context`)
+- the `OData-Version` header, which is declared on every request so that the service answers in the
+  matching form
+
+## V2 Specific Options
+
+### Extra Results Wrapper
+
+The OData V2 specification is sometimes quite ambiguous or not detailed enough. This is especially true when it
+comes to the JSON representation of expanded collections. Because of that two variants exist in the wild:
+
+```ts
+export interface Category {
+  // this is the default typing by odata2ts
+  products: Array<Product> | DeferredContent;
+}
+
+export interface Category {
+  // this is with the extra results wrapper
+  products: { results: Array<Product> } | DeferredContent;
+}
+```
+
+This does not only apply to responses but to requests as well. And to make things even more protracted you might
+have a server which behaves differently regarding requests and responses.
+Which of the two your service uses cannot be told from its metadata, so you need to state it yourself:
+
+| Option                       | What it states                                                   |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `v2.responseResultsWrapping` | responses carry the wrapper, so the generated models describe it |
+| `v2.payloadResultsWrapping`  | a request payload has to carry it                                |
+
+Both default to `false` and both take effect in **every generation mode**: `odata2ts` hands the structure
+through exactly as it was received or given, so a service which wraps needs `v2.responseResultsWrapping`
+whether you generate bare types or a complete client.
+
+:::note
+
+Earlier versions of `odata2ts` removed this wrapper from a response by themselves, and the options only
+took effect with `mode=Models`. That runtime work-around is gone as it doesn't work for the request
+side.
+
+:::
+
+### Use V4 Response Shapes
+
+A V2 service answers in its own JSON verbose shape - collections wrapped as `{d: {results: [...]}}`,
+entities as `{d: {...entity, __metadata: {uri, type, etag}}}`, an unexpanded navigation property carrying a
+`{__deferred: {uri}}` placeholder instead of simply being absent. Setting `v2.responseAsV4` to `true`
+reshapes every response of that service as its V4 equivalent instead:
+
+```ts
+export interface Category {
+  // V2, the default
+  products: Array<Product> | DeferredContent;
+}
+
+export interface Category {
+  // v2ResponseAsV4
+  products: Array<Product>;
+}
+```
+
+- a collection becomes `{value: [...], "@odata.count"?, "@odata.nextLink"?}`
+- an entity is returned bare, with `__metadata` turned into `@odata.id` / `@odata.type` / `@odata.etag`
+- a navigation property that hasn't been expanded is simply left out, exactly as a real V4 service would
+  send it - not stated as `DeferredContent` at all, since there is nothing to narrow against
+- the reshaping applies recursively, so an expanded navigation property is reshaped the very same way,
+  however deep
+
+The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
+`ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
+deals with the V4 shape - the same client code works against a V2 or a V4 service without knowing which.
+
+Bindings and deep inserts already went by the version-neutral notation before this option existed
+(`{"@id": key}`, turned into whatever the wire needs by [`QBinding`](#binding-and-deep-insert)), so
+`v2.responseAsV4` only ever touches responses.
+
+:::note
+
+The options `v2.responseResultsWrapping` and `v2.payloadResultsWrapping` still apply in this scenario.
+
+:::
 
 ## Types and Converters
 
@@ -740,178 +910,5 @@ const config = {
 
 Renaming properties this way is independent of the `allowRenaming` setting
 (see [renaming entities and properties](#renaming-entities-and-properties)).
-
-:::
-
-## V4 Big Number Handling
-
-Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
-However, these numbers might not fit into JS' number type, which might result in precision loss.
-
-OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
-precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
-then you should set the config option `v4BigNumberAsString` to `true`.
-
-Activating this option affects the type generation and will use `string` for `Edm.Int64` and `Edm.Decimal`.
-All requests are executed with the **accept header** set to `application/json;IEEE754Compatible=true`.
-Additionally, when sending data the very same value will be set for the **content-type header**.
-
-Now you can use converters to get a better suited data type: See [Big Number Converters](../converters/big-number-converters).
-
-:::note
-
-The OData V4 specification allows to set this format option on a per-request basis.
-`odata2ts` handles this format option globally, because the type generation process is affected.
-
-:::
-
-## V2 Extra Results Wrapper
-
-The OData V2 specification is sometimes quite ambiguous or not detailed enough. This is especially true when it
-comes to the JSON representation of expanded collections. Because of that two variants exist in the wild:
-
-```ts
-export interface Category {
-  // this is the default typing by odata2ts
-  products: Array<Product> | DeferredContent;
-}
-
-export interface Category {
-  // this is with the extra results wrapper
-  products: { results: Array<Product> } | DeferredContent;
-}
-```
-
-Which of the two your service uses cannot be told from its metadata, so you state it yourself:
-
-| Option                      | What it states                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------ |
-| `v2ResponseResultsWrapping` | responses carry the wrapper, so the generated models describe it               |
-| `v2PayloadResultsWrapping`  | a request payload has to carry it, i.e. the nested collection of a deep insert |
-
-Both default to `false` and both take effect in **every generation mode**: `odata2ts` hands the structure
-through exactly as it was received or given, so a service which wraps needs `v2ResponseResultsWrapping`
-whether you generate bare types or a complete client.
-
-:::note
-
-Earlier versions of `odata2ts` removed this wrapper from a response by themselves, and the options only
-took effect with `mode=Models`. That runtime work-around is gone - the structure now survives, which is
-what lets a deep insert state it in the first place.
-
-:::
-
-They are two options on purpose, and real services show why: Apache Olingo 2 accepts a deep insert in
-either shape, while CAP's V2 adapter answers **with** the wrapper and refuses a payload carrying it
-("Value must be an array"). What a service sends therefore says nothing about what it accepts.
-See [#237](https://github.com/odata2ts/odata2ts/issues/237).
-
-The wrapper is a matter of navigation properties, since it is how V2 serialises a feed. A collection of a
-primitive or of a complex type arrives as a plain array either way, and neither option changes that.
-
-## V2 Responses As V4
-
-A V2 service answers in its own JSON verbose shape - collections wrapped as `{d: {results: [...]}}`,
-entities as `{d: {...entity, __metadata: {uri, type, etag}}}`, an unexpanded navigation property carrying a
-`{__deferred: {uri}}` placeholder instead of simply being absent. Setting `v2ResponseAsV4` to `true`
-reshapes every response of that service as its V4 equivalent instead:
-
-```ts
-export interface Category {
-  // V2, the default
-  products: Array<Product> | DeferredContent;
-}
-
-export interface Category {
-  // v2ResponseAsV4
-  products: Array<Product>;
-}
-```
-
-- a collection becomes `{value: [...], "@odata.count"?, "@odata.nextLink"?}`
-- an entity is returned bare, with `__metadata` turned into `@odata.id` / `@odata.type` / `@odata.etag`
-- a navigation property that hasn't been expanded is simply left out, exactly as a real V4 service would
-  send it - not stated as `DeferredContent` at all, since there is nothing to narrow against
-- the reshaping applies recursively, so an expanded navigation property is reshaped the very same way,
-  however deep
-
-The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
-`ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
-deals with the V4 shape - the same client code works against a V2 or a V4 service without knowing which.
-
-Bindings and deep inserts already went by the version-neutral notation before this option existed
-(`{"@id": key}`, turned into whatever the wire needs by [`QBinding`](#binding-and-deep-insert)), so
-`v2ResponseAsV4` only ever touches responses.
-
-:::note
-
-Turn off `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` (the default) when using this option:
-an expanded collection valued navigation property is always a plain array under `v2ResponseAsV4`, so
-stating the `results` wrapper in the generated types would describe traffic this client no longer sends or
-receives.
-
-:::
-
-## Flattened Complex Types
-
-Not every service maps a structured element to a `<ComplexType>`. SAP CAP unfolds it into one property per
-leaf, joined by an underscore, so a `PostalAddress` sitting on `Member.Address` reaches you as four
-separate properties - `Address_Street`, `Address_City`, `Address_PostalCode`, `Address_Country` - and
-nothing in the metadata says that those four belong together. That is the shape CAP recommends; its
-structured mode (`cds.odata.structs`) is deprecated.
-
-Setting `unflattenComplexTypes` to `true` groups them back into one complex property:
-
-```ts
-const member = (await service.Members(1).query().execute()).data;
-
-member.Address_City; // off (default)
-member.Address.City; // on
-```
-
-The service still knows nothing but the flat properties, so the client keeps speaking that form on the
-wire. Request and response payloads are converted in both directions and query paths are rewritten:
-
-```ts
-service
-  .Members()
-  .query((builder, qMember) =>
-    builder
-      .filter(qMember.Address.props.City.eq("Hamburg"))
-      .expanding("Address", (address) => address.select("Street", "City")),
-  );
-// $filter=Address_City eq 'Hamburg'&$select=Address_Street,Address_City
-```
-
-A complex property is reached via `expanding()` rather than a deep `$select`, in V4 as well as in V2. For a
-flattened one no nested clause is produced at all, only the flat paths of its leaves; selecting the
-property as a whole (`select("Address")`) selects every leaf it owns. Setting it to `null` in a payload
-nulls each of them, since it has no representation of its own to clear.
-
-### What gets grouped
-
-A flattened foreign key looks exactly like a flattened complex type - CAP writes `Publisher_Id` next to the
-navigation property `Publisher`. Grouping is therefore careful rather than eager and leaves a group alone
-where
-
-- its name is that of a navigation property,
-- it would swallow a key property, which every URL of the entity addresses by name,
-- a segment is empty: CAP's `Location_` sits right next to `Location_Id` and neither is a structured
-  element,
-- or it consists of nothing but an `Id`.
-
-The last rule is what reads `Publisher_Id` as the foreign key it is. Its price is that a complex type made
-up of a single property named `Id` goes unrecognised - whereas `Publisher_Id` next to `Publisher_Name` is a
-group again.
-
-Where the metadata declares a `<ComplexType>` whose properties match the group exactly, that type is used
-with its own name. CAP does emit them wherever the type appears in a position that has no column
-equivalent, such as a collection or an operation parameter, so the generated client usually speaks the
-vocabulary of the service rather than an invented one. Only where no declared type matches is one
-synthesized, named after the model and the group (`Member_Address`).
-
-:::note
-
-The separator is the underscore, which is what CAP uses, and it is not configurable.
 
 :::

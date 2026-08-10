@@ -563,7 +563,7 @@ on every request so the service answers in the matching form.
 In V2 things are more complicated: Each kind of request wraps the response in an extra object with the
 property `d`. Collections are wrapped again, like in V4, but with the property `results`. The same goes
 for an expanded entity collection _inside_ an entity - though not for every service, see
-[extra results wrapping](#v2-extra-results-mapping).
+[extra results wrapping](../generator/configuration#extra-results-wrapper).
 
 Value Types (e.g. selecting a primitive property of an entity) are really special in V2. First you
 have the standard wrapping with `d` and then you use the name of the property in question as the key
@@ -593,7 +593,7 @@ However, the spec itself is quite vague in this regard.
 
 `odata2ts` hands this structure through untouched: what the service sent is what you get. So if your
 service wraps, you say so with the generator option
-[`v2ResponseResultsWrapping`](../generator/configuration#v2-extra-results-wrapper) and the generated
+[`v2ResponseResultsWrapping`](../generator/configuration#extra-results-wrapper) and the generated
 models describe the response you actually receive. The option applies to every generation mode - bare
 types and a complete client alike.
 

@@ -85,7 +85,7 @@ the root barrel stays flat and exports everything directly.
 
 ### One File per Artefact Kind
 
-Set [`bundledFileGeneration`](./configuration#file-layout) to `true` and the generation collapses into one
+Set [`bundledFileGeneration`](./configuration#file-layout--cyclic-imports) to `true` and the generation collapses into one
 file per kind of artefact instead:
 
 ```
