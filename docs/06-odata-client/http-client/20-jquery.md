@@ -12,6 +12,7 @@ JQuery is used by this client but not installed (declared as peer dependency).
 The existing JQuery instance must be provided when initializing the client.
 
 The whole client is meant to support usage of `odata2ts` in UI5 apps, which use Jquery for HTTP communication.
+But the FetchClient also works in these scenarios.
 
 ## Setup
 
@@ -40,11 +41,10 @@ The client can be further configured, of course.
 
 ## Configuration
 
-By default, the request headers `Accept` and `Content-Type` are set to `application/json`
-for all requests. Also caching of `GET` requests is disabled (option `cache`).
+By default, caching of `GET` requests is disabled (option `cache`).
 
 Use the second constructor parameter to pass your global configuration for the client.
-The configuration is of type `AjaxRequestConfig` (from `@odata2ts/http-client-jquery` package)
+The configuration is of type `JQueryRequestConfig` (from `@odata2ts/http-client-jquery` package)
 and will be applied to all requests made with this client.
 
 Here's the JQuery documentation on its [ajax method](https://api.jquery.com/Jquery.ajax/), the configuration

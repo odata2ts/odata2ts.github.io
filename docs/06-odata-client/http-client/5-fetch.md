@@ -44,9 +44,6 @@ The client can be further configured, of course.
 
 ## Configuration
 
-By default, the request headers `Accept` and `Content-Type` are set to `application/json`
-for all requests to ensure proper JSON communication.
-
 Use the first constructor parameter to pass your global configuration for the client.
 It will be applied to all requests made with this client.
 
@@ -68,7 +65,8 @@ const client = new FetchClient(
 ```
 
 You set the option `csrfTokenFetchUrl` to a static path of your OData service. Ideally one, that
-returns fast and with a minimum amount of data.
+returns fast and with a minimum amount of data. The root path with a final `/` is usually the easiest and a universal
+option here.
 
 With this setup you should be done, the rest is handled automatically.
 
