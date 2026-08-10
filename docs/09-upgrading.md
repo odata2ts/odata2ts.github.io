@@ -8,7 +8,7 @@ sidebar_position: 9
 
 What changes between releases in ways that need something from you. Everything else is additive.
 
-## Coming from 0.42.0
+## Coming from 0.42.0 and earlier
 
 ### Services are no longer generic over the HTTP client
 
@@ -42,6 +42,20 @@ await cmd.execute<FetchRequestConfig>({ credentials: "include" });
 ```
 
 See [Request Configuration](./odata-client/the-main-service#request-configuration).
+
+### Refactored V2 and V4 Specific Configurations
+
+All V4 specific configurations are grouped under `v4`:
+
+- `v4BigNumberAsString` becomes `bigNumberAsStrin`
+- `v4OdataVersion` becomes `odataVersion`
+- `enableNativeInOperator` has just been moved
+
+All V2 specific configurations are grouped under `v2`:
+
+- `v2ResponseResultsWrapping` becomes `responseResultsWrapping`
+- `v2PayloadResultsWrapping` becomes `payloadResultsWrapping`
+- `v2ResponseAsV4` becomes `responseAsV4`
 
 ## Coming from 0.41.0 and earlier
 
@@ -141,7 +155,7 @@ generation mode. Their names say the direction rather than the artefact:
 
 There is no alias for the old names. Mind the changed behaviour as well: **a V2 client generated without
 `v2ResponseResultsWrapping` no longer has the wrapping removed for you.** If your service wraps, turn the
-option on. See [Extra Results Wrapper](./generator/configuration#v2-extra-results-wrapper).
+option on. See [Extra Results Wrapper](./generator/configuration#extra-results-wrapper).
 
 ### `Edm.Stream` properties left the models
 
