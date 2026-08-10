@@ -10,10 +10,10 @@ The **Axios HTTP Client** serves uses - as its name suggests -
 
 It allows for:
 
-- request configuration
-- automatic CSRF token handling
-
-By default, the request headers `Accept` and `Content-Type` are set to `application/json`.
+- request configuration (custom headers, query params)
+- uploading and downloading binary data (createBlob / updateBlob / getBlob)
+- customizing how the OData error message is extracted from a failed response's body (setErrorMessageRetriever)
+- automatic CSRF token handling for the OData handshake (useCsrfProtection / csrfTokenFetchUrl, see below)
 
 ## Setup
 
@@ -41,9 +41,6 @@ const trippinService = new TrippinService(httpClient, BASE_URL);
 The client can be further configured, of course.
 
 ## Configuration
-
-By default, the request headers `Accept` and `Content-Type` are set to `application/json`
-for all requests.
 
 Use the first constructor parameter to pass your global configuration for the client.
 The configuration is of type `AxiosRequestConfig` (from this package)
