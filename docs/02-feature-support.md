@@ -49,19 +49,20 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 ## Filtering
 
-| Group                 | V4  | V2  | Notes                                                                                                                                                         |
-| --------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Comparison operators  | ✅  | ✅  | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, plus `isNull` / `isNotNull`                                                                                               |
-| Logical operators     | ✅  | ✅  | `and`, `or`, `not`                                                                                                                                            |
-| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](./generator/configuration#using-the-native-in-operator) |
-| String functions      | 🔶  | 🔶  | `contains`, `startsWith`, `endsWith`, `indexOf`, `length`, `concat`, `toLower`, `toUpper`, `trim`, `matchesPattern`; `substring` and `has` are missing        |
-| Arithmetic            | ✅  | ✅  | `add`, `sub`, `mul`, `div`, `mod`                                                                                                                             |
-| Number functions      | ✅  | ✅  | `round`, `floor`, `ceiling`                                                                                                                                   |
-| Date & time functions | 🔶  | 🔶  | The component functions (`year`, `month`, `day`, `hour`, …); `now`, `totalseconds` and date arithmetic are missing                                            |
-| Lambda operators      | ✅  | ➖  | `any()` / `all()` over collections                                                                                                                            |
-| `cast` / `isof`       | ❌  | ➖  |                                                                                                                                                               |
-| Geo functions         | ❌  | ➖  | Geo types are typed as `string`                                                                                                                               |
-| Custom expressions    | ✅  | ✅  | An escape hatch for anything the builder does not model                                                                                                       |
+| Group                 | V4  | V2  | Notes                                                                                                                                                                                    |
+| --------------------- | :-: | :-: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Comparison operators  | ✅  | ✅  | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, plus `isNull` / `isNotNull`                                                                                                                          |
+| Logical operators     | ✅  | ✅  | `and`, `or`, `not`                                                                                                                                                                       |
+| `in`                  | ✅  | ✅  | Emulated as `or`-chained equals by default; V4 can render it natively with [`enableNativeInOperator`](./generator/configuration#using-the-native-in-operator)                            |
+| String functions      | ✅  | 🔶  | `contains`, `startsWith`, `endsWith`, `indexOf`, `length`, `concat`, `substring`, `toLower`, `toUpper`, `trim`, `matchesPattern`; V2's `replace` is missing, `matchesPattern` is V4 only |
+| `has` (flag enums)    | ✅  | ➖  | On enum properties only; V2 has no enum types. `IsFlags` is not carried into the generated code, so it is offered on every enum property                                                 |
+| Arithmetic            | ✅  | ✅  | `add`, `sub`, `mul`, `div`, `mod`                                                                                                                                                        |
+| Number functions      | ✅  | ✅  | `round`, `floor`, `ceiling`                                                                                                                                                              |
+| Date & time functions | 🔶  | 🔶  | The component functions (`year`, `month`, `day`, `hour`, …); `now`, `totalseconds` and date arithmetic are missing                                                                       |
+| Lambda operators      | ✅  | ➖  | `any()` / `all()` over collections                                                                                                                                                       |
+| `cast` / `isof`       | ❌  | ➖  |                                                                                                                                                                                          |
+| Geo functions         | ❌  | ➖  | Geo types are typed as `string`                                                                                                                                                          |
+| Custom expressions    | ✅  | ✅  | An escape hatch for anything the builder does not model                                                                                                                                  |
 
 ## Reading and Writing
 

@@ -163,6 +163,20 @@ The following data types don't support any filtering:
 
 Specification: OData V4 URL Conventions on [Logical Operators](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_LogicalOperators).
 
+### The `has` Operator
+
+`has` is the one operator which is not available for (nearly) all data types — it exists on **enum**
+properties only, and only in V4:
+
+| Operator Name(s) | Example Usage                        | Produced OData Query      |
+| ---------------- | ------------------------------------ | ------------------------- |
+| has              | `q.amenities.has(Amenities.Parking)` | `Amenities has 'Parking'` |
+
+It asks whether a **flag** is set, so it is only meaningful for an enum declared `IsFlags="true"` in the
+metadata. Nothing carries `IsFlags` into the generated code, so `has` is offered on every enum property and
+it is on you to use it where the enum really is a flag set: a server will not necessarily refuse it
+elsewhere, it may just do bit arithmetic on the underlying numbers and answer with something surprising.
+
 ### Meaning of Equality
 
 A short summary of what equality means in OData:
@@ -222,15 +236,27 @@ To achieve a **case-insensitive** matching you can use `toLower` or `toUpper` li
 
 Manipulation Functions:
 
-| Function     | Example                          | Produced OData Query     | Result Type | Description                                                                                           |
-| ------------ | -------------------------------- | ------------------------ | ----------- | ----------------------------------------------------------------------------------------------------- |
-| concatPrefix | `q.lastName.concatPrefix("pre")` | `concat('pre',LastName)` | Edm.String  | Prefixes the value.                                                                                   |
-| concatSuffix | `q.lastName.concatSuffix("suf")` | `concat(LastName,'suf')` | Edm.String  | Suffixes the value.                                                                                   |
-| indexOf      | `q.lastName.indexOf("y")`        | `indexof(LastName,'y')`  | Edm.Int32   | Returns the zero-based character position of the first occurrence of the given term within the value. |
-| length       | `q.lastName.length()`            | `length(LastName)`       | Edm.Int32   | Returns the length of the value string.                                                               |
-| toLower      | `q.lastName.toLower()`           | `tolower(LastName)`      | Edm.String  | Returns the value string in lower case.                                                               |
-| toUpper      | `q.lastName.toUpper()`           | `toupper(LastName)`      | Edm.String  | Returns the value string in upper case.                                                               |
-| trim         | `q.lastName.trim()`              | `trim(LastName)`         | Edm.String  | Returns the value string without any leading or trailing whitespace.                                  |
+| Function     | Example                          | Produced OData Query      | Result Type | Description                                                                                                                     |
+| ------------ | -------------------------------- | ------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| concatPrefix | `q.lastName.concatPrefix("pre")` | `concat('pre',LastName)`  | Edm.String  | Prefixes the value.                                                                                                             |
+| concatSuffix | `q.lastName.concatSuffix("suf")` | `concat(LastName,'suf')`  | Edm.String  | Suffixes the value.                                                                                                             |
+| indexOf      | `q.lastName.indexOf("y")`        | `indexof(LastName,'y')`   | Edm.Int32   | Returns the zero-based character position of the first occurrence of the given term within the value.                           |
+| length       | `q.lastName.length()`            | `length(LastName)`        | Edm.Int32   | Returns the length of the value string.                                                                                         |
+| substring    | `q.lastName.substring(1, 3)`     | `substring(LastName,1,3)` | Edm.String  | Returns the part of the value string starting at the given zero-based position; without the second argument it runs to the end. |
+| toLower      | `q.lastName.toLower()`           | `tolower(LastName)`       | Edm.String  | Returns the value string in lower case.                                                                                         |
+| toUpper      | `q.lastName.toUpper()`           | `toupper(LastName)`       | Edm.String  | Returns the value string in upper case.                                                                                         |
+| trim         | `q.lastName.trim()`              | `trim(LastName)`          | Edm.String  | Returns the value string without any leading or trailing whitespace.                                                            |
+
+:::caution
+
+The second argument of `substring` is a **length**, not an end position — unlike JavaScript's
+`String.prototype.substring`. So `q.lastName.substring(1, 3)` yields three characters, where
+`"Whyte".substring(1, 3)` in JavaScript yields two.
+
+Not every server gets this right either: Apache Olingo 2 ignores the length argument and answers with `200`
+and a wrong result rather than with an error.
+
+:::
 
 ### Date and Time Functions
 
