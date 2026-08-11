@@ -10,4 +10,5 @@ build
 .yarnrc.yml
 yarn.lock
 
+CHANGELOG.md
 .gitignore
