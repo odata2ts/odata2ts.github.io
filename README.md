@@ -1,4 +1,4 @@
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/odata2ts/odata2ts.github.io/buildAndDeploy.yml?branch=release&style=for-the-badge)](https://github.com/odata2ts/odata2ts.github.io/actions/workflows/buildAndDeploy.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/odata2ts/odata2ts.github.io/buildAndDeploy.yml?branch=main&style=for-the-badge)](https://github.com/odata2ts/odata2ts.github.io/actions/workflows/buildAndDeploy.yml)
 
 # Documentation Website of odata2ts
 
@@ -41,23 +41,40 @@ yarn build
 check that matters most: broken links and broken anchors fail the build. `yarn serve` serves that
 build locally, `yarn clear` removes the Docusaurus caches.
 
+## Commits
+
+[Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) drive the release, so the type
+is not decoration: it decides whether a change ever reaches the live site. Everything in this
+repository is documentation, which makes `doc` meaningless as a type here. Pick the type by what the
+change does to the content instead:
+
+- `feat` - new content: a new page or chapter, a newly documented option
+- `fix` - content that was wrong, outdated, misleading or broken, dead links and typos included
+- `refactor` - restructuring existing content without changing what it says
+- `chore` / `build` - dependencies, tooling, workflows
+- `doc` - this repository's own meta documentation, i.e. this README
+
+Only `feat`, `fix`, dependency bumps and anything marked as a breaking change reach the changelog and
+cause a release. The rest is invisible to release-please, so a batch of only `refactor` or `chore`
+commits sits on `main` until the next `feat` or `fix` publishes it along with everything else.
+
+Scope with the page or section the change belongs to - `fix(configuration): ...` - or leave the scope
+out.
+
 ## Branches and Deployment
 
-This repository uses two long-lived branches:
+`main` is the only long-lived branch. Every pull request targets it, and everything that is finished
+lands there - including documentation for features that are not released yet. What separates
+"finished" from "published" is release-please: merged work accumulates in a release PR
+(`chore(release): publish branch main`), and only merging that release PR publishes the live site.
 
-- **`main`** collects the work. Every pull request targets `main`, and everything that is finished
-  lands there - including documentation for features that are not released yet.
-- **`release`** is what the live site shows. It is only advanced once the corresponding odata2ts
-  release is out, by merging `main` into it.
+That way documentation can be written ahead of a release without publishing it early, which is what
+the former `release` branch was for, but without a second branch to keep in sync.
 
-That split exists so that documentation can be written ahead of a release without publishing it
-early. `release` is never worked on directly: it only ever receives what has already passed
-through `main`.
-
-The site is deployed to GitHub Pages by the
-[buildAndDeploy](./.github/workflows/buildAndDeploy.yml) workflow, which runs on every push to
-`release` and can also be triggered manually from the Actions tab. There is no manual deployment
-step - in particular, the site is not served from a `gh-pages` branch.
+Both steps live in the [buildAndDeploy](./.github/workflows/buildAndDeploy.yml) workflow, which runs
+on every push to `main`: it first lets release-please open or merge the release PR, and deploys to
+GitHub Pages only when that actually created a release. There is no manual deployment step - in
+particular, the site is not served from a `gh-pages` branch.
 
 Pull requests are verified by the [buildAndTest](./.github/workflows/buildAndTest.yml) workflow,
 which type-checks, checks the formatting and builds the site.
