@@ -1,0 +1,29 @@
+name: Update Release PR Lockfile
+
+on:
+  push:
+    branches:
+      # Match branches created by release-please
+      - "release-please--*"
+
+permissions:
+  contents: write
+
+jobs:
+  update-lockfile:
+    runs-on: ubuntu-latest
+    # don't run on forks
+    if: github.repository == 'odata2ts/odata2ts.github.io'
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v7
+      - name: Setup node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Update yarn.lock
+        run: yarn install --mode=update-lockfile
+      - name: Commit lockfile adjustments
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update yarn.lock for release"
