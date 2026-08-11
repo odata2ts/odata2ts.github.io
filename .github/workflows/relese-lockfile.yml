@@ -4,7 +4,7 @@ on:
   push:
     branches:
       # Match branches created by release-please
-      - 'release-please--*'
+      - "release-please--*"
 
 permissions:
   contents: write

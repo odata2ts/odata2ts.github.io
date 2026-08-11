@@ -35,11 +35,10 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v5.0.0
         with:
-          release-type: 'node'
+          release-type: "node"
           config-file: release-please-config.json
           target-branch: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
 
   # Deployment job
   deploy:
