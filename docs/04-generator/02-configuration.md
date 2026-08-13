@@ -48,7 +48,6 @@ const defaultConfig = {
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
   enumType: "string",
-  enumByAllowedValues: false,
   disableBindingProps: false,
   disableDeepInsertProps: false,
   naming: {
@@ -189,7 +188,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                                          |
 | enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                                            |
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                          |
-| enumByAllowedValues                 | `boolean`                                 | `false`           | Generate an enum from a `Validation.AllowedValues` annotation carrying symbolic names. See [enums a service only describes](#enums-a-service-only-describes)                                                     |
+| enumSynthesized                     | `EnumSynthesis`                           | –                 | Names the strategy by which an enum a service only describes is recognised and generated. See [enums a service only describes](#enums-a-service-only-describes)                                                  |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                              |
 | disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                                     |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                    |
@@ -423,14 +422,30 @@ nested `Core.SymbolicName`.
 </Annotations>
 ```
 
-By default such a property reaches you as the `number` it is. Setting `enumByAllowedValues` to `true`
-generates an enum from the annotation, named after the property, and types the property with it:
+By default such a property reaches you as the `number` it is. The `enumSynthesized` option names the
+strategy by which odata2ts should recognise the shape and generate the enum the service left out — there
+is one so far, and naming it is how you opt in:
+
+```ts
+import { EnumSynthesis } from "@odata2ts/odata2ts";
+
+const config: ConfigFileOptions = {
+  services: {
+    myService: {
+      // the CAP convention: allowed values, each with a symbolic name
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
+    },
+  },
+};
+```
+
+The enum is named after the property and shared by every property describing the same members:
 
 ```ts
 const copy = (await service.Copies(key).query().execute()).data;
 
-copy.Status; // 0          - off (default)
-copy.Status; // "Available" - on, i.e. Status.Available
+copy.Status; // 0           - no strategy named (default)
+copy.Status; // "Available" - with the strategy, i.e. Status.Available
 ```
 
 The service knows nothing of that enum, so the _value_ behind a member is what travels - in payloads as
@@ -440,15 +455,17 @@ well as in `$filter` and `$orderby`. The generated client converts between the t
 A property is converted only if **every** allowed value carries a symbolic name. Where one does not, the
 property is left as it was: an enum missing one of its values would reject a value the service accepts.
 
-:::warning Bit masks are not supported
+:::warning Bit masks are out of reach
 
-odata2ts does not support `IsFlags` enums, and one derived from an annotation cannot be a flags enum
-either: `AllowedValues` lists the values a property allows and says nothing about **combining** them.
-The generated enum therefore covers exactly the values listed, so a combination of two of them - `1 | 2`
-where CAP's `Branches/Amenities` lists `1, 2, 4, 8, 16` - is a value the type does not know, and it
-converts to `undefined` on the way in. That combination is legal as far as the service is concerned, which
-is why this option is off by default: where a service packs a set into a number, leaving that number
-alone remains the honest choice.
+A synthesized enum can never be a flag set. `AllowedValues` lists the values a property allows and says
+nothing about **combining** them, and unlike a declared enum there is no `IsFlags` alongside it to say so.
+Such a property therefore gets the plain query path, without the `has` operator,
+and its type covers exactly the values listed. A combination of two of them — `1 | 2` where CAP's
+`Branches/Amenities` lists `1, 2, 4, 8, 16` — is legal as far as the service is concerned, but a value the
+type does not know, and it converts to `undefined` on the way in.
+
+Where a service packs a set into a number, naming no strategy and leaving that number alone remains the
+honest choice.
 
 :::
 
