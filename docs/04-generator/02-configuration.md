@@ -187,8 +187,8 @@ Here is the list of all **base settings** of the config file. By and large this 
 | naming                              | `OverridableNamingOptions`                | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                                               |
 | bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                                          |
 | enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                                            |
+| enumSynthesized                     | `EnumSynthesis`                           | –                 | Synthesize an enum from annotation data (for CAP mainly). See [Synthesized Enums (for CAP)](#synthesized-enums-for-cap)                                                                                          |
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                          |
-| enumSynthesized                     | `EnumSynthesis`                           | –                 | Names the strategy by which an enum a service only describes is recognised and generated. See [enums a service only describes](#enums-a-service-only-describes)                                                  |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                              |
 | disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                                     |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                    |
@@ -399,12 +399,37 @@ The wire format is unaffected: OData transports the member name in every case. W
 generator additionally emits the member list as a constant of the same name, since the query objects need
 something at runtime that a union type does not provide.
 
-## Enums a Service Only Describes
+## Synthesized Enums (for CAP)
 
-Not every service which has enums declares them. In SAP CAP an enum is a constraint on a value rather than
-a type of its own, so no `<EnumType>` is emitted at all: the property keeps its underlying primitive and
-the members turn into a `Validation.AllowedValues` annotation, each allowed value carrying its name in a
-nested `Core.SymbolicName`.
+With the `enumSynthesized` option you can opt-in to get a real enum where your server might generate something
+else. You get a real enum to work with instead of raw numbers - in payloads as well as in `$filter` and `$orderby`.
+odata2ts converts those strings into numbers again behind the scene.
+
+As it could be a more general feature in the future, you have to name the strategy by which odata2ts should
+recognise the shape and generate the enum the service left out — but yeah, there's only one use case so far,
+and it's for CAP:
+
+```ts
+import { EnumSynthesis } from "@odata2ts/odata2ts";
+
+const config: ConfigFileOptions = {
+  services: {
+    myService: {
+      // the CAP convention: allowed values, each with a symbolic name
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
+    },
+  },
+};
+```
+
+### Allowed Values And Symbolic Name
+
+Although you can use enums in CAP at the CDS layer, they are exposed in the metadata as a constraint on a value
+rather than a type of its own, so no `<EnumType>` is emitted at all: We only get annotations and by default,
+an enum property reaches you as the `number` it is.
+
+<details>
+<summary>Annotation Example</summary>
 
 ```xml
 <Property Name="Status" Type="Edm.Byte"/>
@@ -422,52 +447,13 @@ nested `Core.SymbolicName`.
 </Annotations>
 ```
 
-By default such a property reaches you as the `number` it is. The `enumSynthesized` option names the
-strategy by which odata2ts should recognise the shape and generate the enum the service left out — there
-is one so far, and naming it is how you opt in:
+</details>
 
-```ts
-import { EnumSynthesis } from "@odata2ts/odata2ts";
-
-const config: ConfigFileOptions = {
-  services: {
-    myService: {
-      // the CAP convention: allowed values, each with a symbolic name
-      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
-    },
-  },
-};
-```
-
-The enum is named after the property and shared by every property describing the same members:
-
-```ts
-const copy = (await service.Copies(key).query().execute()).data;
-
-copy.Status; // 0           - no strategy named (default)
-copy.Status; // "Available" - with the strategy, i.e. Status.Available
-```
-
-The service knows nothing of that enum, so the _value_ behind a member is what travels - in payloads as
-well as in `$filter` and `$orderby`. The generated client converts between the two, which means the
-`enumType` option applies here as it does to a declared enum.
-
-A property is converted only if **every** allowed value carries a symbolic name. Where one does not, the
-property is left as it was: an enum missing one of its values would reject a value the service accepts.
-
-:::warning Bit masks are out of reach
-
-A synthesized enum can never be a flag set. `AllowedValues` lists the values a property allows and says
-nothing about **combining** them, and unlike a declared enum there is no `IsFlags` alongside it to say so.
-Such a property therefore gets the plain query path, without the `has` operator,
-and its type covers exactly the values listed. A combination of two of them — `1 | 2` where CAP's
-`Branches/Amenities` lists `1, 2, 4, 8, 16` — is legal as far as the service is concerned, but a value the
-type does not know, and it converts to `undefined` on the way in.
-
-Where a service packs a set into a number, naming no strategy and leaving that number alone remains the
-honest choice.
-
-:::
+- A property is converted only if **every** allowed value carries a symbolic name
+- A synthesized enum can never be a flag set / bit mask (regular enums announce that with `IsFlags`)
+- The enum is named after the property
+- The enum is shared by every property describing the same members
+- The `enumType` option applies to these synthesized enums, so you can still choose your output type
 
 ## Binding and Deep Insert
 
