@@ -48,6 +48,7 @@ const defaultConfig = {
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
   enumType: "string",
+  enumByAllowedValues: false,
   disableBindingProps: false,
   disableDeepInsertProps: false,
   naming: {
@@ -188,6 +189,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                                          |
 | enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                                            |
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                          |
+| enumByAllowedValues                 | `boolean`                                 | `false`           | Generate an enum from a `Validation.AllowedValues` annotation carrying symbolic names. See [enums a service only describes](#enums-a-service-only-describes)                                                     |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                              |
 | disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                                     |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                    |
@@ -397,6 +399,56 @@ The `enumType` option controls how enums surface in TypeScript:
 The wire format is unaffected: OData transports the member name in every case. With `"string-union"` the
 generator additionally emits the member list as a constant of the same name, since the query objects need
 something at runtime that a union type does not provide.
+
+## Enums a Service Only Describes
+
+Not every service which has enums declares them. In SAP CAP an enum is a constraint on a value rather than
+a type of its own, so no `<EnumType>` is emitted at all: the property keeps its underlying primitive and
+the members turn into a `Validation.AllowedValues` annotation, each allowed value carrying its name in a
+nested `Core.SymbolicName`.
+
+```xml
+<Property Name="Status" Type="Edm.Byte"/>
+...
+<Annotations Target="Library.Service.Copies/Status">
+  <Annotation Term="Validation.AllowedValues">
+    <Collection>
+      <Record Type="Validation.AllowedValue">
+        <Annotation Term="Core.SymbolicName" String="Available"/>
+        <PropertyValue Property="Value" Int="0"/>
+      </Record>
+      ...
+    </Collection>
+  </Annotation>
+</Annotations>
+```
+
+By default such a property reaches you as the `number` it is. Setting `enumByAllowedValues` to `true`
+generates an enum from the annotation, named after the property, and types the property with it:
+
+```ts
+const copy = (await service.Copies(key).query().execute()).data;
+
+copy.Status; // 0          - off (default)
+copy.Status; // "Available" - on, i.e. Status.Available
+```
+
+The service knows nothing of that enum, so the _value_ behind a member is what travels - in payloads as
+well as in `$filter` and `$orderby`. The generated client converts between the two, which means the
+`enumType` option applies here as it does to a declared enum.
+
+A property is converted only if **every** allowed value carries a symbolic name. Where one does not, the
+property is left as it was: an enum missing one of its values would reject a value the service accepts.
+
+:::warning Flags are not covered
+
+`AllowedValues` says nothing about whether values may be **combined**. Where the values are flags - CAP's
+`Branches/Amenities` lists `1, 2, 4, 8, 16` and the combination `31` - the generated enum covers exactly
+the members the annotation lists. A perfectly valid combination such as `1 | 2` is then a value the type
+does not know, and it converts to `undefined` on the way in. This is why the option is off by default;
+where a service has such a property, leaving it as the number it is remains the honest choice.
+
+:::
 
 ## Binding and Deep Insert
 
