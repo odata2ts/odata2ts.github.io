@@ -104,20 +104,20 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 ## Types and Payload Format
 
-| Feature                      | V4  | V2  | Notes                                                                                                                                       |
-| ---------------------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primitive types              | ✅  | ✅  | See [OData Data Types](pathname:///odata-concepts/odata-types)                                                                              |
-| Converters                   | ✅  | ✅  | See [Converters](./converters)                                                                                                              |
-| Enum types                   | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union                                                                             |
-| Complex types                | ✅  | ✅  |                                                                                                                                             |
-| Inheritance and type casts   | ✅  | 🔶  | V4 addresses derived types by cast segment; V2 renders the hierarchy but cannot serialise it                                                |
-| Open types                   | ✅  | ➖  | The declared properties are typed; the dynamic ones cannot be, since nothing announces them                                                 |
-| `IEEE754Compatible`          | ✅  | ➖  | [`v4.bigNumberAsString`](./generator/configuration#big-number-handling)                                                                     |
-| 4.01 short-form control info | ✅  | ➖  | [`odataVersionV4`](./generator/configuration#odata-401) selects one spelling, requests and responses alike                                  |
-| `metadata=full` / `none`     | 🔶  | ➖  | Through a manual `Accept` header; the extra control information stays untyped                                                               |
-| Instance annotations         | 🔶  | 🔶  | Passed through untyped                                                                                                                      |
-| Vocabulary annotations       | 🔶  | 🔶  | Only the four `Core.*` terms which state how a property is managed: see [managed properties](./generator/configuration#managed-properties). |
-| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](./generator/configuration#extra-results-wrapper)                                                                |
+| Feature                      | V4  | V2  | Notes                                                                                                                                                                                           |
+| ---------------------------- | :-: | :-: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitive types              | ✅  | ✅  | See [OData Data Types](pathname:///odata-concepts/odata-types)                                                                                                                                  |
+| Converters                   | ✅  | ✅  | See [Converters](./converters)                                                                                                                                                                  |
+| Enum types                   | ✅  | ➖  | V2 knows no enums; as string enum, numeric enum or string union                                                                                                                                 |
+| Complex types                | ✅  | ✅  |                                                                                                                                                                                                 |
+| Inheritance and type casts   | ✅  | 🔶  | V4 addresses derived types by cast segment; V2 renders the hierarchy but cannot serialise it                                                                                                    |
+| Open types                   | ✅  | ➖  | The declared properties are typed; the dynamic ones cannot be, since nothing announces them                                                                                                     |
+| `IEEE754Compatible`          | ✅  | ➖  | [`v4.bigNumberAsString`](./generator/configuration#big-number-handling)                                                                                                                         |
+| 4.01 short-form control info | ✅  | ➖  | [`odataVersionV4`](./generator/configuration#odata-401) selects one spelling, requests and responses alike                                                                                      |
+| `metadata=full` / `none`     | 🔶  | ➖  | Through a manual `Accept` header; the extra control information stays untyped                                                                                                                   |
+| Instance annotations         | 🔶  | 🔶  | Passed through untyped                                                                                                                                                                          |
+| Vocabulary annotations       | 🔶  | 🔶  | `Core.*` terms for [managed properties](./generator/configuration#managed-properties), `Validation.AllowedValues` for [derived enums](./generator/configuration#enums-a-service-only-describes) |
+| `results` wrapping           | ➖  | ✅  | See [extra results wrapper](./generator/configuration#extra-results-wrapper)                                                                                                                    |
 
 ## Deliberately Out of Scope
 
