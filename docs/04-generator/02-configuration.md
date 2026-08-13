@@ -440,13 +440,15 @@ well as in `$filter` and `$orderby`. The generated client converts between the t
 A property is converted only if **every** allowed value carries a symbolic name. Where one does not, the
 property is left as it was: an enum missing one of its values would reject a value the service accepts.
 
-:::warning Flags are not covered
+:::warning Bit masks are not supported
 
-`AllowedValues` says nothing about whether values may be **combined**. Where the values are flags - CAP's
-`Branches/Amenities` lists `1, 2, 4, 8, 16` and the combination `31` - the generated enum covers exactly
-the members the annotation lists. A perfectly valid combination such as `1 | 2` is then a value the type
-does not know, and it converts to `undefined` on the way in. This is why the option is off by default;
-where a service has such a property, leaving it as the number it is remains the honest choice.
+odata2ts does not support `IsFlags` enums, and one derived from an annotation cannot be a flags enum
+either: `AllowedValues` lists the values a property allows and says nothing about **combining** them.
+The generated enum therefore covers exactly the values listed, so a combination of two of them - `1 | 2`
+where CAP's `Branches/Amenities` lists `1, 2, 4, 8, 16` - is a value the type does not know, and it
+converts to `undefined` on the way in. That combination is legal as far as the service is concerned, which
+is why this option is off by default: where a service packs a set into a number, leaving that number
+alone remains the honest choice.
 
 :::
 
