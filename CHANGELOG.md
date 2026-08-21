@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/odata2ts/odata2ts.github.io/compare/v1.0.0...v1.1.0) (2026-08-21)
+
+
+### Features
+
+* **configuration:** document annotation-driven managed properties ([6c99ffb](https://github.com/odata2ts/odata2ts.github.io/commit/6c99ffbc34620ba9077c5f8986739ac1893a8493))
+* **configuration:** document deepInsertProps and what changed since 0.43.0 ([85e4619](https://github.com/odata2ts/odata2ts.github.io/commit/85e461922df66009c9f0ab5ea17dee1e0e961500))
+* **configuration:** document enumByAllowedValues ([593e645](https://github.com/odata2ts/odata2ts.github.io/commit/593e6452d0527718e7c8cdffff978168fedce231))
+* document keys and managed props ([559c74e](https://github.com/odata2ts/odata2ts.github.io/commit/559c74e57068f3fb589b4405c8656c406aeba76c))
+* document substring and the has operator ([3e22ec7](https://github.com/odata2ts/odata2ts.github.io/commit/3e22ec749d97b23f60012fcc831b2dc42bac4e36))
+* rewrite Synthesized Enums ([01b61fe](https://github.com/odata2ts/odata2ts.github.io/commit/01b61fed44d917627c2f81c70d1a93d7a844a278))
+
+
+### Bug Fixes
+
+* **feature-support:** has is offered only for flags enums ([30e86b4](https://github.com/odata2ts/odata2ts.github.io/commit/30e86b4061ccfc081844c7c73ebc5a2b96fd963c))
+* **feature-support:** state that IsFlags enums are not supported ([391e033](https://github.com/odata2ts/odata2ts.github.io/commit/391e0331de1ed203ed761e40b6104b7350d6b5c6))
+
 ## 1.0.0 (2026-08-11)
 
 
