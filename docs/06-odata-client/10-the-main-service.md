@@ -206,7 +206,7 @@ For one, when querying for something like an ID field, you definitely get a valu
 standpoint, it is required. However, when creating a new entity - and the server is responsible for generating
 the ID (as it should be) - you cannot specify the ID that is about to be generated. So the whole property
 should be left out for create (and update) requests. `odata2ts` allows to configure these
-[managed properties](../generator/configuration#managed-properties),
+[managed properties](../generator/configuration#keys--managed-properties),
 which only affect the editable model version (e.g. `EditablePerson`).
 
 ```ts

@@ -130,13 +130,19 @@ navigation properties accept a related entity or a reference to an existing one.
 in its minimal form, and the **id function** (`QPersonId`) formats and parses the entity path built from it,
 e.g. `People('russellwhyte')`.
 
+A type with an immutable property additionally gets an **updatable model** (`UpdatablePerson`) wherever
+that would differ from the editable one — `update` and `patch` take it, while `create` keeps the
+editable model. `managedPropertyMode` decides what
+it says about that property - see
+[managed properties in the write models](./configuration#optional-vs-omit).
+
 Several options take artefacts away again:
 
 | Option               | Removes                                              |
 | -------------------- | ---------------------------------------------------- |
 | `mode: "models"`     | all q-objects and services                           |
 | `mode: "qobjects"`   | all services                                         |
-| `skipEditableModels` | the editable models                                  |
+| `skipEditableModels` | the editable and updatable models                    |
 | `skipIdModels`       | the id models and id functions                       |
 | `skipOperations`     | the parameter models and the q-functions / q-actions |
 | `skipComments`       | the doc comments on model properties                 |
@@ -198,7 +204,8 @@ const newPerson: EditablePerson = {
 const created = await trippin.people().create(newPerson).execute();
 ```
 
-**Patching** — the same editable model, but every property optional, so you send only what changes.
+**Patching** — every property optional, so you send only what changes. Where the type has an immutable
+property this is `Partial<UpdatablePerson>` rather than `Partial<EditablePerson>`.
 
 ```ts
 const person = trippin.people("russellwhyte");

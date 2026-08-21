@@ -66,21 +66,21 @@ on a **collection** query, not on a single entity, and `$search` and `groupBy` a
 
 ## Reading and Writing
 
-| Feature                            | V4  | V2  | Notes                                                                                                    |
-| ---------------------------------- | :-: | :-: | -------------------------------------------------------------------------------------------------------- |
-| Read entity / collection           | ✅  | ✅  | Typed response models per version                                                                        |
-| Create, update, patch, delete      | ✅  | ✅  | V2 sends `MERGE` where the protocol demands it                                                           |
-| `$select` / `$expand` on a write   | ✅  | ✅  | The same builder as on a read                                                                            |
-| Editable models                    | ✅  | ✅  | Managed properties are excluded — see [managed properties](./generator/configuration#managed-properties) |
-| Binding an existing entity         | ✅  | ✅  | By key; rendered as `@odata.bind` (4.0), `{"@id": …}` (4.01) or `__metadata.uri` (V2)                    |
-| Deep insert / deep update          | ✅  | ✅  | Related entities inside the parent's payload                                                             |
-| Return representation              | ✅  | ➖  | `patch<true>()` plus `Prefer: return=representation`                                                     |
-| Individual property access         | ✅  | ✅  | Opt-in via [`enablePrimitivePropertyServices`](./generator/configuration#primitive-property-services)    |
-| Optimistic concurrency (ETag)      | ❌  | ❌  | No `If-Match` workflow; possible through manual headers                                                  |
-| Relationship management via `$ref` | ❌  | ➖  |                                                                                                          |
-| Batch requests                     | ❌  | ❌  | Out of scope of the HTTP client design                                                                   |
-| Delta / change tracking            | ❌  | ➖  |                                                                                                          |
-| Asynchronous requests              | ❌  | ➖  |                                                                                                          |
+| Feature                            | V4  | V2  | Notes                                                                                                          |
+| ---------------------------------- | :-: | :-: | -------------------------------------------------------------------------------------------------------------- |
+| Read entity / collection           | ✅  | ✅  | Typed response models per version                                                                              |
+| Create, update, patch, delete      | ✅  | ✅  | V2 sends `MERGE` where the protocol demands it                                                                 |
+| `$select` / `$expand` on a write   | ✅  | ✅  | The same builder as on a read                                                                                  |
+| Editable models                    | ✅  | ✅  | Managed properties are excluded — see [managed properties](./generator/configuration#keys--managed-properties) |
+| Binding an existing entity         | ✅  | ✅  | By key; rendered as `@odata.bind` (4.0), `{"@id": …}` (4.01) or `__metadata.uri` (V2)                          |
+| Deep insert / deep update          | ✅  | ✅  | Related entities inside the parent's payload                                                                   |
+| Return representation              | ✅  | ➖  | `patch<true>()` plus `Prefer: return=representation`                                                           |
+| Individual property access         | ✅  | ✅  | Opt-in via [`enablePrimitivePropertyServices`](./generator/configuration#primitive-property-services)          |
+| Optimistic concurrency (ETag)      | ❌  | ❌  | No `If-Match` workflow; possible through manual headers                                                        |
+| Relationship management via `$ref` | ❌  | ➖  |                                                                                                                |
+| Batch requests                     | ❌  | ❌  | Out of scope of the HTTP client design                                                                         |
+| Delta / change tracking            | ❌  | ➖  |                                                                                                                |
+| Asynchronous requests              | ❌  | ➖  |                                                                                                                |
 
 ## Operations
 

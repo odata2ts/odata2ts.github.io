@@ -16,7 +16,14 @@ so that you only need to provide those settings which diverge from that.
 <summary>Default Configuration</summary>
 
 ```ts
-import { ConfigFileOptions, EmitModes, ManagedPropertyDetection, Modes, NamingStrategies } from "@odata2ts/odata2ts";
+import {
+  ConfigFileOptions,
+  EmitModes,
+  KeyProperties,
+  ManagedPropertyMode,
+  Modes,
+  NamingStrategies,
+} from "@odata2ts/odata2ts";
 
 const defaultConfig = {
   sourceUrlConfig: {},
@@ -32,7 +39,9 @@ const defaultConfig = {
   skipOperations: false,
   skipComments: false,
   enablePrimitivePropertyServices: false,
-  managedPropertyDetection: ManagedPropertyDetection.auto,
+  annotations: { disableManagedProperties: false },
+  keyProperties: KeyProperties.interoperable,
+  managedPropertyMode: ManagedPropertyMode.lenient,
   allowRenaming: false,
   v2: {
     responseResultsWrapping: false,
@@ -56,6 +65,11 @@ const defaultConfig = {
       propNamingStrategy: NamingStrategies.CAMEL_CASE,
       editableModels: {
         prefix: "Editable",
+        suffix: "",
+        applyModelNaming: true,
+      },
+      updatableModels: {
+        prefix: "Updatable",
         suffix: "",
         applyModelNaming: true,
       },
@@ -167,38 +181,40 @@ Consider using the config file for all your configurations.
 
 Here is the list of all **base settings** of the config file. By and large this matches the [CLI options](#cli-options).
 
-| Base Setting                        | Type                                      | Default Value     | Description                                                                                                                                                                                                      |
-| ----------------------------------- | ----------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceUrlConfig                     | `UrlSourceConfiguration`                  | `{}`              | Configuration of the request to download the metadata file. See [downloading-metadata](#downloading-metadata)                                                                                                    |
-| refreshFile                         | `boolean`                                 | `false`           | Download metadata file even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                                                      |
-| mode                                | `Modes`                                   | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                                           |
-| emitMode                            | `EmitModes`                               | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                                         |
-| prettier                            | `boolean`                                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                                               |
-| tsconfig                            | `string`                                  | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                                               |
-| allowRenaming                       | `boolean`                                 | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                                        |
-| managedPropertyDetection            | `ManagedPropertyDetection`                | `"auto"`          | Which sources odata2ts derives from whether a prop is managed on the server side and therefore not editable. Allowed are: auto, annotation, simpleHeuristic, none. See [managed properties](#managed-properties) |
-| debug                               | `boolean`                                 | `false`           | Turn off adding `ts-nocheck` to all generated artefacts; prints out debug information                                                                                                                            |
-| serviceName                         | `string`                                  |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                                  |
-| skipEditableModels                  | `boolean`                                 | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                         |
-| skipIdModels                        | `boolean`                                 | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                               |
-| skipOperations                      | `boolean`                                 | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                          |
-| skipComments                        | `boolean`                                 | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                                            |
-| converters                          | `Array<TypeConverterConfig>`              | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                                             |
-| naming                              | `OverridableNamingOptions`                | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                                               |
-| bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                                          |
-| enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                                            |
-| enumSynthesized                     | `EnumSynthesis`                           | –                 | Synthesize an enum from annotation data (for CAP mainly). See [Synthesized Enums (for CAP)](#synthesized-enums-for-cap)                                                                                          |
-| unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                                          |
-| disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                                              |
-| disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                                     |
-| disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                                    |
-| enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services)                 |
-| v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                                |
-| v4.enableNativeInOperator           | `boolean`                                 | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions.See [the in operator](#using-the-native-in-operator)                                                                           |
-| v4.odataVersion                     | `"4.0" \| "4.01"`                         | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                                     |
-| v2.responseResultsWrapping          | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#extra-results-wrapper)                                                           |
-| v2.payloadResultsWrapping           | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#extra-results-wrapper)                                                                                 |
-| v2.responseAsV4                     | `boolean`                                 | `false`           | Reshape every response of a V2 service as its V4 equivalent, so consumers only ever deal with the V4 shape. See [V2 responses as V4](#use-v4-response-shapes)                                                    |
+| Base Setting                        | Type                                      | Default Value     | Description                                                                                                                                                                                      |
+| ----------------------------------- | ----------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| sourceUrlConfig                     | `UrlSourceConfiguration`                  | `{}`              | Configuration of the request to download the metadata file. See [downloading-metadata](#downloading-metadata)                                                                                    |
+| refreshFile                         | `boolean`                                 | `false`           | Download metadata file even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                                      |
+| mode                                | `Modes`                                   | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                           |
+| emitMode                            | `EmitModes`                               | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                         |
+| prettier                            | `boolean`                                 | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                               |
+| tsconfig                            | `string`                                  | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                               |
+| allowRenaming                       | `boolean`                                 | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                        |
+| annotations                         | `AnnotationOptions`                       | `{}`              | What odata2ts reads out of the annotations of the service. See [annotations](#annotations)                                                                                                       |
+| keyProperties                       | `KeyProperties`                           | `"interoperable"` | What an unannotated key property is taken to be. Allowed are: interoperable, strict, singleComputed, singleComputedComplexOptional, allComputed. See [key properties](#keys--managed-properties) |
+| managedPropertyMode                 | `ManagedPropertyMode`                     | `"lenient"`       | How a managed property shows up in the generated write models. Allowed are: lenient, strictOmit. See [managed properties](#optional-vs-omit)                                                     |
+| debug                               | `boolean`                                 | `false`           | Turn off adding `ts-nocheck` to all generated artefacts; prints out debug information                                                                                                            |
+| serviceName                         | `string`                                  |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                  |
+| skipEditableModels                  | `boolean`                                 | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
+| skipIdModels                        | `boolean`                                 | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                               |
+| skipOperations                      | `boolean`                                 | `false`           | Don't generate separate models & q-objects for operations (function or action). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                          |
+| skipComments                        | `boolean`                                 | `false`           | Don't generate comments for model properties. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                                            |
+| converters                          | `Array<TypeConverterConfig>`              | `[]`              | Provide list of installed converters to use. See [converters](#types-and-converters)                                                                                                             |
+| naming                              | `OverridableNamingOptions`                | see defaultConfig | Configure naming aspects of the generated artefacts. See [configuring naming schemes](#configuring-naming-schemes)                                                                               |
+| bundledFileGeneration               | `boolean`                                 | `false`           | Bundle the generation into one file per kind of artefact instead of a folder per model. See [file layout](#file-layout--cyclic-imports)                                                          |
+| enumType                            | `"string" \| "numeric" \| "string-union"` | `"string"`        | How to represent enums in TypeScript. See [enum representation](#enum-representation)                                                                                                            |
+| enumSynthesized                     | `EnumSynthesis`                           | –                 | Synthesize an enum from annotation data (for CAP mainly). See [Synthesized Enums (for CAP)](#synthesized-enums-for-cap)                                                                          |
+| unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                          |
+| disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
+| disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                     |
+| disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
+| enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
+| v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
+| v4.enableNativeInOperator           | `boolean`                                 | `false`           | Render the `in` operator natively instead of rolling it out as equals-expressions.See [the in operator](#using-the-native-in-operator)                                                           |
+| v4.odataVersion                     | `"4.0" \| "4.01"`                         | `"4.0"`           | Which minor version of OData V4 to target; affects payloads and response types. See [OData 4.01](#odata-401)                                                                                     |
+| v2.responseResultsWrapping          | `boolean`                                 | `false`           | State that a V2 service answers with an extra wrapper object around an expanded entity collection. See [extra results wrapper](#extra-results-wrapper)                                           |
+| v2.payloadResultsWrapping           | `boolean`                                 | `false`           | The same for a request payload, i.e. the nested collection of a deep insert. See [extra results wrapper](#extra-results-wrapper)                                                                 |
+| v2.responseAsV4                     | `boolean`                                 | `false`           | Reshape every response of a V2 service as its V4 equivalent, so consumers only ever deal with the V4 shape. See [V2 responses as V4](#use-v4-response-shapes)                                    |
 
 ## Service Settings
 
@@ -217,7 +233,7 @@ as well as options to reconfigure entities and properties:
 | output           | `string`                            | ---           | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)     |
 | serviceName      | `string`                            |               | Overwrites the service name found in OData metadata & controls the main service name. Same as the base setting but on this level it makes sense. |
 | byTypeAndName    | `Array<TypeBasedGenerationOptions>` | `[]`          | Match types by their name and configure them. See [type options](#type-options)                                                                  |
-| propertiesByName | `Array<PropertyGenerationOptions>`  | `[]`          | Match properties by their name and configure them. See [configuration by property](#configuration-by-property)                                   |
+| propertiesByName | `Array<PropertyGenerationOptions>`  | `[]`          | Match properties by their name and configure them. See [configuration by property](#reconfiguring-entities-and-properties)                       |
 
 ## CLI Options
 
@@ -227,20 +243,21 @@ As you can see, this largely matches the **base settings**:
 - additionally, `source` and `output` options are available (cf. [service settings](#service-settings))
 - options `skipXXX`, `converters` and `naming` are not available though
 
-| CLI Option                     | Default Value     | Description                                                                                                                                                                                                      |
-| ------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--source-url`<br/>`-u`        |                   | Specifies the full URL to the root of your OData service. See [downloading-metadata](#downloading-metadata)                                                                                                      |
-| `--source`<br/>`-s`            |                   | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                                                                                      |
-| `--output`<br/>`-o`            |                   | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)                                                                     |
-| `--refresh-file`<br/>`-f`      |                   | Download metadata file again, even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                                               |
-| `--service-name`               |                   | Overwrites the service name found in OData metadata => controls name of main odata service                                                                                                                       |
-| `--mode`<br/>`-m`              | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                                           |
-| `--emit-mode`<br/>`-e`         | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                                         |
-| `--prettier`<br/>`-p`          | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                                               |
-| `--tsconfig`<br/>`-t`          | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                                               |
-| `--allow-renaming`<br/>`-r`    | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                                        |
-| `--managed-property-detection` | `"auto"`          | Which sources odata2ts derives from whether a prop is managed on the server side and therefore not editable. Allowed are: auto, annotation, simpleHeuristic, none. See [managed properties](#managed-properties) |
-| `--debug`<br/>`-d`             | `false`           | Add debug information; also removes the `@ts-nocheck` comment from each generated file                                                                                                                           |
+| CLI Option                  | Default Value     | Description                                                                                                                                                                                      |
+| --------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--source-url`<br/>`-u`     |                   | Specifies the full URL to the root of your OData service. See [downloading-metadata](#downloading-metadata)                                                                                      |
+| `--source`<br/>`-s`         |                   | Specifies the path to the metadata source file (EDMX). See [setup-and-usage](setup-and-usage#configuration)                                                                                      |
+| `--output`<br/>`-o`         |                   | Specifies the output directory. This folder gets cleaned and overwritten on generation. See [setup-and-usage](setup-and-usage#configuration)                                                     |
+| `--refresh-file`<br/>`-f`   |                   | Download metadata file again, even if it exists. See [downloading-metadata](#downloading-metadata)                                                                                               |
+| `--service-name`            |                   | Overwrites the service name found in OData metadata => controls name of main odata service                                                                                                       |
+| `--mode`<br/>`-m`           | `"all"`           | Allowed are: all, models, qobjects, service. See [generation modes](#generation-modes)                                                                                                           |
+| `--emit-mode`<br/>`-e`      | `"js_dts"`        | Specify what to emit. ALlowed values: ts, js, dts, js_dts. See [emit modes](#emit-modes)                                                                                                         |
+| `--prettier`<br/>`-p`       | `false`           | Use prettier to pretty print the TS result files; only applies when emitMode = ts. See [emitting TypeScript](#emitting-typescript)                                                               |
+| `--tsconfig`<br/>`-t`       | `"tsconfig.json"` | When compiling TS to JS, the compilerOptions of the specified file are used; only takes effect, when emitMode != ts. See [emitting JS](#emitting-compiled-js--dts)                               |
+| `--allow-renaming`<br/>`-r` | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                        |
+| `--key-properties`          | `"interoperable"` | What an unannotated key property is taken to be. Allowed are: interoperable, strict, singleComputed, singleComputedComplexOptional, allComputed. See [key properties](#keys--managed-properties) |
+| `--managed-property-mode`   | `"lenient"`       | How a managed property shows up in the generated write models. Allowed are: lenient, strictOmit. See [managed properties](#optional-vs-omit)                                                     |
+| `--debug`<br/>`-d`          | `false`           | Add debug information; also removes the `@ts-nocheck` comment from each generated file                                                                                                           |
 
 Besides options, the CLI takes any number of **service names** as arguments. Each must exist in the config
 file, and only those services are generated:
@@ -386,6 +403,115 @@ A clash that no automatism can resolve is a **renaming** clash: two distinct ODa
 TypeScript name, e.g. `Location_` and `Location` under camelCase. Only you can say which of the two keeps
 the plain name, so generation stops with a message naming both and pointing at `propertiesByName` or
 `byTypeAndName`.
+
+## Keys & Managed Properties
+
+Some properties are **managed by the server**, most notably `ID` fields or fields like `createdAt` or `modifiedBy`,
+which are usually automatically generated by the database. This matters for clients, e.g. when it comes to
+creating an entity: Is this a key the client has to provide or is it server generated? The typing changes accordingly
+from required to optional, and you might even want such props completely gone from the type.
+
+Servers can announce managed state via annotations, e.g. (`Core.Computed`). CAP generates `ComputedDefaultValue` for
+each key of type `UUID` out-of-the-box, then it's your turn to annotate the CDS for managed props that are not UUID
+keys, which is quite easy. In ASPNet and other frameworks it's more difficult, as you want to annotate your data model
+(which might be a different framework, e.g. EF) which doesn't know about your OData layer. But no rocket science either.
+All-in-all there's no guarantee that managed properties are announced by the server; quite on the contrary,
+we should expect that managed state is not properly announced.
+
+And here comes the hiccup: If not annotated otherwise, keys are required on create by default.
+This default may be fitting for test servers like the legendary Trippin service, but in real-life scenarios the server
+will most likely generate all the keys. To remedy the situation odata2ts offers the option to specify how keys should
+be treated in general via option `keyProperties`.
+
+| Option                        | Meaning                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| interoperable                 | The default: All keys are optional on create & update        |
+| strict                        | All keys are as announced by the metadata                    |
+| singleComputed                | Mark all single keys as computed, complex keys stay required |
+| singleComputedComplexOptional | Like previous option, but complex keys become optional       |
+| allComputed                   | Single as well as complex keys are marked as immutable       |
+
+Now, that you can set your default key handling strategy, you can also override it for individual properties
+(see [property options](#property-options)):
+
+| State                 | Meaning                                                                     |
+| --------------------- | --------------------------------------------------------------------------- |
+| `readOnly`            | the server owns it, on create and on update alike                           |
+| `writeOnly`           | the client may or must write it but never reads it back                     |
+| `createOnly`          | the client may or must supply it on create, and it never changes afterwards |
+| `optionalWithDefault` | the client may supply it, and the server generates one where it does not    |
+
+### Optional vs Omit
+
+You have two options regarding the shape of the write models via the configuration `managedPropertyMode`:
+
+- `lenient` (the default): Non-updatable and non-creatable props become simply optional; you can send them, but you don't have to
+- `strict-omit`: Non-updatable and non-creatable props are omitted entirely
+
+| Managed state         | `lenient` create   | `lenient` update   | `strictOmit` create | `strictOmit` update |
+| --------------------- | ------------------ | ------------------ | ------------------- | ------------------- |
+| `readOnly`            | present, optional  | present, optional  | **absent**          | **absent**          |
+| `createOnly`          | follows `nullable` | present, optional  | follows `nullable`  | **absent**          |
+| `optionalWithDefault` | present, optional  | present, optional  | present, optional   | present, optional   |
+| `writeOnly`           | follows `nullable` | follows `nullable` | follows `nullable`  | follows `nullable`  |
+
+While it's more intuitive to omit unnecessary properties, you get the real-life benefit of being able to
+reuse your models you retrieved by read operations for write operations, if you don't omit.
+
+### Annotations
+
+The following annotations from the `Org.OData.Core.V1` vocabulary are evaluated:
+
+| Term                   | Meaning                                                                      | Resulting state       |
+| ---------------------- | ---------------------------------------------------------------------------- | --------------------- |
+| `Computed`             | The value is generated on insert and/or on update                            | `readOnly`            |
+| `Permissions.Read`     | The client is not allowed to set new value                                   | `readOnly`            |
+| `Permissions.Write`    | The client may or must set value, but is not allowed to read it              | `writeOnly`           |
+| `ComputedDefaultValue` | The client may supply a value; without one the server generates a default    | `optionalWithDefault` |
+| `Immutable`            | The client may supply a value on create, and it stays unchanged from then on | `createOnly`          |
+
+Alias resolution for the vocabulary as well as both ways of attaching an annotation are supported:
+inline as a child of the property, and externally through an `<Annotations Target="...">` block.  
+Annotations whose value is a **dynamic expression** (`Path`, `If`, `Apply`, …) are ignored.
+The same goes for **qualified** annotations (`Qualifier="..."`), which apply to a context that only
+the application knows.
+
+As the V2 protocol predates the concept of vocabularies, it has different semantics here, so we translate that
+into the V4 anlaogs. odata2ts evaluates the following historic attributes:
+
+- `sap:updatable` and `sap:creatable`: evaluated in combination
+  - can express: `readOnly` and `createOnly`
+  - the combination of `updatable: true` and `creatable: false` is ignored completely (no V4 analog)
+- `StoreGeneratedPattern="Identity"` and `StoreGeneratedPattern="Computed"`
+  - expresses: `readOnly`
+
+Where the annotations are wrong or unwanted, turn them off and state what is managed
+yourself:
+
+```ts
+annotations: {
+  disableManagedProperties: true;
+}
+```
+
+Nothing is then derived from an annotation. `keyProperties` and the per-property configuration are
+untouched by this switch — they are the two other sources, and they still apply.
+
+### Updatable Models
+
+Create and update might be two different payloads, and an immutable property is what they disagree about. So a
+type which has one gets a write model per operation, wherever the two would differ:
+
+- **create** takes `EditableXModel`, which `create()` on the collection service uses.
+- **update** takes `UpdatableXModel`, which `update()` (PUT) and `patch()` (PATCH) both use.
+
+`UpdatableXModel` is generated only where it would actually differ from `EditableXModel`.
+Nested types resolve accordingly: a complex property points at the nested
+type's `UpdatableXModel` where that type has one, while a navigation property always points at the
+referenced entity's `EditableXModel`, which is also spec conformant, because it is a complete replacement.
+
+`skipEditableModels` remains the single switch for generating write models at all; it gates
+`UpdatableXModel` too.
 
 ## Enum Representation
 
@@ -767,6 +893,11 @@ const namingConfig = {
         suffix: "",
         applyModelNaming: true,
       },
+      updatableModels: {
+        prefix: "Updatable",
+        suffix: "",
+        applyModelNaming: true,
+      },
       idModels: {
         prefix: "",
         suffix: "Id",
@@ -810,79 +941,6 @@ this way: `IPerson`, `IEditablePerson`, `IPersonId`.
 As best practice, always override `prefix` **and** `suffix`, when you want to set one or the other.
 
 :::
-
-## Managed Properties
-
-Some properties are **managed by the server**, most notably ID fields:
-The server is responsible for generating a unique identifier for each new entity.
-Other examples are fields like `createdAt` or `modifiedBy` which are
-automatically handled by the server or database.
-
-odata2ts has a simple heuristic to decide that single key properties are
-read only. However, OData actually allows the server to provide such information
-via annotations, which then take precedence over the simple heuristic and also
-captures more properties. Last but not least you can control this explicitly via
-property configuration.
-
-The options are fine-grained thanks to OData, so you get the following options:
-
-- readOnly: editable models don't get this property
-- writeOnly: the regular read models don't get this property
-- createOnly: optional or required on create, not allowed on updates
-- optionalWithDefault: property is optional and a default is set by the server if not provided
-
-:::note
-
-CreateOnly is special: to be implemented.
-
-:::
-
-### Annotations
-
-odata2ts respects the following annotations to decide on the managed state, which all belong
-to the `Org.OData.Core.V1` vocabulary:
-
-| Term                   | Meaning                                                                      | Effect on the generated models                                                                                         |
-| ---------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `Computed`             | The server generates the value, on insert as well as on update               | Left out of the editable model                                                                                         |
-| `Permissions`          | Which access the client has; only `Read` resp. only `Write` are acted upon   | Read-only: left out of the editable model.<br/>Write-only: left out of the model, since it never arrives in a response |
-| `ComputedDefaultValue` | The client may supply a value; without one the server generates a default    | Editable, but never required                                                                                           |
-| `Immutable`            | The client may supply a value on create, and it stays unchanged from then on | Editable, but never required                                                                                           |
-
-Alias resolution for the vocabulary as well as both ways of attaching an annotation are supported:
-inline as a child of the property, and externally through an `<Annotations Target="...">` block.  
-Annotations whose value is a **dynamic expression** (`Path`, `If`, `Apply`, …) are ignored.
-The same goes for **qualified** annotations (`Qualifier="..."`), which apply to a context that only
-the application knows.
-
-### The Simple Heuristic
-
-Many services state no annotations at all. For those `odata2ts` falls back on an automatism: single key
-fields (the key of the entity is composed of one single field), like ID, are marked as `readOnly`, while
-each field of a complex key (the key of the entity is composed of multiple fields) is left alone.
-
-Note that this heuristic only ever concerns keys - it has nothing to say about any other property.
-
-### Detection Sources
-
-The option `managedPropertyDetection` controls which of the two sources `odata2ts` derives the managed
-state from. It applies to **every property**, not just to keys.
-
-| Value             | Annotations | Simple heuristic                               |
-| ----------------- | ----------- | ---------------------------------------------- |
-| `auto` (default)  | yes         | yes, but only where no annotation applies      |
-| `annotation`      | yes         | no                                             |
-| `simpleHeuristic` | no          | yes - the behaviour before annotations existed |
-| `none`            | no          | no                                             |
-
-With `none` no property is managed at all unless you say so yourself via configuration.
-
-### Configuration by Property
-
-You can configure properties manually to mark them as `managed`;
-this always wins over the annotations of the service and over the simple heuristic,
-whatever `managedPropertyDetection` is set to.
-See [property options](#property-options).
 
 ## Reconfiguring Entities and Properties
 
@@ -977,7 +1035,7 @@ Renaming types this way is independent of the `allowRenaming` setting
 You have two options here:
 
 - rename properties (regular expressions are supported)
-- mark properties as managed (cf. [managed properties](#managed-properties))
+- mark properties as managed (cf. [managed properties](#keys--managed-properties))
 
 ```ts
 const config = {
