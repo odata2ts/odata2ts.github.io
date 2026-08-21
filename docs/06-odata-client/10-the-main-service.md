@@ -274,9 +274,10 @@ await trippinService
   .execute();
 ```
 
-Both are on by default. Switch them off individually with
-[`disableBindingProps`](../generator/configuration#binding-and-deep-insert) and `disableDeepInsertProps`
-if you would rather not have the navigation properties on the editable models at all.
+Both are on by default. Switch the binding off with
+[`disableBindingProps`](../generator/configuration#binding-and-deep-insert); the deep insert props are
+steered by [`deepInsertProps`](../generator/configuration#deepinsertprops), which also has a setting for
+CAP, where deep writes run along compositions only.
 
 To **clear** an existing (optional) association, set the field to `null` in a `patch()` (or `update()`):
 
