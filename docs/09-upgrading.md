@@ -8,6 +8,92 @@ sidebar_position: 9
 
 What changes between releases in ways that need something from you. Everything else is additive.
 
+## Coming from 0.43.0 and earlier
+
+### `disableAutoManagedKey` is now `keyProperties`
+
+A key cannot change once the entity exists — that much odata2ts can tell without being told. What it
+cannot tell is **who supplies the value**, the client on create or the server. The old boolean answered
+that with one heuristic; the new option lets you state it.
+
+| before                        | equivalent now                    |
+| ----------------------------- | --------------------------------- |
+| the default                   | `keyProperties: "singleComputed"` |
+| `disableAutoManagedKey: true` | `keyProperties: "strict"`         |
+
+The default changed as well, to `interoperable`: the key stays immutable, but is **never required on
+create**, whatever `nullable` says. That is deliberately not what the specification asks for — it is what
+works against the services people really have, since a server generating keys without annotating them is
+the common case. `strict` is the spec-conformant reading.
+
+The practical difference from the old default: a single key property used to be **absent** from the
+editable models, and is now **present and optional**. Set `keyProperties: "singleComputed"` to keep the
+old shape.
+
+See [Keys & Managed Properties](./generator/configuration#keys--managed-properties).
+
+### Managed properties are read from the service's annotations
+
+`Core.Computed`, `Core.Immutable`, `Core.ComputedDefaultValue` and `Core.Permissions` are now evaluated,
+where previously nothing but the key heuristic and your own per-property configuration had any say. A
+service that states these terms properly needs no configuration at all.
+
+**Your write models may therefore change shape** — a computed property is no longer demanded on create, an
+immutable one no longer offered on update. Nothing is required that was not required before, so this
+relaxes rather than tightens. Switch it off with `annotations: { disableManagedProperties: true }`.
+
+The new `managedPropertyMode` decides how such a property appears: `lenient` (the default) keeps it in
+the write model but never requires it, `strictOmit` takes it out. The per-property `managed` option still
+accepts a boolean, so existing configurations keep working.
+
+### `update()` and `patch()` may take an Updatable model
+
+Where a type has immutable properties of its own, it now gets a second write model beside the editable
+one, and the entity service uses it: `create()` takes `EditableFoo`, `update()` and `patch()` take
+`UpdatableFoo`. Types with nothing immutable about them are unaffected — a second, identical model would
+be noise, so none is generated.
+
+This only concerns you where you wrote such a payload type out by hand; inferred usage is unchanged.
+
+### `has` is offered only for flags enums
+
+`has` used to sit on the shared enum path, so it appeared on **every** enum property, although V4 defines
+it for a flag set alone. Elsewhere it was not refused but silently useless: the server evaluates it
+bitwise over the underlying values, and for a member of `0` every row matches.
+
+It now lives on `QFlagsEnumPath` and `QNumericFlagsEnumPath`, which the generator picks exactly where the
+metadata declares `IsFlags="true"`. **Calling `has` on an enum without that declaration no longer
+compiles.** Regenerate; properties whose enum does carry the flag keep the operator. A collection keeps
+the plain path, since `has` applies to the property rather than to its items.
+
+If the compiler now rejects a `has` you were relying on, that call was never doing what it looked like.
+
+### Enums can be synthesized from `Validation.AllowedValues`
+
+New and opt-in, so it asks nothing of you — listed here only so you know it arrived. Some services declare
+no `<EnumType>` and annotate a plain property with the values it accepts instead, which is CAP's habit;
+`enumSynthesized` turns such an annotation into a real enum. See
+[Synthesized Enums](./generator/configuration#synthesized-enums-for-cap).
+
+`enumType` is unchanged and still decides how enums are rendered.
+
+### `disableDeepInsertProps` is now `deepInsertProps`
+
+The option names what it selects instead of switching a feature off, which leaves room for the third
+setting that came with it:
+
+| before                          | now                       |
+| ------------------------------- | ------------------------- |
+| `disableDeepInsertProps: false` | `deepInsertProps: "all"`  |
+| `disableDeepInsertProps: true`  | `deepInsertProps: "none"` |
+
+The default is unchanged. The new value is `composition-only`, which offers the deep insert shape only
+for navigation properties marked `ContainsTarget="true"` — meant for CAP, where deep writes run along
+compositions and not along associations. See
+[`deepInsertProps`](./generator/configuration#deepinsertprops).
+
+`disableBindingProps` is untouched.
+
 ## Coming from 0.42.0 and earlier
 
 ### Services are no longer generic over the HTTP client

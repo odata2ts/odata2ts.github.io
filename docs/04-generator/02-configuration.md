@@ -18,6 +18,7 @@ so that you only need to provide those settings which diverge from that.
 ```ts
 import {
   ConfigFileOptions,
+  DeepInsertProps,
   EmitModes,
   KeyProperties,
   ManagedPropertyMode,
@@ -58,7 +59,7 @@ const defaultConfig = {
   unflattenComplexTypes: false,
   enumType: "string",
   disableBindingProps: false,
-  disableDeepInsertProps: false,
+  deepInsertProps: DeepInsertProps.all,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -206,7 +207,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | enumSynthesized                     | `EnumSynthesis`                           | –                 | Synthesize an enum from annotation data (for CAP mainly). See [Synthesized Enums (for CAP)](#synthesized-enums-for-cap)                                                                          |
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                          |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
-| disableDeepInsertProps              | `boolean`                                 | `false`           | Don't allow to create or update related entities within the payload of their parent. See [binding and deep insert](#binding-and-deep-insert)                                                     |
+| deepInsertProps                     | `DeepInsertProps`                         | `"all"`           | Which navigation properties may carry a related entity within the payload of their parent. Allowed are: all, composition-only, none. See [deepInsertProps](#deepinsertprops)                     |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
 | enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
 | v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
@@ -605,8 +606,54 @@ CAP also supports an alternative as it additionally maps the key of the associat
 as simple property, e.g. if the entity has a navigation property `BestFriend` then you automatically
 get `BestFriend_ID`. Setting a new id on this property is effectively the same as `Binding`.
 
-You can switch off both features individually with `disableBindingProps`
-and `disableDeepInsertProps`.
+You can switch off the binding props with `disableBindingProps`. The deep insert props are steered by
+`deepInsertProps`, which has three settings.
+
+### `deepInsertProps`
+
+| Value              | Effect                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `all`              | The default: every navigation property carries the deep insert shape.              |
+| `composition-only` | Only a navigation property marked `ContainsTarget="true"` carries it. **For CAP.** |
+| `none`             | No navigation property carries it.                                                 |
+
+`all` is what the protocol allows. The specification puts no condition on a deep insert: each nested
+entity is processed "as if it was posted against the original target URL extended with the navigation
+path to this related entity".
+
+#### `composition-only` is for CAP, and narrower than the protocol
+
+It exists because of the CAP limitation described above: deep writes run along compositions only. Sending
+a nested entity for an association gets you a **400** for a to-one and a **silent no-op** for a to-many —
+the payload is accepted, and quietly dropped. This setting takes those properties out of the editable
+models, leaving the binding, which does work.
+
+CAP has to be told to say which relationship is which, because it emits no `ContainsTarget` by default.
+Either switch containment on for every composition:
+
+```json title="package.json"
+{ "cds": { "odata": { "containment": true } } }
+```
+
+or annotate a single one, which works without the global flag:
+
+```cds
+annotate Library.Service.Audiobooks with { Chapters @odata.contained };
+```
+
+Under the global flag, `@odata.contained: false` opts an individual composition back out. Either way the
+contained target **loses its own entity set** and becomes reachable only through its container. capire
+describes containment as opt-in today and as the default of the next major release.
+
+:::warning On other servers this takes away more than it should
+Containment is a statement about _addressing_, not about write permission: it says the target is reached
+through its container, and nothing about what may be written. A server such as ASP.NET Core OData marks
+containment faithfully **and** accepts a deep insert on plain associations, so `composition-only` removes
+properties there for writes that would have succeeded. Use it for CAP, not as a general setting.
+:::
+
+OData V2 knows no containment at all, so a V2 service is exempt from the setting rather than emptied by
+it: every navigation property keeps the deep insert shape.
 
 ## Flattened Complex Types
 
