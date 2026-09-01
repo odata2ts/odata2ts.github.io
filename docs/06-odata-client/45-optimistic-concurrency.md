@@ -77,6 +77,21 @@ Ask for the entity back and both the data and the ETag are fresh in one round tr
 await service.Copies(id).patch<true>({ Condition: 7 }).execute();
 ```
 
+## Actions carry it too
+
+An action bound to the entity - not a function, which only reads, and not one bound to a collection,
+which addresses no single resource - sends `If-Match` from the same store a `patch` or `query` would
+fill:
+
+```ts
+await service.Copies(id).query().execute();
+await service.Copies(id).assessCondition({ newCondition: 5 }).execute();
+```
+
+Everything below applies just the same: a fresh read is enough, a stale or missing ETag throws
+`ODataConcurrencyError` before the request is sent, and `withETag()` / `ignoreETag()` work exactly as
+they do for `patch`.
+
 ## When no ETag is known
 
 `ODataConcurrencyError` is thrown **before** the request is sent — the service would answer `428
@@ -151,7 +166,6 @@ No `If-Match` is then ever sent, and a service demanding one answers `428`.
 
 ## Limitations
 
-- **Actions bound to an entity** do not carry `If-Match` yet, although the specification requires it.
 - **Navigation-reached entities** are covered by the annotation of their entity set. A service that states
   concurrency control only through `Capabilities.NavigationRestrictions` is not recognised.
 - **Streams and media content** (`…/$value`) are written without an ETag.
