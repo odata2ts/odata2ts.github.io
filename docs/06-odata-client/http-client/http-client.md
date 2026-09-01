@@ -21,8 +21,9 @@ The responsibilities of the HTTP Client are:
 - custom request configuration (optional)
 - automatic CSRF token handling (optional)
 
-Features like **optimistic locking** (via `ETag`) or **batch requests** are currently not in scope
-of the HTTP client and may never be.
+**Optimistic locking** (via `ETag`) is part of the contract: every implementation stores ETags and adds
+`If-Match` automatically - see [Optimistic Concurrency](../optimistic-concurrency). **Batch requests**
+remain out of scope of the HTTP client and may never be in it.
 
 Provided implementations:
 
