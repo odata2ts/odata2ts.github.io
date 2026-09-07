@@ -61,7 +61,7 @@ const defaultConfig = {
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
   cacheKeys: { enabled: false },
-  namespace: { alias: {}, disableAutoAlias: false, useAliasForFolderName: false },
+  namespace: { alias: {}, useAliasForFolderName: false },
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -748,19 +748,13 @@ unlocks (`RequestCmd.cacheKey`, `invalidates` on write responses, `touchesResour
 
 ## Namespace Aliasing
 
-Most of a `cacheKey` never carries a namespace at all - a hop is named after the route actually taken (a
-navigation property's or entity set's own name), never a type. Two restrictions remain genuinely
-type-shaped, though, because the URL itself states them that way: a subtype cast segment and a bound
-operation's own name, both requiring the addressed type's fully qualified OData name (FQN) -
-`Library.Circulation.BulkRenew`, not `BulkRenew` - since the generated TypeScript name is not unique across
-namespaces even though the FQN is. That's correct, but verbose wherever it applies: a real service's
-namespaces are often deeply nested (`Company.Product.Area.SubArea`), and both of these cache-key literals,
-plus a `byTypeAndName`/`propertiesByName` matcher written against a type in such a namespace (see
-[type options](#type-options)), pay for the whole path even though only the last segment usually carries
-the distinguishing information.
+Namespaces make entities unique, but at the same time they are unhandy, lengthening names considerably with redundant
+noise.
 
-OData already has a spec-native answer to this: CSDL's `<Schema Namespace="..." Alias="...">`. `namespace`
-lets you fill in an alias the server doesn't declare one for, or let `odata2ts` guess one on its own:
+OData already has a spec-native answer to this by virtue of the `Alias` attribute:
+`<Schema Namespace="..." Alias="...">`. So you define a much shorter alias and can use it instead of the
+fully qualified name. odata2ts adds to this by offering you a custom alias mapping for namespaces without
+an alias:
 
 ```ts
 const config: ConfigFileOptions = {
@@ -770,32 +764,12 @@ const config: ConfigFileOptions = {
 };
 ```
 
-Every namespace's **effective alias** is resolved from three sources, in fixed precedence:
-
-1. **Server-declared** - a `<Schema Alias="...">` the metadata itself carries. Authoritative: it already
-   drives how alias-qualified references inside the EDMX itself resolve, so a project's own choice can
-   never contradict it - configuring `alias` for a namespace the server already aliases is a hard error at
-   generation time, before any file is emitted.
-2. **Project-configured** - the `alias` map above, keyed by the real namespace. Only ever fills a namespace
-   the server left unaliased.
-3. **Auto-synthesized** - odata2ts's own guess, computed where the first two leave a gap: the namespace's
-   **last dot-segment** (`Library.Catalog` → `Catalog`, `PublisherRegistry` → `PublisherRegistry`). This
-   happens **by default**, even for a service with only one namespace - there is no special case that drops
-   the prefix to nothing instead, since that would make a single-namespace service's literals and matchers
-   look structurally different from a multi-namespace one for no reason a caller can see from the value
-   alone. Set `disableAutoAlias: true` to turn this off entirely and keep every unaliased namespace's full
-   name, i.e. the behavior before this option existed.
-
-A synthesized alias that would collide - with another synthesized alias, with a server-declared or
-project-configured one, or with a real namespace name elsewhere in the service - is silently dropped for the
-namespace(s) involved, never breaking a build: nobody explicitly asked for it. A server-declared or
-project-configured alias colliding with anything, by contrast, is a hard error - that's a deliberate setting
-someone actually wrote, not a best-effort guess.
-
 The resulting alias is used in three places:
 
-- **Cache-key literals** - the cast and bound-operation literals above shorten automatically, with no
-  separate opt-in beyond `cacheKeys` itself.
+- **Cache-key literals** - a subtype cast and a bound operation's own name are the only two places a
+  `cacheKey` still carries a namespace-qualified name at all (see [Cache Keys](../odata-client/cache-keys));
+  both shorten automatically once their namespace has an alias, with no separate opt-in beyond `cacheKeys`
+  itself.
 - **`byTypeAndName`/`propertiesByName` matching** - a matcher written in alias form (`"Cat.Book"`) resolves
   the same way one written against the real namespace (`"Library.Catalog.Book"`) already does; the alias is
   an additional accepted spelling, never a replacement.
@@ -810,7 +784,7 @@ const config: ConfigFileOptions = {
   },
 };
 // generates library-catalog/book/... as catalog/book/... instead, once "Library.Catalog" has an
-// effective alias of "Catalog" - from any of the three sources above
+// effective alias of "Catalog" - server-declared or configured above, either way
 ```
 
 ## V4 Specific Options
