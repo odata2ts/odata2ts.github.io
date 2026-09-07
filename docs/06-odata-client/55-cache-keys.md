@@ -57,7 +57,10 @@ service.Media(5).Copies().query().cacheKey;
   resource rather than becoming one of its own — with `"$value"` appended where the raw value itself is
   addressed.
 - A bound operation hop carries its own namespace-qualified name — that literally is the URL segment OData
-  appends to address it, unlike a type name, which never appears in a URL at all.
+  appends to address it, unlike a type name, which never appears in a URL at all. A subtype cast in the
+  params object (below) is the only other place a namespace-qualified name appears in a key. Both shorten
+  automatically once a namespace has an effective alias — see
+  [Namespace Aliasing](../generator/configuration#namespace-aliasing).
 - Everything a query restricts the resource by — `$select`, `$expand`, `$filter`, `$orderby`, `$top`/
   `$skip`, `$count`, `$search`, `$apply`, a subtype cast, a singleton marker, an operation's invocation
   parameters — lands in one flat **params object**, always last, omitted entirely when it would be empty.
