@@ -61,6 +61,7 @@ const defaultConfig = {
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
   cacheKeys: { enabled: false },
+  namespace: { alias: {}, disableAutoAlias: false, useAliasForFolderName: false },
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -210,6 +211,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
 | deepInsertProps                     | `DeepInsertProps`                         | `"all"`           | Which navigation properties may carry a related entity within the payload of their parent. Allowed are: all, composition-only, none. See [deepInsertProps](#deepinsertprops)                     |
 | cacheKeys                           | `boolean \| { enabled: boolean }`         | `false`           | Generate `RequestCmd.cacheKey` for building a cache on top of the client. See [Cache Keys](#cache-keys)                                                                                          |
+| namespace                           | `NamespaceOptions`                        | see defaultConfig | Shortens a namespace wherever its length matters: cache-key literals, `byTypeAndName`/`propertiesByName` matchers, and (opt-in) folder layout. See [Namespace Aliasing](#namespace-aliasing)     |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
 | enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
 | v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
@@ -744,6 +746,73 @@ See [Cache Keys](../odata-client/cache-keys) for the shape of a key, how respons
 write reached via one route invalidate a cache entry reached via another, and the runtime API this option
 unlocks (`RequestCmd.cacheKey`, `invalidates` on write responses, `touchesResource`).
 
+## Namespace Aliasing
+
+Most of a `cacheKey` never carries a namespace at all - a hop is named after the route actually taken (a
+navigation property's or entity set's own name), never a type. Two restrictions remain genuinely
+type-shaped, though, because the URL itself states them that way: a subtype cast segment and a bound
+operation's own name, both requiring the addressed type's fully qualified OData name (FQN) -
+`Library.Circulation.BulkRenew`, not `BulkRenew` - since the generated TypeScript name is not unique across
+namespaces even though the FQN is. That's correct, but verbose wherever it applies: a real service's
+namespaces are often deeply nested (`Company.Product.Area.SubArea`), and both of these cache-key literals,
+plus a `byTypeAndName`/`propertiesByName` matcher written against a type in such a namespace (see
+[type options](#type-options)), pay for the whole path even though only the last segment usually carries
+the distinguishing information.
+
+OData already has a spec-native answer to this: CSDL's `<Schema Namespace="..." Alias="...">`. `namespace`
+lets you fill in an alias the server doesn't declare one for, or let `odata2ts` guess one on its own:
+
+```ts
+const config: ConfigFileOptions = {
+  namespace: {
+    alias: { "Library.Catalog": "Cat" },
+  },
+};
+```
+
+Every namespace's **effective alias** is resolved from three sources, in fixed precedence:
+
+1. **Server-declared** - a `<Schema Alias="...">` the metadata itself carries. Authoritative: it already
+   drives how alias-qualified references inside the EDMX itself resolve, so a project's own choice can
+   never contradict it - configuring `alias` for a namespace the server already aliases is a hard error at
+   generation time, before any file is emitted.
+2. **Project-configured** - the `alias` map above, keyed by the real namespace. Only ever fills a namespace
+   the server left unaliased.
+3. **Auto-synthesized** - odata2ts's own guess, computed where the first two leave a gap: the namespace's
+   **last dot-segment** (`Library.Catalog` → `Catalog`, `PublisherRegistry` → `PublisherRegistry`). This
+   happens **by default**, even for a service with only one namespace - there is no special case that drops
+   the prefix to nothing instead, since that would make a single-namespace service's literals and matchers
+   look structurally different from a multi-namespace one for no reason a caller can see from the value
+   alone. Set `disableAutoAlias: true` to turn this off entirely and keep every unaliased namespace's full
+   name, i.e. the behavior before this option existed.
+
+A synthesized alias that would collide - with another synthesized alias, with a server-declared or
+project-configured one, or with a real namespace name elsewhere in the service - is silently dropped for the
+namespace(s) involved, never breaking a build: nobody explicitly asked for it. A server-declared or
+project-configured alias colliding with anything, by contrast, is a hard error - that's a deliberate setting
+someone actually wrote, not a best-effort guess.
+
+The resulting alias is used in three places:
+
+- **Cache-key literals** - the cast and bound-operation literals above shorten automatically, with no
+  separate opt-in beyond `cacheKeys` itself.
+- **`byTypeAndName`/`propertiesByName` matching** - a matcher written in alias form (`"Cat.Book"`) resolves
+  the same way one written against the real namespace (`"Library.Catalog.Book"`) already does; the alias is
+  an additional accepted spelling, never a replacement.
+- **Folder layout** - opt-in via `useAliasForFolderName: true`, since this is the one consumer that moves
+  physical files on disk. Only takes effect under `bundledFileGeneration: false` (the default), where
+  `odata2ts` generates one folder per namespace in the first place:
+
+```ts
+const config: ConfigFileOptions = {
+  namespace: {
+    useAliasForFolderName: true,
+  },
+};
+// generates library-catalog/book/... as catalog/book/... instead, once "Library.Catalog" has an
+// effective alias of "Catalog" - from any of the three sources above
+```
+
 ## V4 Specific Options
 
 ### Big Number Handling
@@ -1091,6 +1160,8 @@ const config = {
 
 The `name` may be the simple name (`"Person"`) or the fully qualified one (`"Trippin.Person"`). The latter
 is what you need when the same name exists in more than one namespace - see [name clashes](#name-clashes).
+A namespace's effective alias, once it has one, is an accepted spelling here too - see
+[Namespace Aliasing](#namespace-aliasing).
 
 :::note
 
