@@ -753,8 +753,11 @@ noise.
 
 OData already has a spec-native answer to this by virtue of the `Alias` attribute:
 `<Schema Namespace="..." Alias="...">`. So you define a much shorter alias and can use it instead of the
-fully qualified name. odata2ts adds to this by offering you a custom alias mapping for namespaces without
-an alias:
+fully qualified name.
+
+odata2ts adds to this by offering you a custom alias mapping for namespaces without
+an alias. If you are sure that you don't have any conflicts between different namespaces and want to die hard
+on not seeing any namespace at all, then specify the alias as empty string `""`.
 
 ```ts
 const config: ConfigFileOptions = {
@@ -764,7 +767,7 @@ const config: ConfigFileOptions = {
 };
 ```
 
-The resulting alias is used in three places:
+The alias can then be used in three places:
 
 - **Cache-key literals** - a subtype cast and a bound operation's own name are the only two places a
   `cacheKey` still carries a namespace-qualified name at all (see [Cache Keys](../odata-client/cache-keys));
@@ -773,8 +776,8 @@ The resulting alias is used in three places:
 - **`byTypeAndName`/`propertiesByName` matching** - a matcher written in alias form (`"Cat.Book"`) resolves
   the same way one written against the real namespace (`"Library.Catalog.Book"`) already does; the alias is
   an additional accepted spelling, never a replacement.
-- **Folder layout** - opt-in via `useAliasForFolderName: true`, since this is the one consumer that moves
-  physical files on disk. Only takes effect under `bundledFileGeneration: false` (the default), where
+- **Folder layout** - opt-in via `useAliasForFolderName: true`;
+  Only takes effect under `bundledFileGeneration: false` (the default), where
   `odata2ts` generates one folder per namespace in the first place:
 
 ```ts
