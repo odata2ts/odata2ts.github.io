@@ -60,6 +60,7 @@ const defaultConfig = {
   enumType: "string",
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
+  namespace: { alias: {}, useAliasForFolderName: false },
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -208,6 +209,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                          |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
 | deepInsertProps                     | `DeepInsertProps`                         | `"all"`           | Which navigation properties may carry a related entity within the payload of their parent. Allowed are: all, composition-only, none. See [deepInsertProps](#deepinsertprops)                     |
+| namespace                           | `NamespaceOptions`                        | see defaultConfig | Shortens a namespace wherever its length matters: `byTypeAndName`/`propertiesByName` matchers and (opt-in) folder layout. See [Namespace Aliasing](#namespace-aliasing)                          |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
 | enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
 | v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
@@ -722,6 +724,46 @@ Not every server serves individual properties. Check yours before switching this
 
 :::
 
+## Namespace Aliasing
+
+Namespaces make entities unique, but at the same time they are unhandy, lengthening names considerably with redundant
+noise.
+
+OData already has a spec-native answer to this by virtue of the `Alias` attribute:
+`<Schema Namespace="..." Alias="...">`. So you define a much shorter alias and can use it instead of the
+fully qualified name.
+
+odata2ts adds to this by offering you a custom alias mapping for namespaces without
+an alias. If you are sure that you don't have any conflicts between different namespaces and want to die hard
+on not seeing any namespace at all, then specify the alias as empty string `""`.
+
+```ts
+const config: ConfigFileOptions = {
+  namespace: {
+    alias: { "Library.Catalog": "Cat" },
+  },
+};
+```
+
+The alias can then be used in two places:
+
+- **`byTypeAndName`/`propertiesByName` matching** - a matcher written in alias form (`"Cat.Book"`) resolves
+  the same way one written against the real namespace (`"Library.Catalog.Book"`) already does; the alias is
+  an additional accepted spelling, never a replacement.
+- **Folder layout** - opt-in via `useAliasForFolderName: true`;
+  Only takes effect under `bundledFileGeneration: false` (the default), where
+  `odata2ts` generates one folder per namespace in the first place:
+
+```ts
+const config: ConfigFileOptions = {
+  namespace: {
+    useAliasForFolderName: true,
+  },
+};
+// generates library-catalog/book/... as catalog/book/... instead, once "Library.Catalog" has an
+// effective alias of "Catalog" - server-declared or configured above, either way
+```
+
 ## V4 Specific Options
 
 ### Big Number Handling
@@ -1069,6 +1111,8 @@ const config = {
 
 The `name` may be the simple name (`"Person"`) or the fully qualified one (`"Trippin.Person"`). The latter
 is what you need when the same name exists in more than one namespace - see [name clashes](#name-clashes).
+A namespace's effective alias, once it has one, is an accepted spelling here too - see
+[Namespace Aliasing](#namespace-aliasing).
 
 :::note
 
