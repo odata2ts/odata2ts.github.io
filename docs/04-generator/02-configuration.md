@@ -32,6 +32,7 @@ const defaultConfig = {
   mode: Modes.all,
   emitMode: EmitModes.js_dts,
   debug: false,
+  enableTsNoCheck: false,
   prettier: false,
   tsconfig: "tsconfig.json",
   converters: [],
@@ -196,7 +197,8 @@ Here is the list of all **base settings** of the config file. By and large this 
 | annotations                         | `AnnotationOptions`                       | `{}`              | What odata2ts reads out of the annotations of the service. See [annotations](#annotations)                                                                                                       |
 | keyProperties                       | `KeyProperties`                           | `"interoperable"` | What an unannotated key property is taken to be. Allowed are: interoperable, strict, singleComputed, singleComputedComplexOptional, allComputed. See [key properties](#keys--managed-properties) |
 | managedPropertyMode                 | `ManagedPropertyMode`                     | `"lenient"`       | How a managed property shows up in the generated write models. Allowed are: lenient, strictOmit. See [managed properties](#optional-vs-omit)                                                     |
-| debug                               | `boolean`                                 | `false`           | Turn off adding `ts-nocheck` to all generated artefacts; prints out debug information                                                                                                            |
+| debug                               | `boolean`                                 | `false`           | Prints out debug information (CLI options, resolved config, metadata-download requests)                                                                                                          |
+| enableTsNoCheck                     | `boolean`                                 | `false`           | Add `// @ts-nocheck` to the top of every generated file, skipping downstream type checking for a faster build. Independent of `debug`.                                                           |
 | serviceName                         | `string`                                  |                   | Overwrites the service name found in OData metadata. But only makes sense on this level when `source` & `output` are specified via CLI options.                                                  |
 | skipEditableModels                  | `boolean`                                 | `false`           | Don't generate separate models for manipulating actions (create, update, patch). See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                         |
 | skipIdModels                        | `boolean`                                 | `false`           | Don't generate separate models & q-objects for entity ids. See [fine-tuning artefact generation](#fine-tuning-artefact-generation)                                                               |
@@ -262,7 +264,8 @@ As you can see, this largely matches the **base settings**:
 | `--allow-renaming`<br/>`-r` | `false`           | Allow renaming of model entities and their props by applying naming strategies like camelCase or PascalCase. See [renaming properties](#renaming-entities-and-properties)                        |
 | `--key-properties`          | `"interoperable"` | What an unannotated key property is taken to be. Allowed are: interoperable, strict, singleComputed, singleComputedComplexOptional, allComputed. See [key properties](#keys--managed-properties) |
 | `--managed-property-mode`   | `"lenient"`       | How a managed property shows up in the generated write models. Allowed are: lenient, strictOmit. See [managed properties](#optional-vs-omit)                                                     |
-| `--debug`<br/>`-d`          | `false`           | Add debug information; also removes the `@ts-nocheck` comment from each generated file                                                                                                           |
+| `--debug`<br/>`-d`          | `false`           | Add debug information (CLI options, resolved config, metadata-download requests)                                                                                                                 |
+| `--enable-ts-no-check`      | `false`           | Add `// @ts-nocheck` to the top of every generated file, skipping downstream type checking for a faster build. Independent of `--debug`.                                                         |
 
 Besides options, the CLI takes any number of **service names** as arguments. Each must exist in the config
 file, and only those services are generated:
