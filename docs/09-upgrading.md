@@ -8,6 +8,25 @@ sidebar_position: 9
 
 What changes between releases in ways that need something from you. Everything else is additive.
 
+## Coming from 0.44.0 and earlier
+
+### `// @ts-nocheck` is now opt-in, and no longer tied to `debug`
+
+Generated files used to open with `// @ts-nocheck` unless you set `debug: true` — a flag whose real
+purpose is unrelated verbose logging (CLI options, resolved config, metadata-download requests). The two
+are now fully independent: `debug` no longer affects type checking, and a new option,
+`enableTsNoCheck` (`--enable-ts-no-check` on the CLI), is the sole switch for the header.
+
+| before                                  | equivalent now          |
+| --------------------------------------- | ----------------------- |
+| the default                             | `enableTsNoCheck: true` |
+| `debug: true` (to disable `ts-nocheck`) | the default             |
+
+The default flips along with it: generated code is **type-checked by default** now, trading the build-time
+performance of skipping downstream `tsc` checks for safety by default. If you were relying on the old
+unconditional `// @ts-nocheck` and your generated code doesn't currently type-check cleanly, set
+`enableTsNoCheck: true` to keep the old behavior until you have time to address it.
+
 ## Coming from 0.43.0 and earlier
 
 ### `disableAutoManagedKey` is now `keyProperties`
@@ -341,8 +360,9 @@ result off `execute()`.
 
 ## Checking your setup
 
-Two settings are worth having whatever you upgrade from:
+Two settings are worth checking whatever you upgrade from:
 
-- **`debug: true`** while you sort things out. Without it every generated file opens with `@ts-nocheck`,
-  so a type check over the output confirms nothing.
+- **Leave `enableTsNoCheck` unset (or `false`)** while you sort things out. That's the default since
+  0.44.0, and it's what lets a type check over the generated output mean something; setting it to `true`
+  brings back `// @ts-nocheck` and makes such a check confirm nothing.
 - **`prettier: true`** if you emit TypeScript and read the result.
