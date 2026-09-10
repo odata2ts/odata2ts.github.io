@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.0](https://github.com/odata2ts/odata2ts.github.io/compare/v1.1.0...v1.2.0) (2026-09-10)
+
+
+### Features
+
+* **batch:** document batch support ([d122550](https://github.com/odata2ts/odata2ts.github.io/commit/d1225509a889c3d92f4f42293272689f3ca22e72))
+* cache keys & invalidates ([96dc320](https://github.com/odata2ts/odata2ts.github.io/commit/96dc320807bb725083726e0a6aea6704c15be401))
+* **configuration:** document ts-nocheck opt-in and what changed since 0.44.0 ([ccdd0f7](https://github.com/odata2ts/odata2ts.github.io/commit/ccdd0f72926f93dd87bc5d47ccbb723fce794faf))
+* **optimistic-concurrency:** document automatic ETag handling ([#75](https://github.com/odata2ts/odata2ts.github.io/issues/75)) ([8af71d0](https://github.com/odata2ts/odata2ts.github.io/commit/8af71d074abea1e5171d9c22dd1e6da4e67d4b45))
+
 ## [1.1.0](https://github.com/odata2ts/odata2ts.github.io/compare/v1.0.0...v1.1.0) (2026-08-21)
 
 
