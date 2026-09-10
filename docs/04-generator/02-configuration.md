@@ -241,6 +241,7 @@ as well as options to reconfigure entities and properties:
 | serviceName      | `string`                            |               | Overwrites the service name found in OData metadata & controls the main service name. Same as the base setting but on this level it makes sense. |
 | byTypeAndName    | `Array<TypeBasedGenerationOptions>` | `[]`          | Match types by their name and configure them. See [type options](#type-options)                                                                  |
 | propertiesByName | `Array<PropertyGenerationOptions>`  | `[]`          | Match properties by their name and configure them. See [configuration by property](#reconfiguring-entities-and-properties)                       |
+| batch            | `BatchOptions`                      |               | Batch options: `format` (`multipart` or `json`) and `disabled`. See [batch requests](../odata-client/batch-requests#the-wire-format)             |
 
 ## CLI Options
 
