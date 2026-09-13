@@ -100,14 +100,18 @@ service.Copies().query((b) => b.top(10).skip(5)).cacheKey;
 Two things about `query` are easy to miss:
 
 - **`$expand` shows up twice** — once as the structured `expand` hop above (which `touchesResource` and
-  invalidation read), and again, verbatim, inside `query`. This duplication for a _plain_ `$expand` is
-  deliberate: the structured entry only ever carries the hop's own name and kind, never a nested
-  restriction. `$expand=Copies($filter=Condition eq 3)` and `$expand=Copies($filter=Condition eq 5)` both
-  enrich to the identical `expand: [["Copies", "list"]]` — so if `$expand`'s raw text were dropped from
-  `query` too, two requests keeping different rows of the nested `Copies` collection would get the _same_
-  cache key. Keeping the full text in `query` is what still tells them apart. `$select`, by contrast, has no
-  such gap — its structured entry already captures its entire restriction — so its raw text is dropped from
-  `query` with nothing lost.
+  invalidation read), and again inside `query`, where it keeps its full text while its top-level segment
+  order is sorted. The full text is deliberate: the structured entry only ever carries the hop's own name
+  and kind, never a nested restriction. `$expand=Copies($filter=Condition eq 3)` and
+  `$expand=Copies($filter=Condition eq 5)` both enrich to the identical `expand: [["Copies", "list"]]` —
+  so if `$expand`'s raw text were dropped from `query` too, two requests keeping different rows of the
+  nested `Copies` collection would get the _same_ cache key. Only the segment order is sorted, never
+  anything inside a segment: a nested sub-query stays one segment, comma and all — which is exactly what
+  keeps `Copies($filter=Condition eq 3)` distinct from `Copies` — and since `$expand` names a _set_ of
+  targets, each path an independent sub-query over the same resource, the order the `.expand()` calls
+  happened in is identity noise the same way `$filter`'s clause order is. `$select`, by contrast, has no
+  such gap — its structured entry already captures its entire restriction — so its raw text is dropped
+  from `query` with nothing lost.
 - **`$filter`/`$search` never show up twice, and never get their own key either.** Their raw text is
   _replaced_ inside `query` by a canonical rendering, computed from the individual `.filter()`/`.search()`
   clauses before they get joined into one string — sorted by each clause's own text, and (for `$filter`)
@@ -151,7 +155,12 @@ records that, so that a write reached via a _different_ route can still find and
   [`ConcurrencyHandler`](./optimistic-concurrency) ETag key already uses) to the request's own hierarchical
   `cacheKey`. This happens for the directly addressed resource and for every entity an `$expand` pulled in
   alongside it, at any depth — never for a contained entity, a complex value, or anything else with no
-  entity set of its own, which has no canonical id to record against in the first place.
+  entity set of its own, which has no canonical id to record against in the first place. When the route
+  statically addresses exactly one resource — a detail read whose key is known before the request goes
+  out — that resource is recorded from its **address**, the response body only as the fallback source.
+  That is what lets a `$select` that left every key property out of the payload still converge: the route
+  named the resource, so the read records it even though the response never spells the id out. Entities
+  pulled in by `$expand` have no address of their own and are always recorded from the payload.
 - A later **write**, addressing that same canonical resource through any route, looks its own canonical id
   up and folds every hierarchical key ever recorded against it into its own [`invalidates`](#invalidates) —
   alongside the entries its own route already contributes.
@@ -323,7 +332,7 @@ Together they cover the functional breadth the generator supports today.
 | 10  | Containment (no entity set of its own)                                                                                                                                                                                       | `service.Media(id).asAudiobookService().Chapters().query()`                      | `["Media", "detail", id, "Chapters", "list"]`                                                        |
 | 11  | Stream, raw value                                                                                                                                                                                                            | `stream.getBlob()` on `Audiobook/Sample`                                         | `["Media", "detail", id, "Sample", "$value"]`                                                        |
 | 12  | `$select` structured, `query` dropped entirely (nothing else restricted the resource)                                                                                                                                        | `service.Media().query((b, q) => b.select(q.title))`                             | `["Media", "list", { select: ["Title"] }]`                                                           |
-| 13  | `$expand`, hop-shaped, and its own full text kept in `query` too (see [The params object](#the-params-object))                                                                                                               | `service.Media(5).query((b) => b.expand("Copies"))`                              | `["Media", "detail", 5, { expand: [["Copies", "list"]], query: "%24expand=Copies" }]`                |
+| 13  | `$expand`, hop-shaped, its full text kept in `query` too, and its top-level segment order sorted so call-site order converges (see [The params object](#the-params-object))                                                  | `service.Media(5).query((b) => b.expand("Copies"))`                              | `["Media", "detail", 5, { expand: [["Copies", "list"]], query: "%24expand=Copies" }]`                |
 | 14  | `$expand`, nested (`expanding()` with its own restriction) — the nested restriction survives only inside `query`'s full `$expand` text, never in the structured `expand` hop                                                 | `$expand=Copies($filter=Condition eq 3)`                                         | `[..., { expand: [["Copies", "list"]], query: "%24expand=Copies%28%24filter%3DCondition+eq+3%29" }]` |
 | 15  | Everything left over (`$top`/`$skip`/`$orderby`/`$count`/`$apply`/custom), sorted so call-site order converges                                                                                                               | `service.Copies().query((b) => b.top(10).skip(5))`                               | `["Copies", "list", { query: "%24skip=5&%24top=10" }]`                                               |
 | 16  | Unbound operation, no declared result entity set                                                                                                                                                                             | `service.TotalMediaCount()`                                                      | `["TotalMediaCount", "detail"]`                                                                      |
