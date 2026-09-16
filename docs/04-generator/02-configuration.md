@@ -61,7 +61,6 @@ const defaultConfig = {
   enumType: "string",
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
-  cacheKeys: { enabled: false },
   namespace: { alias: {}, useAliasForFolderName: false },
   naming: {
     models: {
@@ -212,8 +211,7 @@ Here is the list of all **base settings** of the config file. By and large this 
 | unflattenComplexTypes               | `boolean`                                 | `false`           | Group properties which the service states flat (`Address_City`) back into one complex property. See [flattened complex types](#flattened-complex-types)                                          |
 | disableBindingProps                 | `boolean`                                 | `false`           | Don't allow to bind an existing entity to a navigation property by its key. See [binding and deep insert](#binding-and-deep-insert)                                                              |
 | deepInsertProps                     | `DeepInsertProps`                         | `"all"`           | Which navigation properties may carry a related entity within the payload of their parent. Allowed are: all, composition-only, none. See [deepInsertProps](#deepinsertprops)                     |
-| cacheKeys                           | `boolean \| { enabled: boolean }`         | `false`           | Generate `RequestCmd.cacheKey` for building a cache on top of the client. See [Cache Keys](#cache-keys)                                                                                          |
-| namespace                           | `NamespaceOptions`                        | see defaultConfig | Shortens a namespace wherever its length matters: cache-key literals, `byTypeAndName`/`propertiesByName` matchers, and (opt-in) folder layout. See [Namespace Aliasing](#namespace-aliasing)     |
+| namespace                           | `NamespaceOptions`                        | see defaultConfig | Shortens a namespace wherever its length matters: `byTypeAndName`/`propertiesByName` matchers and (opt-in) folder layout. See [Namespace Aliasing](#namespace-aliasing)                          |
 | disableAutomaticNameClashResolution | `boolean`                                 | `false`           | Turn off the counter odata2ts appends when one name results from several types; only relevant with `bundledFileGeneration`. See [name clashes](#name-clashes)                                    |
 | enablePrimitivePropertyServices     | `boolean`                                 | `false`           | Generate services for primitive properties, allowing to read, update and delete a single property (excluding stream properties). See [primitive property services](#primitive-property-services) |
 | v4.bigNumberAsString                | `boolean`                                 | `false`           | Retrieve types of `Edm.Int64` and `Edm.Decimal` as `string` instead of `number`. See [handling big numbers](#big-number-handling)                                                                |
@@ -730,26 +728,6 @@ Not every server serves individual properties. Check yours before switching this
 
 :::
 
-## Cache Keys
-
-`odata2ts` can generate `RequestCmd.cacheKey`: a structured key that identifies the **resource** a request
-addresses, meant for a cache built on top of the generated client — TanStack Query is the motivating case.
-Off by default, opted into per service (or globally, as a base setting) via `cacheKeys`:
-
-```ts
-const config: ConfigFileOptions = {
-  cacheKeys: true,
-};
-```
-
-`cacheKeys` is a plain boolean: `true`/`false`, or the equivalent object form `{ enabled: true/false }` —
-which exists only so a later option can join `enabled` under the same key without a breaking change, and
-behaves identically to the bare boolean either way.
-
-See [Cache Keys](../odata-client/cache-keys) for the shape of a key, how response-observed identity lets a
-write reached via one route invalidate a cache entry reached via another, and the runtime API this option
-unlocks (`RequestCmd.cacheKey`, `invalidates` on write responses, `touchesResource`).
-
 ## Namespace Aliasing
 
 Namespaces make entities unique, but at the same time they are unhandy, lengthening names considerably with redundant
@@ -771,12 +749,8 @@ const config: ConfigFileOptions = {
 };
 ```
 
-The alias can then be used in three places:
+The alias can then be used in two places:
 
-- **Cache-key literals** - a subtype cast and a bound operation's own name are the only two places a
-  `cacheKey` still carries a namespace-qualified name at all (see [Cache Keys](../odata-client/cache-keys));
-  both shorten automatically once their namespace has an alias, with no separate opt-in beyond `cacheKeys`
-  itself.
 - **`byTypeAndName`/`propertiesByName` matching** - a matcher written in alias form (`"Cat.Book"`) resolves
   the same way one written against the real namespace (`"Library.Catalog.Book"`) already does; the alias is
   an additional accepted spelling, never a replacement.

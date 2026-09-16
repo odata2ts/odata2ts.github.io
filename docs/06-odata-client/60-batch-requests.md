@@ -120,7 +120,7 @@ The examples below use two services: `service`, generated with the default multi
 
 `byRef(id)` is the `byId` twin on the entity-set service: it returns the single-entity service whose path
 is the bare `$<id>`, so a request built from it goes out under the earlier request's answer and the
-service rewrites it against that answer. It is not ETag-gated and carries no cache key — a reference is
+service rewrites it against that answer. It is not ETag-gated — a reference is
 not a real address, so there is nothing to gate on or to store under.
 
 On a multipart batch the creating parent and the referring child go out in one change set:
