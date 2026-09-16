@@ -140,10 +140,8 @@ needs no such fix, since its own `.or()` compounds always self-parenthesize alre
 thing in `query` that's never reordered or canonicalized at all: its own sequence is real, result-changing
 content (sort priority), not identity noise.
 
-This also closes a real bug from an earlier iteration: `$apply`/`groupBy` used to be silently invisible to
-the cache key, so a grouped query and its ungrouped counterpart collapsed onto the same key despite
-returning completely different data. Every query restriction now lands somewhere in the key — structured or
-opaque — so this can't recur the next time a query feature is added.
+Every query restriction now lands somewhere in the key — structured or
+opaque.
 
 ## Response-observed identity: `resourceIdentity`
 
